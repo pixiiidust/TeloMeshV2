@@ -161,4 +161,8 @@ venv.bak/
 
 # TeloMesh specific files
 Telomesh simple stage.md
-Telomesh lovable stage.md 
+Telomesh lovable stage.md
+
+# Generated output files
+outputs/*.json
+outputs/*.gpickle 
