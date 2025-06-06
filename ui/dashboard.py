@@ -1,5 +1,5 @@
 """
-TeloMesh Friction Intelligence Dashboard - LOVABLE Stage
+TeloMesh User Flow Intelligence Dashboard - LOVABLE Stage
 
 This module provides a Streamlit dashboard for visualizing friction points in user journeys.
 It displays event chokepoints, fragile flows, and a graph heatmap with interactive elements.
@@ -109,14 +109,14 @@ def configure_dark_theme():
     logo_path = "logos/telomesh logo.png"
     if os.path.exists(logo_path):
         st.set_page_config(
-            page_title="TeloMesh Friction Intelligence",
+            page_title="TeloMesh User Flow Intelligence",
             page_icon=logo_path,
             layout="wide",
             initial_sidebar_state="expanded"
         )
     else:
         st.set_page_config(
-            page_title="TeloMesh Friction Intelligence",
+            page_title="TeloMesh User Flow Intelligence",
             page_icon="🔍",
             layout="wide", 
             initial_sidebar_state="expanded"
@@ -909,7 +909,7 @@ def main():
             st.markdown(f'''
             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
                 <img src="data:image/png;base64,{encoded_logo}" width="80" style="margin-bottom: 10px;" />
-                <h1 style="margin: 0; color: #F8FAFC; text-align: center;">TeloMesh Friction Intelligence</h1>
+                <h1 style="margin: 0; color: #F8FAFC; text-align: center;">TeloMesh User Flow Intelligence</h1>
             </div>
             ''', unsafe_allow_html=True)
         else:
@@ -917,13 +917,13 @@ def main():
             st.markdown(f'''
             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
                 <div style="font-size: 48px; margin-bottom: 10px;">🔍</div>
-                <h1 style="margin: 0; color: #F8FAFC; text-align: center;">TeloMesh Friction Intelligence</h1>
+                <h1 style="margin: 0; color: #F8FAFC; text-align: center;">TeloMesh User Flow Intelligence</h1>
             </div>
             ''', unsafe_allow_html=True)
     except Exception as e:
         logger.error(f"Error displaying header: {str(e)}")
         # Fallback to simple title
-        st.title("TeloMesh Friction Intelligence")
+        st.title("TeloMesh User Flow Intelligence")
     
     st.markdown("""
     This dashboard helps product managers identify and prioritize UX improvements by analyzing user journeys and detecting friction points.
