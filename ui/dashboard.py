@@ -428,8 +428,11 @@ def render_friction_table(df: pd.DataFrame):
     
     # Main friction table
     st.header("🔥 Friction Table")
-    st.write("The friction table shows event chokepoints ranked by friction score (WSJF).")
-    
+    st.write("""
+    * Event chokepoints ranked by friction metrics. 
+    * Filter by page, event, and percentile. 
+    * Mouse over column headers for metric definitions.
+    """)
     try:
         # UI controls for filtering
         col1, col2, col3 = st.columns(3)
@@ -544,7 +547,7 @@ def render_network_graph(net, height=600):
             html_content = f.read()
         
         # Render the HTML content
-        components.html(html_content, height=height)
+        components.html(html_content, height=height, scrolling=False)
         
         return html_content
     except Exception as e:
@@ -560,108 +563,256 @@ def render_network_graph(net, height=600):
         except Exception as e:
             logger.warning(f"Could not remove temporary file {html_file}: {str(e)}")
 
-def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
+# ============================================================================
+# MULTIPARTITE LAYOUT FUNCTIONS - NEW FUNCTIONALITY
+# ============================================================================
+
+def setup_multipartite_layout(graph, score_map, layout_type="friction_levels"):
     """
-    Render a graph heatmap with nodes colored by WSJF score.
+    Set up multipartite layout by assigning nodes to different subsets.
     
     Args:
-        graph (nx.DiGraph): Directed graph of user journeys.
-        score_map (Dict[str, float]): Dictionary mapping page names to WSJF scores.
-    """
-    st.header("🌐 User Journey Graph", help="Visualizes user journeys with friction nodes and their connecting flows")
-    st.write("This graph visualizes user journeys across multiple paths, highlighting high-friction chokepoints (nodes) and their connecting flows (edges).")
+        graph: NetworkX graph
+        score_map: Dictionary mapping nodes to WSJF scores
+        layout_type: "friction_levels", "funnel_stages", or "betweenness_tiers"
     
+    Returns:
+        Graph with subset attributes added to nodes
+    """
+    
+    if layout_type == "friction_levels":
+        return setup_friction_multipartite(graph, score_map)
+    elif layout_type == "funnel_stages":
+        return setup_funnel_multipartite(graph, score_map)
+    elif layout_type == "betweenness_tiers":
+        return setup_betweenness_multipartite(graph, score_map)
+    else:
+        return setup_friction_multipartite(graph, score_map)
+
+def setup_friction_multipartite(graph, score_map):
+    """
+    Arrange nodes in layers by friction level (high friction at top).
+    Perfect for PM dashboards - shows problem areas prominently.
+    """
+    
+    # Calculate thresholds
+    scores = list(score_map.values())
+    if not scores:
+        return graph
+    
+    top10_threshold = np.percentile(scores, 90)
+    top25_threshold = np.percentile(scores, 75)
+    top50_threshold = np.percentile(scores, 50)
+    
+    # Assign nodes to subsets (layers)
+    for node in graph.nodes():
+        score = score_map.get(node, 0)
+        
+        if score >= top10_threshold:
+            subset = 0  # Top layer - highest friction
+        elif score >= top25_threshold:
+            subset = 1  # Second layer
+        elif score >= top50_threshold:
+            subset = 2  # Third layer
+        else:
+            subset = 3  # Bottom layer - lowest friction
+        
+        graph.nodes[node]['subset'] = subset
+    
+    return graph
+
+def setup_funnel_multipartite(graph, score_map):
+    """
+    Assign nodes into funnel stages based on known page patterns.
+    0 = Awareness
+    1 = Discovery
+    2 = Consideration
+    3 = Conversion
+    4 = Retention
+    5 = Exit
+    """
+
+    stage_keywords = {
+        0: ["landing", "ads", "referral", "blog", "faq"],
+        1: ["home", "search", "products", "categories"],
+        2: ["product", "features", "pricing", "review"],
+        3: ["login", "register", "checkout", "cart", "plan"],
+        4: ["account", "settings", "dashboard", "orders"],
+        5: ["help", "contact", "logout", "404"]
+    }
+
+    def infer_stage(node_name):
+        name = node_name.lower()
+        for stage, keywords in stage_keywords.items():
+            if any(k in name for k in keywords):
+                return stage
+        return 1  # fallback = Discovery
+
+    for node in graph.nodes():
+        stage = infer_stage(str(node))
+        graph.nodes[node]["subset"] = stage
+
+    # Debug summary
+    from collections import Counter
+    stage_counts = Counter(nx.get_node_attributes(graph, "subset").values())
+    print("Funnel Stage Counts:")
+    for stage, count in sorted(stage_counts.items()):
+        print(f"  Stage {stage}: {count} nodes")
+
+    return graph
+
+def setup_betweenness_multipartite(graph, score_map):
+    """
+    Arrange nodes by centrality (hub nodes in middle, peripheral on edges).
+    Shows information flow patterns.
+    """
+    
+    betweenness = nx.betweenness_centrality(graph)
+    centrality_values = list(betweenness.values())
+    
+    if not centrality_values:
+        return graph
+    
+    high_centrality = np.percentile(centrality_values, 80)
+    med_centrality = np.percentile(centrality_values, 20)
+    
+    for node in graph.nodes():
+        centrality = betweenness.get(node, 0)
+        
+        if centrality >= high_centrality:
+            subset = 1  # Middle layer - hub nodes
+        elif centrality >= med_centrality:
+            subset = 0  # First layer
+        else:
+            subset = 2  # Outer layer - peripheral nodes
+        
+        graph.nodes[node]['subset'] = subset
+    
+    return graph
+
+def apply_multipartite_layout(graph, score_map, layout_type="friction_levels", scale=800):
+    """
+    Apply layout to graph using multipartite or force-directed arrangement.
+    
+    - funnel_stages: left→right (vertical alignment → x = stage)
+    - friction_levels: top→bottom (horizontal alignment → y = friction)
+    - betweenness_tiers: force-directed hub-spoke layout
+    """
+
+    # --------------------------------------------
+    # Case 1: Force-directed layout for betweenness
+    # --------------------------------------------
+    if layout_type == "betweenness_tiers":
+        try:
+            pos = nx.kamada_kawai_layout(graph, weight='weight')
+        except:
+            pos = nx.spring_layout(graph, k=2, iterations=100, seed=42)
+
+        for node in pos:
+            x, y = pos[node]
+            pos[node] = (x * scale * 0.4, y * scale * 0.4)
+
+        return pos
+
+    # --------------------------------------------
+    # Case 2: Multipartite layout (funnel/friction)
+    # --------------------------------------------
+    graph_copy = graph.copy()
+
+    if layout_type == "funnel_stages":
+        graph_copy = setup_funnel_multipartite(graph_copy, score_map)
+    else:
+        graph_copy = setup_multipartite_layout(graph_copy, score_map, layout_type)
+
     try:
-        # Compute thresholds for coloring
-        if score_map:
-            scores = list(score_map.values())
-            top10_threshold = np.percentile(scores, 90)
-            top20_threshold = np.percentile(scores, 80)
-            top50_threshold = np.percentile(scores, 50)  # Add top 50% threshold
+        # Choose alignment based on layout type
+        align = "horizontal" if layout_type == "friction_levels" else "vertical"
+        pos = nx.multipartite_layout(graph_copy, subset_key='subset', align=align)
+
+        # Set correct axis-based scaling
+        if align == "vertical":
+            # Subset controls X-axis (left→right)
+            scale_x = scale * 0.6
+            scale_y = scale * 0.6
         else:
-            top10_threshold = 1.0
-            top20_threshold = 0.5
-            top50_threshold = 0.2  # Default value for top 50% threshold
-        
-        # Filter controls
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            # Option to show only top friction nodes
-            show_options = ["All nodes", "Top 50% friction nodes", "Top 20% friction nodes", "Top 10% friction nodes"]
-            show_selection = st.selectbox("Show in graph:", show_options)
-        
-        with col2:
-            # Option to adjust physics
-            physics_enabled = st.checkbox("Enable physics for movable nodes\n(toggle to re-center graph)", value=False)
-        
-        # Create and configure the network based on filters
-        html_content = ""
-        if show_selection == "Top 10% friction nodes":
-            # Filter to only include top 10% nodes
-            filtered_nodes = {node: score for node, score in score_map.items() if score >= top10_threshold}
-            if not filtered_nodes:
-                st.warning("No nodes meet the top 10% threshold. Try showing all nodes or top 20%.")
-                return
-            
-            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold)
-        elif show_selection == "Top 20% friction nodes":
-            # Filter to only include top 20% nodes
-            filtered_nodes = {node: score for node, score in score_map.items() if score >= top20_threshold}
-            if not filtered_nodes:
-                st.warning("No nodes meet the top 20% threshold. Try showing all nodes.")
-                return
-            
-            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold)
-        elif show_selection == "Top 50% friction nodes":
-            # Filter to only include top 50% nodes
-            filtered_nodes = {node: score for node, score in score_map.items() if score >= top50_threshold}
-            if not filtered_nodes:
-                st.warning("No nodes meet the top 50% threshold. Try showing all nodes.")
-                return
-            
-            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold)
-        else:
-            # Show all nodes
-            net = create_full_network(graph, score_map, top10_threshold, top20_threshold, physics_enabled, top50_threshold)
-        
-        # Add export button for the graph
-        export_container = st.container()
-        with export_container:
-            st.markdown(
-                '<div class="download-container">Use the button below to export the current graph view</div>',
-                unsafe_allow_html=True
-            )
-        
-        # Render the network and get HTML content
-        html_content = render_network_graph(net)
-        
-        # Add export HTML button if we have content
-        if html_content:
-            filtered_text = "top_10pct" if show_selection == "Top 10% friction nodes" else "top_20pct" if show_selection == "Top 20% friction nodes" else "top_50pct" if show_selection == "Top 50% friction nodes" else "all_nodes"
-            filename = f"flow_heatmap_{filtered_text}"
-            
-            st.markdown(
-                f'<div class="download-container">{get_html_download_link(html_content, filename, "📥 Export Graph as HTML")}</div>',
-                unsafe_allow_html=True
-            )
-        
-        # Add a legend
+            # Subset controls Y-axis (top→bottom)
+            scale_x = scale * 0.4
+            scale_y = scale * 0.6
+
+        # Apply scaled and separated positions
+        for node in pos:
+            x, y = pos[node]
+            pos[node] = (x * scale_x, y * scale_y)
+
+        # Optional debug info
+        if pos:
+            xs = [p[0] for p in pos.values()]
+            ys = [p[1] for p in pos.values()]
+            print(f"[Layout: {layout_type}] X range: {min(xs):.1f} → {max(xs):.1f}")
+            print(f"[Layout: {layout_type}] Y range: {min(ys):.1f} → {max(ys):.1f}")
+
+        return pos
+
+    except Exception as e:
+        print(f"⚠️ Layout fallback due to error: {e}")
+        return nx.spring_layout(graph, k=3, iterations=100, seed=42)
+
+
+def render_enhanced_legend(layout_type="friction_levels", physics_enabled=False):
+    """
+    Render an enhanced legend that shows both color coding and layout arrangement.
+    
+    Args:
+        layout_type: The selected multipartite layout type
+        physics_enabled: Whether physics is currently enabled
+    """
+    
+    # Create columns for better layout
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        st.markdown("### 📊 Node Colors")
         st.markdown("""
-        **Legend:**
         - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#F87171;"></span> **Red**: Top 10% friction (highest WSJF scores)
         - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#FBBF24;"></span> **Yellow**: Top 20% friction
-        - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#A3E635;"></span> **Green**: Top 50% friction
+        - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#A3E635;"></span> **Green**: Top 50% friction  
         - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#94A3B8;"></span> **Gray**: Lower friction
         """, unsafe_allow_html=True)
-    except Exception as e:
-        st.error(f"Error in graph heatmap: {str(e)}")
-        logger.error(f"Error in graph heatmap: {str(e)}")
-        logger.error(traceback.format_exc())
+    
+    with col2:
+        if not physics_enabled:
+            st.markdown("### 📐 Layout Arrangement")
+            
+            if layout_type == "friction_levels":
+                st.markdown("""
+                - **Top Layer**: Highest friction (urgent)
+                - **Middle Layers**: Medium friction (monitor)  
+                - **Lowest Layer**: Low friction (stable)
+                """)
+            elif layout_type == "funnel_stages":
+                st.markdown("""
+                **User Funnel Stages:**
+                - 🚪 **Left**: Entry points
+                - ⚙️ **Middle**: Conversion steps
+                - 🚪 **Right**: Exit points
+                """)
+            elif layout_type == "betweenness_tiers":
+                st.markdown("""
+                **Journey Centrality Structure:**
+                - 📍 **Edges**: Peripheral nodes
+                - 🎯 **Center**: Hub nodes
+                """)
+        else:
+            st.markdown("### ℹ️ Physics Mode")
+            st.markdown("Nodes move freely. Layout arrangement disabled.")
 
-def create_full_network(graph, score_map, top10_threshold, top20_threshold, physics_enabled, top50_threshold=None):
+# ============================================================================
+# UPDATED NETWORK CREATION FUNCTIONS WITH MULTIPARTITE SUPPORT
+# ============================================================================
+
+def create_full_network(graph, score_map, top10_threshold, top20_threshold, physics_enabled, top50_threshold=None, layout_type="friction_levels"):
     """
-    Create a network with all nodes.
+    Create a network with all nodes, now supporting multipartite layouts.
     
     Args:
         graph (nx.DiGraph): The user journey graph
@@ -670,12 +821,20 @@ def create_full_network(graph, score_map, top10_threshold, top20_threshold, phys
         top20_threshold (float): Threshold for top 20% nodes
         physics_enabled (bool): Whether physics simulation is enabled
         top50_threshold (float, optional): Threshold for top 50% nodes
+        layout_type (str): Type of multipartite layout to use
         
     Returns:
         Network: PyVis network object
     """
     # Create a pyvis network
     net = Network(height="600px", width="100%", bgcolor="#0B0F19", font_color="#E2E8F0")
+    
+    # Get positions using multipartite layout (when physics is disabled)
+    if not physics_enabled:
+        pos = apply_multipartite_layout(graph, score_map, layout_type)
+    else:
+        # Use default positioning for physics-enabled mode
+        pos = {node: (0, 0) for node in graph.nodes()}
     
     # Create a mapping of node colors for use in highlighting edges
     node_colors = {}
@@ -686,22 +845,32 @@ def create_full_network(graph, score_map, top10_threshold, top20_threshold, phys
         
         if score >= top10_threshold:
             color = "#F87171"  # Soft red for top 10%
-            title = f"{node}<br>WSJF Score: {score:.6f}<br>Top 10% friction point"
+            title = f"{node} | WSJF Score: {score:.3f} Top 10%"
             node_colors[node] = color
         elif score >= top20_threshold:
             color = "#FBBF24"  # Warm amber for top 20%
-            title = f"{node}<br>WSJF Score: {score:.6f}<br>Top 20% friction point"
+            title = f"{node} | WSJF Score: {score:.3f} Top 20%"
             node_colors[node] = color
         elif top50_threshold and score >= top50_threshold:
             color = "#A3E635"  # Lime green for top 50%
-            title = f"{node}<br>WSJF Score: {score:.6f}<br>Top 50% friction point"
+            title = f"{node} | WSJF Score: {score:.3f} Top 50%"
             node_colors[node] = color
         else:
             color = "#94A3B8"  # Soft steel for low-friction nodes
-            title = f"{node}<br>WSJF Score: {score:.6f}"
+            title = f"{node} | WSJF Score: {score:.3f}"
             node_colors[node] = color
         
-        net.add_node(node, title=title, color=color, font={"color": "#FFFFFF"})
+        # Apply position
+        x, y = pos.get(node, (0, 0))
+        net.add_node(
+            node, 
+            title=title, 
+            color=color, 
+            font={"color": "#FFFFFF"},
+            x=x, 
+            y=y, 
+            physics=physics_enabled  # Only use physics if enabled
+        )
     
     # Add edges with event labels
     for source, target, data in graph.edges(data=True):
@@ -723,13 +892,14 @@ def create_full_network(graph, score_map, top10_threshold, top20_threshold, phys
                 "color": "rgba(148, 163, 184, 0.35)",
                 "highlight": source_color,  # Use source node color for highlighting
                 "hover": source_color       # Also use it for hover effects
-            }
+            },
+            smooth={"type": "continuous", "roundness": 0.2}
         )
     
     # Configure network options with more precise color inheritance
     options = {
         "nodes": {
-            "font": {"color": "#FFFFFF", "size": 14},
+            "font": {"color": "#FFFFFF", "size": 16},
             "color": {
                 "highlight": {"border": "#38BDF8", "background": "#38BDF8"}
             },
@@ -760,15 +930,22 @@ def create_full_network(graph, score_map, top10_threshold, top20_threshold, phys
         },
         "physics": {
             "enabled": physics_enabled,
+            "stabilization": {
+                "enabled": physics_enabled,  # Only stabilize when physics is enabled
+                "iterations": 1500 if physics_enabled else 0,
+                "updateInterval": 1,
+                "fit": physics_enabled  # Only auto-fit when physics is enabled
+            },
             "barnesHut": {
-                "gravitationalConstant": -10000,
+                "gravitationalConstant": -15000,
                 "centralGravity": 0.3,
-                "springLength": 150,
-                "springConstant": 0.04
+                "springLength": 200,
+                "springConstant": 0.04,
+                "damping": 0.09
             },
             "maxVelocity": 50
         },
-        "layout": {"improvedLayout": True},
+        "layout": {"improvedLayout": True, "randomSeed": 42},
         "interaction": {
             "hover": True,
             "tooltipDelay": 200,
@@ -777,16 +954,18 @@ def create_full_network(graph, score_map, top10_threshold, top20_threshold, phys
             "multiselect": False,
             "navigationButtons": True,
             "selectConnectedEdges": True,  # Highlight connected edges when clicking a node
-            "hoverConnectedEdges": True    # Highlight connected edges when hovering over a node
+            "hoverConnectedEdges": True,    # Highlight connected edges when hovering over a node
+            "dragNodes": True,
+            "dragView": True
         }
     }
     
     net.set_options(json.dumps(options))
     return net
 
-def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold=None):
+def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold=None, layout_type="friction_levels"):
     """
-    Create a network with only the filtered nodes.
+    Create a network with only the filtered nodes, now supporting multipartite layouts.
     
     Args:
         graph (nx.DiGraph): The user journey graph
@@ -795,6 +974,7 @@ def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_thresh
         top20_threshold (float): Threshold for top 20% nodes
         physics_enabled (bool): Whether physics simulation is enabled
         top50_threshold (float, optional): Threshold for top 50% nodes
+        layout_type (str): Type of multipartite layout to use
         
     Returns:
         Network: PyVis network object
@@ -802,6 +982,15 @@ def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_thresh
     # Create a pyvis network
     net = Network(height="600px", width="100%", bgcolor="#0B0F19", font_color="#E2E8F0")
     
+    # Create filtered subgraph
+    filtered_graph = graph.subgraph(filtered_nodes.keys())
+    
+    # Get positions using multipartite layout (when physics is disabled)
+    if not physics_enabled:
+        pos = apply_multipartite_layout(filtered_graph, filtered_nodes, layout_type)
+    else:
+        pos = {node: (0, 0) for node in filtered_graph.nodes()}
+
     # Create a mapping of node colors for use in highlighting edges
     node_colors = {}
     
@@ -810,22 +999,32 @@ def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_thresh
         if node in graph.nodes():
             if score >= top10_threshold:
                 color = "#F87171"  # Soft red for top 10%
-                title = f"{node}<br>WSJF Score: {score:.6f}<br>Top 10% friction point"
+                title = f"{node} | WSJF Score: {score:.3f} Top 10%"
                 node_colors[node] = color
             elif score >= top20_threshold:
                 color = "#FBBF24"  # Warm amber for top 20%
-                title = f"{node}<br>WSJF Score: {score:.6f}<br>Top 20% friction point"
+                title = f"{node} | WSJF Score: {score:.3f} Top 20%"
                 node_colors[node] = color
             elif top50_threshold and score >= top50_threshold:
                 color = "#A3E635"  # Lime green for top 50%
-                title = f"{node}<br>WSJF Score: {score:.6f}<br>Top 50% friction point"
+                title = f"{node} | WSJF Score: {score:.3f} Top 50%"
                 node_colors[node] = color
             else:
                 color = "#94A3B8"  # Soft steel for low-friction nodes
-                title = f"{node}<br>WSJF Score: {score:.6f}"
+                title = f"{node} | WSJF Score: {score:.3f}"
                 node_colors[node] = color
             
-            net.add_node(node, title=title, color=color, font={"color": "#FFFFFF"})
+            # Apply position
+            x, y = pos.get(node, (0, 0))
+            net.add_node(
+                node, 
+                title=title, 
+                color=color, 
+                font={"color": "#FFFFFF"},
+                x=x, 
+                y=y, 
+                physics=physics_enabled
+            )
     
     # Add edges between filtered nodes
     for source, target, data in graph.edges(data=True):
@@ -846,7 +1045,8 @@ def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_thresh
                     "color": "rgba(148, 163, 184, 0.35)",
                     "highlight": source_color,  # Use source node color for highlighting
                     "hover": source_color       # Also use it for hover effects
-                }
+                },
+                smooth={"type": "continuous", "roundness": 0.2}
             )
     
     # Configure network options with more precise color inheritance
@@ -882,16 +1082,22 @@ def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_thresh
             }
         },
         "physics": {
-            "enabled": physics_enabled,
+            "enabled": physics_enabled,  # always on
+            "stabilization": {
+                "enabled": physics_enabled,  # only run stabilization if checkbox is on
+                "iterations": 1500 if physics_enabled else 0,
+                "fit": physics_enabled
+            },
             "barnesHut": {
-                "gravitationalConstant": -10000,
+                "gravitationalConstant": -15000,
                 "centralGravity": 0.3,
                 "springLength": 150,
-                "springConstant": 0.04
+                "springConstant": 0.04,
+                "damping": 0.09
             },
             "maxVelocity": 50
         },
-        "layout": {"improvedLayout": True},
+        "layout": {"improvedLayout": True, "randomSeed": 42},
         "interaction": {
             "hover": True,
             "tooltipDelay": 200,
@@ -900,12 +1106,134 @@ def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_thresh
             "multiselect": False,
             "navigationButtons": True,
             "selectConnectedEdges": True,  # Highlight connected edges when clicking a node
-            "hoverConnectedEdges": True    # Highlight connected edges when hovering over a node
+            "hoverConnectedEdges": True,    # Highlight connected edges when hovering over a node
+            "dragNodes": True,
+            "dragView": True
         }
     }
     
     net.set_options(json.dumps(options))
     return net
+
+def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
+    """
+    Render a graph heatmap with nodes colored by WSJF score, now with multipartite layout support.
+    
+    Args:
+        graph (nx.DiGraph): Directed graph of user journeys.
+        score_map (Dict[str, float]): Dictionary mapping page names to WSJF scores.
+    """
+    st.header("🌐 User Journey Graph", help="Visualizes user journeys with friction nodes and their connecting flows")
+    st.write("Visualize user journeys across multiple paths, with high-friction chokepoints (nodes) and connecting flows (edges) highlighted.")
+    
+    try:
+        # Compute thresholds for coloring
+        if score_map:
+            scores = list(score_map.values())
+            top10_threshold = np.percentile(scores, 90)
+            top20_threshold = np.percentile(scores, 80)
+            top50_threshold = np.percentile(scores, 50)  # Add top 50% threshold
+        else:
+            top10_threshold = 1.0
+            top20_threshold = 0.5
+            top50_threshold = 0.2  # Default value for top 50% threshold
+        
+        # Filter and layout controls - NOW WITH 3 COLUMNS
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            # Option to show only top friction nodes
+            show_options = ["All nodes", "Top 50% friction nodes", "Top 20% friction nodes", "Top 10% friction nodes"]
+            show_selection = st.selectbox("Show in graph:", show_options)
+        
+        with col2:
+            # Option to adjust physics
+            physics_enabled = st.checkbox("Enable Physics", value=False)
+        
+        with col3:
+            # NEW: Layout type selection
+            layout_options = {
+                "Friction Levels": "friction_levels",
+                "Funnel Stages": "funnel_stages", 
+                "Journey Centrality": "betweenness_tiers"
+            }
+            
+            selected_layout_name = st.selectbox(
+                "Layout arrangement:",
+                list(layout_options.keys()),
+                disabled=physics_enabled,
+                help="Choose layouts by friction, funnel stages, or journey centrality (only when physics is disabled)"
+            )
+            layout_type = layout_options[selected_layout_name]
+        
+        # Display current configuration info
+        if not physics_enabled:
+            layout_descriptions = {
+                "friction_levels": "📊 Nodes arranged by friction level (problems at top)",
+                "funnel_stages": "🔄 Nodes arranged by user funnel stages (entry → exit)",
+                "betweenness_tiers": "🎯 Nodes arranged by journey centrality (hubs centered)"
+            }
+            st.info(f"**Active Layout**: {layout_descriptions.get(layout_type, 'Custom arrangement')}")
+        
+        # Create and configure the network based on filters
+        html_content = ""
+        if show_selection == "Top 10% friction nodes":
+            # Filter to only include top 10% nodes
+            filtered_nodes = {node: score for node, score in score_map.items() if score >= top10_threshold}
+            if not filtered_nodes:
+                st.warning("No nodes meet the top 10% threshold. Try showing all nodes or top 20%.")
+                return
+            
+            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold, layout_type)
+        elif show_selection == "Top 20% friction nodes":
+            # Filter to only include top 20% nodes
+            filtered_nodes = {node: score for node, score in score_map.items() if score >= top20_threshold}
+            if not filtered_nodes:
+                st.warning("No nodes meet the top 20% threshold. Try showing all nodes.")
+                return
+            
+            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold, layout_type)
+        elif show_selection == "Top 50% friction nodes":
+            # Filter to only include top 50% nodes
+            filtered_nodes = {node: score for node, score in score_map.items() if score >= top50_threshold}
+            if not filtered_nodes:
+                st.warning("No nodes meet the top 50% threshold. Try showing all nodes.")
+                return
+            
+            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold, layout_type)
+        else:
+            # Show all nodes
+            net = create_full_network(graph, score_map, top10_threshold, top20_threshold, physics_enabled, top50_threshold, layout_type)
+        
+        # Add export button for the graph
+        export_container = st.container()
+        with export_container:
+            st.markdown(
+                '<div class="download-container">Export current graph view using button below</div>',
+                unsafe_allow_html=True
+            )
+        
+        # Render the network and get HTML content
+        html_content = render_network_graph(net)
+        
+        # Add export HTML button if we have content
+        if html_content:
+            filtered_text = "top_10pct" if show_selection == "Top 10% friction nodes" else "top_20pct" if show_selection == "Top 20% friction nodes" else "top_50pct" if show_selection == "Top 50% friction nodes" else "all_nodes"
+            filename = f"flow_heatmap_{filtered_text}_{layout_type}"
+            
+            st.markdown(
+                f'<div class="download-container">{get_html_download_link(html_content, filename, "📥 Export Graph as HTML")}</div>',
+                unsafe_allow_html=True
+            )
+        
+        # ENHANCED LEGEND - Replace the existing simple legend
+        st.markdown("---")  # Separator line
+        render_enhanced_legend(layout_type, physics_enabled)
+        
+    except Exception as e:
+        st.error(f"Error in graph heatmap: {str(e)}")
+        logger.error(f"Error in graph heatmap: {str(e)}")
+        logger.error(traceback.format_exc())
 
 def render_flow_summaries(flow_df: pd.DataFrame):
     """
@@ -1084,11 +1412,11 @@ def main():
     if os.path.exists(logo_path):
         logo_html = f'<img src="data:image/png;base64,{load_logo_base64(logo_path)}" class="telomesh-logo">'
         st.markdown(
-            f'<div class="telomesh-header" style="flex-direction: column; align-items: center;">{logo_html}<h1>TeloMesh User Flow Intelligence</h1></div>',
+            f'<div class="telomesh-header" style="flex-direction: column; align-items: center;">{logo_html}<h1>User Journey Intelligence</h1></div>',
             unsafe_allow_html=True
         )
     else:
-        st.title("🔍 TeloMesh User Flow Intelligence")
+        st.title("User Journey Intelligence")
     
     # Sidebar setup
     st.sidebar.header("Dashboard Controls")
@@ -1159,8 +1487,8 @@ def main():
     top20_threshold = friction_df['WSJF_Friction_Score'].quantile(0.8)
     
     with tab1:
-        st.header("🔥 Friction Analysis")
-        st.write("The friction table shows event chokepoints ranked by friction score (WSJF).")
+        st.header("🔥 Friction Analysis Overview")
+        st.write("Select to display top 3 pages ranked by users lost, exit rate or WSJF score")
         
         # Render friction table
         render_friction_table(friction_df)
