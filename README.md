@@ -2,6 +2,53 @@
 
 TeloMesh is a user journey analysis pipeline that processes event data to build a directed graph of user flows. This tool helps product managers and UX designers identify patterns, chokepoints, and optimization opportunities in user journeys.
 
+## Theory & Methodology
+
+TeloMesh uses graph theory and network analysis to identify friction points in user journeys:
+
+1. **Graph Construction**: User sessions are converted into directed graphs where:
+   - Nodes represent pages/screens
+   - Edges represent user actions (events)
+   - Edge weights correspond to transition frequency
+
+2. **Friction Detection Algorithm**: TeloMesh identifies problem areas using a composite scoring system:
+   - **Exit Rate**: Percentage of users who abandon their journey at a specific (page, event) pair
+   - **Betweenness Centrality**: Measures how critical a node is to the overall flow structure
+   - **WSJF Friction Score**: Calculated as `exit_rate × betweenness`, prioritizing high-impact friction points
+
+3. **Percolation Analysis**: Inspired by network percolation theory, TeloMesh identifies:
+   - Critical junctions where small improvements yield large UX gains
+   - Cascading failure patterns where multiple friction points compound
+   - Fragile flows where users encounter multiple high-WSJF obstacles
+
+## Key Features
+
+### 1. Friction Points Analysis
+- Identifies and ranks individual (page, event) pairs by WSJF Friction Score
+- Calculates exit probability and lost user volume
+- Highlights structural weaknesses in the user journey
+
+### 2. User Flow Heatmap
+- Visual representation of user journeys with friction highlighted
+- Color-coded nodes based on friction percentile (top 10%, top 20%)
+- Interactive graph visualization with tooltips and event details
+
+### 3. Fragile Flows Detection
+- Identifies user paths containing multiple high-friction points
+- Highlights sequences where users encounter cascading obstacles
+- Prioritizes flow improvements based on cumulative friction
+
+## For Product Managers
+
+TeloMesh helps product managers by:
+- Quantifying UX friction points for prioritization
+- Visualizing critical user journey bottlenecks
+- Identifying high-impact improvement opportunities
+- Providing data-driven insights for roadmap planning
+- Enabling before/after comparisons of UX changes
+
+By combining exit rates with structural importance, the WSJF scoring system ensures that improvements focus on areas with the highest impact on overall user experience.
+
 ## New in Version 2
 - Enhanced dashboard with export features
 - Friction Intelligence visualization
@@ -124,176 +171,3 @@ python main.py --stage metrics
 # Analyze friction points
 python main.py --stage analysis
 ```
-
-## Using Your Own Data
-
-TeloMesh can analyze user journey data from analytics platforms like Mixpanel, Amplitude, or Google Analytics. Follow these steps to use your own data:
-
-### Data Format Requirements
-
-Place your exported data in `data/events.csv` with the following required columns:
-
-| Column          | Type     | Description                              | Example                     |
-|-----------------|----------|------------------------------------------|----------------------------|
-| `user_id`       | string   | Unique identifier for each user          | "user_123", "5678abcd"     |
-| `timestamp`     | datetime | When the event occurred                  | "2023-04-15T14:32:01.000Z" |
-| `page`          | string   | URL path or screen name                  | "/checkout", "ProductPage" |
-| `event`         | string   | User action that occurred                | "click_button", "scroll"   |
-| `session_id`    | string   | Unique session identifier                | "session_456", "abc123"    |
-
-#### Optional columns:
-| Column          | Type     | Description                              | Example                     |
-|-----------------|----------|------------------------------------------|----------------------------|
-| `event_properties` | JSON/string | Additional event details           | `{"button_id": "submit"}` |
-| `user_properties`  | JSON/string | User profile information           | `{"plan": "premium"}`     |
-
-### Exporting from Analytics Platforms
-
-#### Mixpanel
-1. Go to **Insights** or **Events** view in Mixpanel
-2. Set your desired time range and filters
-3. Click **Export** → **CSV**
-4. Use the following column mapping:
-   - `distinct_id` → `user_id`
-   - `time` → `timestamp`
-   - `$current_url` or `screen` → `page`
-   - `event` remains as `event`
-   - `$insert_id` → `session_id` (or generate one with your session definition)
-   - `properties` → `event_properties`
-
-#### Amplitude
-1. Go to **Events** or **User Streams** in Amplitude
-2. Set your desired date range and filters
-3. Click **Export** → **CSV/JSON**
-4. Use the following column mapping:
-   - `user_id` remains as `user_id`
-   - `event_time` → `timestamp`
-   - `page_url` or `page_title` → `page`
-   - `event_type` → `event`
-   - `session_id` remains as `session_id`
-   - `event_properties` remains as `event_properties`
-
-#### Google Analytics 4
-1. Export your events using the GA4 API or BigQuery
-2. Map the following columns:
-   - `user_pseudo_id` → `user_id`
-   - `event_timestamp` → `timestamp`
-   - `page_location` or `page_title` → `page`
-   - `event_name` → `event`
-   - A combination of `user_pseudo_id` and `session_id` → `session_id`
-
-### Session Definition
-
-If your data doesn't include proper session IDs, you can generate them during import by:
-1. Sorting events by `user_id` and `timestamp`
-2. Creating a new session whenever there's a gap of 30+ minutes between events for the same user
-
-### Processing Your Custom Data
-
-After placing your properly formatted data in `data/events.csv`, run:
-
-```bash
-# Skip synthetic data generation and start from parsing
-python main.py --stage parse
-
-# Or if you need to transform your data first
-python main.py --input-file path/to/your/exported/data.csv --format mixpanel
-```
-
-The pipeline will:
-1. Parse your events into sessions
-2. Build the user journey graph
-3. Calculate metrics and friction points
-4. Prepare data for the dashboard
-
-### Custom Data Processing Script
-
-If your data requires significant preprocessing, you can use this template:
-
-```python
-import pandas as pd
-
-# Load your raw data
-raw_data = pd.read_csv('path/to/your/data.csv')
-
-# Transform to required format
-transformed_data = pd.DataFrame({
-    'user_id': raw_data['your_user_id_column'],
-    'timestamp': pd.to_datetime(raw_data['your_timestamp_column']),
-    'page': raw_data['your_page_column'],
-    'event': raw_data['your_event_column'],
-    'session_id': raw_data['your_session_id_column']
-})
-
-# Sort by user and timestamp
-transformed_data = transformed_data.sort_values(['user_id', 'timestamp'])
-
-# Save in the required location
-transformed_data.to_csv('data/events.csv', index=False)
-```
-
-### Example Custom Data
-
-Here's a sample of correctly formatted data:
-
-```csv
-user_id,timestamp,page,event,session_id
-user_123,2023-04-15T14:30:00.000Z,/home,page_view,session_abc
-user_123,2023-04-15T14:31:25.000Z,/products,page_view,session_abc
-user_123,2023-04-15T14:32:45.000Z,/product/123,click_button,session_abc
-user_123,2023-04-15T14:33:10.000Z,/cart,page_view,session_abc
-user_456,2023-04-15T15:10:00.000Z,/home,page_view,session_def
-user_456,2023-04-15T15:12:30.000Z,/search,search_query,session_def
-```
-
-## Development
-
-### Prerequisites
-
-- Python 3.6+
-- Required packages: pandas, networkx, pytest, streamlit, pyvis
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/pixiiidust/TeloMeshV2.git
-cd TeloMeshV2
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### Running Tests
-
-```bash
-# Run all tests
-pytest tests/
-
-# Run specific test module
-pytest tests/test_synthetic_events.py
-```
-
-## Graph Structure
-
-The user journey graph is structured as follows:
-
-- **Nodes**: Represent pages in the user journey
-- **Edges**: Represent transitions between pages
-- **Edge Attributes**:
-  - `event`: The event that triggered the transition
-  - `weight`: The number of times this transition occurred
-
-## Metrics
-
-The flow metrics validation checks:
-
-- **Sessions per user**: Should be ≥ 1
-- **Average flow length**: Should be ≥ 3 steps
-- **Node count**: Should be ≥ 10
-- **Total sessions**: Should be ≥ 50
-- **Unique edge events**: Should be ≥ 2
-
-## License
-
-MIT
