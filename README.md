@@ -115,14 +115,17 @@ By combining exit rates with structural importance, the WSJF scoring system ensu
 
 ## Dashboard Screenshots
 Discover UX pain points:
+
 <img src="https://github.com/user-attachments/assets/fb7321df-d86f-4506-857e-60daae9e92c6" width="600"/>
 <br>
 
 Triage pain points along user flows:
+
 <img src="https://github.com/user-attachments/assets/4eec77aa-8490-42c9-8a9e-63dbd8b31418" width="600"/>
 <br>
 
 Map priorities with user journey graphs: 
+
 <img src="https://github.com/user-attachments/assets/0e591fae-775d-490e-aeda-76ca0c1e8227" width="600"/>
 <br>
 <img src="https://github.com/user-attachments/assets/d25e7827-298e-46b5-bd4d-af98c00c3c7c" width="600"/>
