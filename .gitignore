@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+temp_*
+*.temp
+temp/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Exported files
+*.csv
+*.html
+!requirements.txt
+
+# Cursor
+.cursor/ 
