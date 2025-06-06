@@ -7,41 +7,66 @@ TeloMesh is a user journey analysis pipeline that processes event data to build 
 - Friction Intelligence visualization
 - Dark theme with improved UX
 
-## Project Structure
+## Repository Structure
 
-The project is organized into the following components:
+The repository is organized into the following components:
 
-```
-TeloMesh/
-├── data/
-│   ├── events.csv                   # Synthetic event log
-│   └── synthetic_event_generator.py # Generates test data
-├── ingest/
-│   ├── parse_sessions.py            # CSV → sessions
-│   ├── build_graph.py               # sessions → graph
-│   └── flow_metrics.py              # Validates sessions and graph
-├── analysis/
-│   └── event_chokepoints.py         # Compute friction metrics
-├── ui/
-│   └── dashboard.py                 # Streamlit dashboard
-├── outputs/
-│   ├── session_flows.csv            # Flat session log
-│   ├── user_graph.gpickle           # Directed, typed, weighted graph
-│   ├── event_chokepoints.csv        # Friction points analysis
-│   ├── high_friction_flows.csv      # Flows with multiple chokepoints
-│   └── friction_node_map.json       # WSJF scores for heatmap
-├── logs/
-│   ├── session_stats.log            # Session validation logs
-│   └── metrics.json                 # Metrics summary
-├── tests/
-│   ├── test_synthetic_events.py     # Tests for event generation
-│   ├── test_parse_sessions.py       # Tests for session parsing
-│   ├── test_build_graph.py          # Tests for graph building
-│   ├── test_flow_metrics.py         # Tests for metrics validation
-│   ├── test_event_chokepoints.py    # Tests for friction analysis
-│   └── test_dashboard_ui.py         # Tests for dashboard
-└── main.py                          # Pipeline entry point
-```
+### Core Directories
+
+#### `/data`
+Contains input data and data generation tools:
+- `events.csv` - Raw event log containing user interactions (synthetic or imported)
+- `synthetic_event_generator.py` - Python script that generates realistic test data with configurable parameters
+
+#### `/ingest`
+Pipeline components for transforming raw events into structured session data:
+- `parse_sessions.py` - Converts raw CSV events into structured user sessions
+- `build_graph.py` - Creates a directed graph representation of user journeys
+- `flow_metrics.py` - Validates sessions and graph quality metrics
+
+#### `/analysis`
+Advanced analysis components for discovering insights:
+- `event_chokepoints.py` - Identifies friction points by computing exit rates and betweenness centrality
+
+#### `/ui`
+User interface components:
+- `dashboard.py` - Streamlit dashboard with interactive visualizations, filtering, and data export capabilities
+
+#### `/outputs`
+Generated data files:
+- `session_flows.csv` - Processed session data in tabular format
+- `user_graph.gpickle` - Serialized NetworkX graph with user journey information
+- `event_chokepoints.csv` - Identified friction points with WSJF scores
+- `high_friction_flows.csv` - User journeys that contain multiple high-friction points
+- `friction_node_map.json` - Mapping of pages to WSJF scores for visualization
+
+#### `/logs`
+Logging and monitoring data:
+- `session_stats.log` - Log file with session validation details
+- `metrics.json` - Summary metrics for quality assessment
+
+#### `/tests`
+Test suites for each component:
+- `test_synthetic_events.py` - Tests for data generation
+- `test_parse_sessions.py` - Tests for session parsing
+- `test_build_graph.py` - Tests for graph construction
+- `test_flow_metrics.py` - Tests for metrics calculation
+- `test_event_chokepoints.py` - Tests for friction point identification
+- `test_dashboard_ui.py` - Tests for UI components
+
+#### `/logos`
+Brand assets and visual elements:
+- `Telomesh logo.png` - Primary logo for application header
+- `telomesh logo white.png` - White version of logo for dark backgrounds
+
+### Key Files
+
+- `main.py` - Entry point for the pipeline with command-line arguments
+- `requirements.txt` - Package dependencies for easy installation
+- `directory_structure.lua` - Canonical definition of project structure
+- `README.md` - Project documentation (this file)
+- `.streamlit/config.toml` - Streamlit configuration for dark theme and UI settings
+- `.gitignore` - Configuration for Git to exclude temporary files
 
 ## Features
 
