@@ -95,6 +95,33 @@ By combining exit rates with structural importance, the WSJF scoring system ensu
 - Dark theme with improved UX
 - Analytics Converter Utility for importing from major platforms
 
+## Future Versions
+
+The TeloMesh roadmap includes several exciting enhancements planned for upcoming versions:
+
+### Performance & Scale
+- **Large Session Testing**: Optimize the pipeline for analyzing datasets with millions of sessions
+- **Distributed Processing**: Support for processing large datasets across multiple nodes
+- **Performance Benchmarks**: Standard tests to evaluate processing time across different dataset sizes
+
+### Enhanced User Interface
+- **Web-Based Upload Interface**: A frontend interface allowing users to directly upload analytics files
+- **Drag-and-Drop Data Import**: Intuitive interface for importing and mapping data
+- **Visualization Exports**: Additional export formats for reports and presentations
+
+### Advanced Analytics
+- **Custom NSM Settings**: Allow Global Net Success Metrics to be defined for specific pages/events
+- **Journey Comparison**: Compare before/after journeys to measure improvement impact
+- **Segmentation Analysis**: Filter friction analysis by user segments and cohorts
+- **Predictive Flow Modeling**: Predict potential friction points in proposed new user journeys
+
+### Integration
+- **Direct API Connections**: Native integrations with major analytics platforms
+- **Data Warehousing**: Connect directly to data warehouses like Snowflake or BigQuery
+- **CI/CD Integration**: Automate friction analysis as part of continuous integration pipelines
+
+If you're interested in contributing to any of these future features, please see our [contribution guidelines](CONTRIBUTING.md).
+
 ## Repository Structure
 
 ### Core Directories
