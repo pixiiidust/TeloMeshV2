@@ -173,7 +173,7 @@ The TeloMesh roadmap includes several enhancements planned for upcoming versions
 - **Data Warehousing**: Connect directly to data warehouses like Snowflake or BigQuery
 - **CI/CD Integration**: Automate friction analysis as part of continuous integration pipelines
 
-If you're interested in contributing to any of these future features, please see our [contribution guidelines](CONTRIBUTING.md).
+If you're interested in contributing to any of these future features, please see our [contribution guidelines](contributing.md).
 
 ## Repository Structure
 
