@@ -1,10 +1,11 @@
 # TeloMesh
 
-TeloMesh is a user journey analysis pipeline that processes event data to build a directed graph of user flows. This tool helps product managers and UX designers identify patterns, chokepoints, and optimization opportunities in user journeys.
+TeloMesh is a user journey analysis pipeline that processes session and event data to build a directed graph of user flows. 
+This tool provides an actionable overview that helps product managers and UX designers identify patterns, triage chokepoints, and prioritize optimization opportunities in user journeys.
 
 ## Theory & Methodology
 
-TeloMesh uses graph theory and network analysis to identify friction points in user journeys:
+TeloMesh uses graph theory and network analysis to identify friction points in user journeys and prioritizes them using WSJF. WSJF (Weighted Shortest Job First) is a prioritization method used in Agile and Lean development (especially the Scaled Agile Framework - SAFe) that ranks work items by dividing their value by their effort, so teams tackle the highest-value, lowest-effort tasks first.:
 
 1. **Graph Construction**: User sessions are converted into directed graphs where:
    - Nodes represent pages/screens
