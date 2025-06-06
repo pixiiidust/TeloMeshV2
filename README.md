@@ -180,20 +180,28 @@ python main.py --stage analysis
 
 ### Using the Analytics Converter
 
-TeloMesh includes a utility to convert data from popular analytics platforms:
+TeloMesh includes a powerful utility to convert data from popular analytics platforms:
 
 ```bash
-# Convert Mixpanel data
-python utils/analytics_converter.py --input mixpanel_export.csv --output data/events.csv --format mixpanel
+# Convert data and make it ready for TeloMesh in one step
+python utils/analytics_converter.py --input your_analytics_export.csv --output data/events.csv --format [platform] --telomesh-format
 
-# Convert Amplitude data
-python utils/analytics_converter.py --input amplitude_export.csv --output data/events.csv --format amplitude
-
-# Convert Google Analytics 4 data
-python utils/analytics_converter.py --input ga4_export.csv --output data/events.csv --format ga4
-
-# Generate sample data if you don't have real analytics data
-python utils/analytics_converter.py --generate-sample --format amplitude --output data/events.csv
+# Where [platform] is one of: mixpanel, amplitude, ga4
 ```
 
-For more details on analytics conversion, see the [Analytics Converter Documentation](utils/README.md).
+#### Supported Platforms:
+
+- **Mixpanel**: Convert event exports with user, timestamp, and page information
+- **Amplitude**: Convert Amplitude CSV exports with event data
+- **Google Analytics 4**: Convert GA4 event exports with page and user data
+
+#### Generate Sample Data:
+
+If you don't have real analytics data, you can generate realistic sample data:
+
+```bash
+# Generate sample data ready for TeloMesh
+python utils/analytics_converter.py --generate-sample --format amplitude --output data/events.csv --telomesh-format
+```
+
+For detailed documentation on analytics conversion, see the [Analytics Converter Guide](utils/GUIDE.md).

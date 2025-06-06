@@ -6,7 +6,10 @@ This script converts analytics data exports from common platforms (Mixpanel, Amp
 to the format required by TeloMesh for user journey analysis.
 
 Usage:
-    python analytics_converter.py --input input_file.csv --output output_file.csv --format [mixpanel|amplitude|ga4]
+    python analytics_converter.py --input input_file.csv --output output_file.csv --format [mixpanel|amplitude|ga4] [--telomesh-format]
+    
+    # Generate sample data:
+    python analytics_converter.py --generate-sample --format [mixpanel|amplitude|ga4] --output sample_data.csv
     
 Requirements:
     - pandas
@@ -158,11 +161,11 @@ def convert_mixpanel(input_file, output_file, session_gap_minutes=30):
         # Save to output file
         output_df.to_csv(output_file, index=False)
         logger.info(f"Conversion completed: {len(output_df)} rows written to {output_file}")
-        return True
+        return output_df
         
     except Exception as e:
         logger.error(f"Error converting Mixpanel data: {str(e)}")
-        return False
+        return None
 
 def convert_amplitude(input_file, output_file, session_gap_minutes=30):
     """
@@ -261,38 +264,34 @@ def convert_amplitude(input_file, output_file, session_gap_minutes=30):
         # Save to output file
         output_df.to_csv(output_file, index=False)
         logger.info(f"Conversion completed: {len(output_df)} rows written to {output_file}")
-        return True
+        return output_df
         
     except Exception as e:
         logger.error(f"Error converting Amplitude data: {str(e)}")
-        return False
+        return None
 
 def convert_ga4(input_file, output_file, session_gap_minutes=30):
     """
-    Convert Google Analytics 4 export to TeloMesh format.
+    Convert Google Analytics 4 (GA4) CSV export to TeloMesh format.
     
     GA4 mapping:
     - user_pseudo_id → user_id
-    - event_timestamp → timestamp
-    - page_location or page_title → page
+    - event_timestamp → timestamp (converted from microseconds since epoch)
+    - page_location → page
     - event_name → event
-    - A combination of user_pseudo_id and session_id → session_id
+    - ga_session_id → session_id (prefixed with user_id)
+    - event_params → event_properties
     
     Args:
-        input_file (str): Path to input GA4 CSV/JSON
+        input_file (str): Path to input GA4 CSV
         output_file (str): Path to output CSV
         session_gap_minutes (int): Gap in minutes to define a new session
     """
     logger.info(f"Converting GA4 data from {input_file} to {output_file}")
     
     try:
-        # Determine file type and read
-        if input_file.endswith('.json'):
-            with open(input_file, 'r') as f:
-                data = json.load(f)
-            df = pd.DataFrame(data)
-        else:
-            df = pd.read_csv(input_file)
+        # Read input file
+        df = pd.read_csv(input_file)
         
         # Check required columns
         required_cols = ['user_pseudo_id', 'event_timestamp', 'event_name']
@@ -308,14 +307,10 @@ def convert_ga4(input_file, output_file, session_gap_minutes=30):
         # Map columns
         output_df['user_id'] = df['user_pseudo_id']
         
-        # Convert timestamp
-        # GA4 timestamps can be in microseconds since epoch
+        # Convert time to timestamp - GA4 uses microseconds since epoch
         if df['event_timestamp'].dtype == 'int64':
-            # Check if it's in microseconds (standard GA4 export)
-            if df['event_timestamp'].iloc[0] > 1600000000000000:  # Around year 2020 in microseconds
-                output_df['timestamp'] = pd.to_datetime(df['event_timestamp'], unit='us')
-            else:
-                output_df['timestamp'] = pd.to_datetime(df['event_timestamp'], unit='s')
+            # Convert from microseconds since epoch
+            output_df['timestamp'] = pd.to_datetime(df['event_timestamp'], unit='us')
         else:
             # Try to parse as string
             output_df['timestamp'] = pd.to_datetime(df['event_timestamp'])
@@ -323,8 +318,6 @@ def convert_ga4(input_file, output_file, session_gap_minutes=30):
         # Determine page column
         if 'page_location' in df.columns:
             output_df['page'] = df['page_location']
-        elif 'page_title' in df.columns:
-            output_df['page'] = df['page_title']
         else:
             # Default to event if no page info is available
             output_df['page'] = df['event_name'].apply(lambda x: f"/{x.lower().replace(' ', '_')}")
@@ -335,10 +328,9 @@ def convert_ga4(input_file, output_file, session_gap_minutes=30):
         
         # Session ID
         if 'ga_session_id' in df.columns:
-            # Combine user and GA session for uniqueness
+            # Prefix with user_id to ensure uniqueness
             output_df['session_id'] = df.apply(
-                lambda row: f"{row['user_pseudo_id']}_{row['ga_session_id']}", 
-                axis=1
+                lambda row: f"{row['user_pseudo_id']}_{row['ga_session_id']}", axis=1
             )
         else:
             # Generate session IDs
@@ -367,207 +359,353 @@ def convert_ga4(input_file, output_file, session_gap_minutes=30):
                 output_df.at[i, 'session_id'] = current_session
                 last_timestamp = row['timestamp']
         
-        # Event properties - combine available parameters
-        if 'event_params' in df.columns:
-            output_df['event_properties'] = df['event_params'].apply(parse_json_column)
-        else:
-            # Collect all columns that might be parameters
-            param_cols = [col for col in df.columns if col.startswith('event_param_')]
+        # Event properties - combine all event_param_* columns
+        event_param_cols = [col for col in df.columns if col.startswith('event_param_')]
+        if event_param_cols:
+            # Gather event parameters into a single dictionary
+            event_properties = []
+            for _, row in df.iterrows():
+                props = {}
+                for col in event_param_cols:
+                    param_name = col.replace('event_param_', '')
+                    if not pd.isna(row[col]):
+                        props[param_name] = row[col]
+                event_properties.append(props)
             
-            if param_cols:
-                # Combine parameter columns into properties
-                output_df['event_properties'] = df[param_cols].apply(
-                    lambda row: {col.replace('event_param_', ''): row[col] for col in param_cols if pd.notna(row[col])},
-                    axis=1
-                )
-            else:
-                output_df['event_properties'] = [{}] * len(output_df)
+            output_df['event_properties'] = event_properties
+        else:
+            output_df['event_properties'] = [{}] * len(output_df)
         
         # Save to output file
         output_df.to_csv(output_file, index=False)
         logger.info(f"Conversion completed: {len(output_df)} rows written to {output_file}")
-        return True
+        return output_df
         
     except Exception as e:
         logger.error(f"Error converting GA4 data: {str(e)}")
-        return False
+        return None
 
 def generate_sample_data(platform, output_file, num_users=10, events_per_user=20):
     """
-    Generate sample data in the format of a specific platform.
+    Generate sample data for the specified analytics platform.
     
     Args:
-        platform (str): Platform to generate data for ('mixpanel', 'amplitude', 'ga4')
+        platform (str): One of 'mixpanel', 'amplitude', 'ga4'
         output_file (str): Path to output file
-        num_users (int): Number of unique users to generate
+        num_users (int): Number of users to generate
         events_per_user (int): Average number of events per user
+    
+    Returns:
+        pd.DataFrame: Generated sample data
     """
     logger.info(f"Generating sample {platform} data with {num_users} users")
     
-    # Define common parameters
-    users = [f"user_{i}" for i in range(1, num_users + 1)]
+    # Define event types
+    event_types = [
+        'page_view', 
+        'click_button', 
+        'add_to_cart', 
+        'begin_checkout',
+        'purchase',
+        'user_sign_in'
+    ]
     
-    # Common pages and events
+    # Define pages
     pages = [
-        "/home", 
-        "/products", 
-        "/product/1", 
-        "/product/2", 
-        "/cart", 
-        "/checkout", 
-        "/payment",
-        "/confirmation",
-        "/account",
-        "/search"
+        '/home',
+        '/products',
+        '/product/1',
+        '/cart',
+        '/checkout',
+        '/account'
     ]
     
-    events = [
-        "page_view",
-        "click_button",
-        "add_to_cart",
-        "remove_from_cart",
-        "begin_checkout",
-        "purchase",
-        "search",
-        "login",
-        "signup",
-        "view_item"
-    ]
+    # Generate synthetic data
+    rows = []
     
-    # Generate random data based on platform
-    data = []
-    now = datetime.now()
+    # Base timestamp
+    base_timestamp = datetime.now()
     
-    for user_id in users:
-        # Random session count (1-3 sessions per user)
-        session_count = min(3, max(1, int(events_per_user / 5)))
-        
-        for session in range(session_count):
-            # Session start time (random in the last 7 days)
-            session_start = now - timedelta(
-                days=session,  # Each session on a different day
-                hours=session * 2,  # Space out sessions
-                minutes=int(30 * session)  # Additional spacing
+    for user_id in range(1, num_users + 1):
+        # Each user gets 3 sessions
+        for session_num in range(3):
+            # Session timestamp starts 1 day apart per user, sessions 2 hours apart
+            session_timestamp = base_timestamp + timedelta(
+                days=user_id - 1,
+                hours=session_num * 2
             )
             
-            # Events in this session
-            event_count = max(3, min(15, int(events_per_user / session_count)))
-            
-            # Session events
-            current_time = session_start
-            current_page_idx = 0  # Start at home
-            
-            for e in range(event_count):
-                # Basic event
-                event_data = {
-                    "user_id": user_id,
-                    "page": pages[current_page_idx],
-                    "event": events[min(e % len(events), len(events) - 1)],
-                    "timestamp": current_time
-                }
+            # Generate 6 events per session
+            for event_idx in range(6):
+                # Each event is 1-3 minutes apart
+                event_timestamp = session_timestamp + timedelta(
+                    minutes=event_idx * 2 + 1
+                )
                 
-                # Add platform-specific fields
+                # Select page and event type
+                page = pages[min(event_idx, len(pages) - 1)]
+                event = event_types[min(event_idx, len(event_types) - 1)]
+                
+                # Create event data based on platform
                 if platform == 'mixpanel':
-                    event_data["distinct_id"] = user_id
-                    event_data["time"] = current_time.isoformat()
-                    event_data["$current_url"] = pages[current_page_idx]
-                    event_data["$insert_id"] = f"session_{user_id}_{session}"
-                    event_data["properties"] = json.dumps({
-                        "source": "sample_data",
-                        "session_number": session + 1
-                    })
-                    
+                    row = {
+                        'user_id': f"user_{user_id}",
+                        'distinct_id': f"user_{user_id}",
+                        'time': event_timestamp,
+                        '$current_url': page,
+                        'event': event,
+                        '$insert_id': f"session_user_{user_id}_{session_num}",
+                        'properties': json.dumps({
+                            'source': 'sample_data',
+                            'session_number': session_num + 1
+                        })
+                    }
                 elif platform == 'amplitude':
-                    event_data["user_id"] = user_id
-                    event_data["event_time"] = current_time.isoformat()
-                    event_data["event_type"] = events[min(e % len(events), len(events) - 1)]
-                    event_data["page_url"] = pages[current_page_idx]
-                    event_data["session_id"] = f"session_{user_id}_{session}"
-                    event_data["event_properties"] = json.dumps({
-                        "source": "sample_data",
-                        "session_number": session + 1
-                    })
-                    
+                    row = {
+                        'user_id': f"user_{user_id}",
+                        'event_time': event_timestamp,
+                        'page_url': page,
+                        'event_type': event,
+                        'session_id': f"session_user_{user_id}_{session_num}",
+                        'event_properties': json.dumps({
+                            'source': 'sample_data',
+                            'session_number': session_num + 1
+                        })
+                    }
                 elif platform == 'ga4':
-                    event_data["user_pseudo_id"] = user_id
-                    # GA4 uses microseconds since epoch
-                    event_data["event_timestamp"] = int(current_time.timestamp() * 1000000)
-                    event_data["event_name"] = events[min(e % len(events), len(events) - 1)]
-                    event_data["page_location"] = pages[current_page_idx]
-                    event_data["ga_session_id"] = f"session_{session}"
-                    # GA4 has structured params
-                    event_data["event_param_source"] = "sample_data"
-                    event_data["event_param_session_number"] = session + 1
+                    # For GA4, timestamps are in microseconds since epoch
+                    timestamp_us = int(event_timestamp.timestamp() * 1000000)
+                    
+                    row = {
+                        'user_id': f"user_{user_id}",
+                        'user_pseudo_id': f"user_{user_id}",
+                        'event_timestamp': timestamp_us,
+                        'timestamp': event_timestamp,
+                        'page_location': page,
+                        'event_name': event,
+                        'ga_session_id': f"session_{session_num}",
+                        'event_param_source': 'sample_data',
+                        'event_param_session_number': session_num + 1
+                    }
+                else:
+                    raise ValueError(f"Unknown platform: {platform}")
                 
-                data.append(event_data)
-                
-                # Advance time by 1-5 minutes
-                current_time += timedelta(minutes=1 + e % 4)
-                
-                # Maybe advance to next page
-                if e > 0 and e % 2 == 0 and current_page_idx < len(pages) - 1:
-                    current_page_idx += 1
+                rows.append(row)
     
-    # Convert to DataFrame and save
-    df = pd.DataFrame(data)
+    # Convert to DataFrame
+    df = pd.DataFrame(rows)
+    
+    # Ensure output directory exists if the output file has a directory path
+    dir_name = os.path.dirname(output_file)
+    if dir_name:
+        os.makedirs(dir_name, exist_ok=True)
+    
+    # Save to CSV
     df.to_csv(output_file, index=False)
     logger.info(f"Generated {len(df)} sample events for {platform} saved to {output_file}")
-    return True
+    
+    return df
+
+def adapt_for_telomesh(df, output_file):
+    """
+    Adapt a DataFrame to TeloMesh expected format.
+    
+    Args:
+        df (pd.DataFrame): DataFrame in standardized format
+        output_file (str): Output file path
+        
+    Returns:
+        pd.DataFrame: Adapted DataFrame
+    """
+    try:
+        # Check if it has the required columns
+        required_cols = ['user_id', 'timestamp', 'page', 'event', 'session_id']
+        missing_cols = [col for col in required_cols if col not in df.columns]
+        
+        if missing_cols:
+            logger.error(f"Missing required columns for TeloMesh format: {', '.join(missing_cols)}")
+            return None
+        
+        # Make a copy of the DataFrame to avoid modifying the original
+        adapted_df = df.copy()
+        
+        # Rename columns to match what TeloMesh expects
+        column_mapping = {
+            'page': 'page_url',
+            'event': 'event_name'
+        }
+        
+        adapted_df = adapted_df.rename(columns=column_mapping)
+        
+        # Ensure the output directory exists if the output file has a directory path
+        dir_name = os.path.dirname(output_file)
+        if dir_name:
+            os.makedirs(dir_name, exist_ok=True)
+        
+        # Save to output file
+        adapted_df.to_csv(output_file, index=False)
+        
+        logger.info(f"Adapted data for TeloMesh and saved to {output_file}")
+        logger.info(f"Converted {len(adapted_df)} events with columns: {list(adapted_df.columns)}")
+        
+        return adapted_df
+    
+    except Exception as e:
+        logger.error(f"Error adapting data for TeloMesh: {str(e)}")
+        return None
 
 def main():
-    """Main entry point for the script."""
-    parser = argparse.ArgumentParser(description='Convert analytics data to TeloMesh format')
+    """Main function for the script."""
+    parser = argparse.ArgumentParser(
+        description='Convert analytics data to TeloMesh format',
+        formatter_class=argparse.RawTextHelpFormatter
+    )
     
     parser.add_argument('--input', type=str, help='Input file path')
     parser.add_argument('--output', type=str, help='Output file path')
-    parser.add_argument('--format', type=str, choices=['mixpanel', 'amplitude', 'ga4'], 
-                        help='Input file format (analytics platform)')
-    parser.add_argument('--session-gap', type=int, default=30,
-                        help='Gap in minutes to define a new session (default: 30)')
-    parser.add_argument('--generate-sample', action='store_true',
-                        help='Generate sample data instead of converting')
-    parser.add_argument('--users', type=int, default=10,
-                        help='Number of users for sample data (default: 10)')
-    parser.add_argument('--events', type=int, default=20,
-                        help='Events per user for sample data (default: 20)')
+    parser.add_argument(
+        '--format', 
+        type=str, 
+        choices=['mixpanel', 'amplitude', 'ga4'],
+        help='Input data format'
+    )
+    parser.add_argument(
+        '--telomesh-format', 
+        action='store_true',
+        help='Output in format directly usable by TeloMesh (renames columns to page_url and event_name)'
+    )
+    parser.add_argument(
+        '--generate-sample', 
+        action='store_true',
+        help='Generate sample data instead of converting'
+    )
+    parser.add_argument(
+        '--users', 
+        type=int, 
+        default=10,
+        help='Number of users for sample data (default: 10)'
+    )
+    parser.add_argument(
+        '--events-per-user', 
+        type=int, 
+        default=6,
+        help='Events per user for sample data (default: 6)'
+    )
     
     args = parser.parse_args()
     
-    # Generate sample data if requested
+    # Check for required arguments
     if args.generate_sample:
         if not args.format:
-            logger.error("Please specify a format for sample data generation")
+            logger.error("--format is required with --generate-sample")
+            return 1
+        
+        if not args.output:
+            logger.error("--output is required with --generate-sample")
+            return 1
+        
+        # Generate sample data to a temporary file
+        temp_output = args.output + ".temp"
+        result = generate_sample_data(
+            args.format, 
+            temp_output, 
+            args.users, 
+            args.events_per_user
+        )
+        
+        if result is None:
+            return 1
+        
+        # Standardize column names for sample data
+        if args.format == 'mixpanel':
+            # Rename columns to standardized format
+            result.rename(columns={
+                'distinct_id': 'user_id',
+                'time': 'timestamp', 
+                '$current_url': 'page',
+                'event': 'event'
+            }, inplace=True)
+        elif args.format == 'amplitude':
+            # Rename columns to standardized format
+            result.rename(columns={
+                'event_time': 'timestamp',
+                'page_url': 'page',
+                'event_type': 'event'
+            }, inplace=True)
+        elif args.format == 'ga4':
+            # Rename columns to standardized format
+            result.rename(columns={
+                'user_pseudo_id': 'user_id',
+                'page_location': 'page',
+                'event_name': 'event'
+            }, inplace=True)
+            
+            # Convert timestamp from microseconds if needed
+            if 'timestamp' not in result.columns and 'event_timestamp' in result.columns:
+                if result['event_timestamp'].dtype == 'int64':
+                    result['timestamp'] = pd.to_datetime(result['event_timestamp'], unit='us')
+        
+        # For telomesh format, adapt the result
+        if args.telomesh_format:
+            # Use adapt_for_telomesh to create final output
+            adapt_for_telomesh(result, args.output)
+        else:
+            # Just copy the temp file to the final output
+            result.to_csv(args.output, index=False)
+            logger.info(f"Sample data saved to {args.output}")
+        
+        # Remove temp file
+        if os.path.exists(temp_output):
+            try:
+                os.remove(temp_output)
+            except:
+                pass
+        
+        return 0
+    else:
+        if not args.input or not args.output or not args.format:
+            logger.error("--input, --output, and --format are required for conversion")
+            return 1
+        
+        # Check if input file exists
+        if not os.path.exists(args.input):
+            logger.error(f"Input file does not exist: {args.input}")
+            return 1
+        
+        # Convert to a temporary file
+        temp_output = args.output + ".temp"
+        
+        # Convert based on format
+        if args.format == 'mixpanel':
+            result = convert_mixpanel(args.input, temp_output)
+        elif args.format == 'amplitude':
+            result = convert_amplitude(args.input, temp_output)
+        elif args.format == 'ga4':
+            result = convert_ga4(args.input, temp_output)
+        else:
+            logger.error(f"Unknown format: {args.format}")
+            return 1
+        
+        if result is None:
             return 1
             
-        if not args.output:
-            args.output = f"sample_{args.format}_data.csv"
-            
-        result = generate_sample_data(args.format, args.output, args.users, args.events)
-        return 0 if result else 1
-    
-    # Otherwise, validate input parameters
-    if not args.input or not args.output or not args.format:
-        logger.error("Please provide input file, output file, and format")
-        parser.print_help()
-        return 1
-    
-    # Check that input file exists
-    if not os.path.exists(args.input):
-        logger.error(f"Input file does not exist: {args.input}")
-        return 1
+        # For telomesh format, adapt the result
+        if args.telomesh_format:
+            # Use adapt_for_telomesh to create final output
+            adapt_for_telomesh(result, args.output)
+        else:
+            # Just copy the temp file to the final output
+            result.to_csv(args.output, index=False)
+            logger.info(f"Converted data saved to {args.output}")
         
-    # Convert based on format
-    if args.format == 'mixpanel':
-        result = convert_mixpanel(args.input, args.output, args.session_gap)
-    elif args.format == 'amplitude':
-        result = convert_amplitude(args.input, args.output, args.session_gap)
-    elif args.format == 'ga4':
-        result = convert_ga4(args.input, args.output, args.session_gap)
-    else:
-        logger.error(f"Unsupported format: {args.format}")
-        return 1
+        # Remove temp file
+        if os.path.exists(temp_output):
+            try:
+                os.remove(temp_output)
+            except:
+                pass
         
-    return 0 if result else 1
+        return 0
 
 if __name__ == "__main__":
     sys.exit(main()) 

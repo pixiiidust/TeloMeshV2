@@ -1,6 +1,36 @@
-# TeloMesh Analytics Converter
+# TeloMesh Utilities
 
-This utility converts analytics data exports from common platforms (Mixpanel, Amplitude, Google Analytics 4) to the format required by TeloMesh for user journey analysis.
+This directory contains utility scripts that enhance the functionality of TeloMesh.
+
+## Analytics Converter
+
+The Analytics Converter is a utility for converting data from popular analytics platforms (Mixpanel, Amplitude, Google Analytics 4) to the format required by TeloMesh.
+
+### Key Features
+
+- Convert data from Mixpanel, Amplitude, and Google Analytics 4
+- Generate sample data for testing and demonstration
+- Automatically adapt column names for direct TeloMesh compatibility
+- Session identification and generation
+- Customizable sample data generation
+
+### Documentation
+
+For comprehensive documentation on how to use the Analytics Converter, please see:
+
+[TeloMesh Analytics Converter Guide](GUIDE.md)
+
+### Quick Start
+
+```bash
+# Convert data for TeloMesh in one step
+python utils/analytics_converter.py --input your_analytics_export.csv --output data/events.csv --format [platform] --telomesh-format
+
+# Generate sample data ready for TeloMesh
+python utils/analytics_converter.py --generate-sample --format amplitude --output data/events.csv --telomesh-format
+```
+
+Where `[platform]` is one of: `mixpanel`, `amplitude`, `ga4`
 
 ## Usage
 
