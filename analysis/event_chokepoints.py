@@ -225,7 +225,7 @@ def detect_fragile_flows(session_df, chokepoints_df):
         # Sort by session_id and step_index
         fragile_flows_df = fragile_flows_df.sort_values(['session_id', 'step_index'])
         
-        print(f"Detected {fragile_flows_df['session_id'].nunique()} fragile flows with ≥2 chokepoints.")
+        print(f"Detected {fragile_flows_df['session_id'].nunique()} fragile flows with >=2 chokepoints.")
         return fragile_flows_df
     else:
         print("No fragile flows detected.")
@@ -302,7 +302,7 @@ def main(input_flows="outputs/session_flows.csv",
     Returns:
         None
     """
-    print("\n🔍 TeloMesh Event Chokepoints Analysis")
+    print("\n[ANALYSIS] TeloMesh Event Chokepoints Analysis")
     print("=" * 50)
     
     # Load the session flows data
@@ -334,7 +334,7 @@ def main(input_flows="outputs/session_flows.csv",
     # Export results
     export_chokepoints(friction_df, fragile_flows_df, node_map, output_dir)
     
-    print("\n✅ Event chokepoints analysis complete!")
+    print("\n[OK] Event chokepoints analysis complete!")
     print("=" * 50)
     
     if not fast:

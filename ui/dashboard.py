@@ -188,12 +188,15 @@ def configure_dark_theme():
         
         .telomesh-header {
             display: flex !important;
+            flex-direction: column !important;
             align-items: center !important;
             margin-bottom: 1.5rem !important;
+            text-align: center !important;
         }
         
         .telomesh-logo {
-            height: 3rem !important;
+            height: 8rem !important;
+            margin-bottom: 1rem !important;
         }
         
         /* Download button styling */
@@ -233,37 +236,125 @@ def load_logo_base64(path: str) -> str:
         logger.error(f"Error loading logo from {path}: {str(e)}")
         return ""
 
-def load_friction_data() -> Tuple[pd.DataFrame, pd.DataFrame, Dict, nx.DiGraph]:
+def discover_datasets():
     """
-    Load the friction data from pre-computed files.
+    Discover available datasets in the outputs directory.
     
     Returns:
-        Tuple[pd.DataFrame, pd.DataFrame, Dict, nx.DiGraph]: Tuple containing:
-            - friction_df: DataFrame with event chokepoints
-            - flow_df: DataFrame with fragile flows
-            - node_map: Dictionary mapping page names to WSJF scores
-            - graph: NetworkX DiGraph of user journeys
+        list: List of dataset names (directory names)
+        str: Most recent dataset name or None if no datasets found
     """
     try:
-        # Load event chokepoints
-        friction_df = pd.read_csv("outputs/event_chokepoints.csv")
+        outputs_dir = Path("outputs")
+        if not outputs_dir.exists():
+            return [], None
         
-        # Load fragile flows
-        flow_df = pd.read_csv("outputs/high_friction_flows.csv")
+        # Get all subdirectories in the outputs directory
+        datasets = [d.name for d in outputs_dir.iterdir() if d.is_dir()]
         
-        # Load node map
-        with open("outputs/friction_node_map.json", "r") as f:
+        # If no datasets found, return empty list
+        if not datasets:
+            return [], None
+        
+        # Find the most recent dataset based on modification time
+        dataset_times = [(d, os.path.getmtime(outputs_dir / d)) for d in datasets]
+        dataset_times.sort(key=lambda x: x[1], reverse=True)
+        
+        most_recent = dataset_times[0][0] if dataset_times else None
+        
+        return datasets, most_recent
+    except Exception as e:
+        logger.error(f"Error discovering datasets: {str(e)}")
+        return [], None
+
+def is_valid_dataset(dataset_name):
+    """
+    Check if a dataset directory contains all the required files.
+    
+    Args:
+        dataset_name (str): Name of the dataset directory
+        
+    Returns:
+        bool: True if the dataset is valid, False otherwise
+    """
+    required_files = [
+        "event_chokepoints.csv",
+        "high_friction_flows.csv",
+        "friction_node_map.json",
+        "user_graph.gpickle"
+    ]
+    
+    dataset_dir = Path(f"outputs/{dataset_name}")
+    
+    # Check if all required files exist
+    for file in required_files:
+        if not (dataset_dir / file).exists():
+            return False
+    
+    return True
+
+def load_friction_data(dataset=None) -> Tuple[pd.DataFrame, pd.DataFrame, Dict, nx.DiGraph]:
+    """
+    Load friction data from files.
+    
+    Args:
+        dataset (str, optional): Name of the dataset to load. If None, uses the default dataset.
+        
+    Returns:
+        Tuple containing:
+        - DataFrame with event chokepoints
+        - DataFrame with high friction flows
+        - Dictionary mapping page names to friction scores
+        - NetworkX DiGraph representing the user journey graph
+    """
+    try:
+        # Determine dataset directory
+        dataset_dir = Path(f"outputs/{dataset if dataset else 'default'}")
+        
+        # Check if dataset directory exists
+        if not dataset_dir.exists() and dataset:
+            st.error(f"Dataset directory not found: {dataset_dir}")
+            st.info("Please select a valid dataset from the dropdown.")
+            return None, None, None, None
+        
+        # Check if required files exist
+        chokepoints_path = dataset_dir / "event_chokepoints.csv"
+        flows_path = dataset_dir / "high_friction_flows.csv"
+        node_map_path = dataset_dir / "friction_node_map.json"
+        graph_path = dataset_dir / "user_graph.gpickle"
+        
+        if not chokepoints_path.exists():
+            st.error(f"File not found: {chokepoints_path}")
+            return None, None, None, None
+            
+        if not flows_path.exists():
+            st.error(f"File not found: {flows_path}")
+            return None, None, None, None
+            
+        if not node_map_path.exists():
+            st.error(f"File not found: {node_map_path}")
+            return None, None, None, None
+            
+        if not graph_path.exists():
+            st.error(f"File not found: {graph_path}")
+            return None, None, None, None
+        
+        # Load data
+        friction_df = pd.read_csv(chokepoints_path)
+        flow_df = pd.read_csv(flows_path)
+        
+        with open(node_map_path, 'r') as f:
             node_map = json.load(f)
         
-        # Load the graph
-        with open("outputs/user_graph.gpickle", "rb") as f:
-            graph = pickle.load(f)
+        with open(graph_path, 'rb') as f:
+            G = pickle.load(f)
         
-        return friction_df, flow_df, node_map, graph
+        return friction_df, flow_df, node_map, G
+    
     except Exception as e:
-        logger.error(f"Error loading data: {str(e)}")
-        logger.error(traceback.format_exc())
-        raise
+        st.error(f"Error loading friction data: {str(e)}")
+        st.error(traceback.format_exc())
+        return None, None, None, None
 
 def render_tooltips(metric: str) -> str:
     """
@@ -279,7 +370,8 @@ def render_tooltips(metric: str) -> str:
         "exit_rate": "% of users who leave after this event. Higher values indicate user abandonment points.",
         "betweenness": "How central this page is in user flows. Higher values indicate pages that many users pass through.",
         "users_lost": "Number of users who exited after this event and didn't return within the same session.",
-        "WSJF_Friction_Score": "Frustration × importance. Prioritizes fixing pain points that are both high in exit rate and structurally critical.",
+        "WSJF_Friction_Score": "WSJF Friction Score is calculated as exit_rate × betweenness, prioritizing high-impact friction points.",
+        "wsjf": "WSJF Friction Score is calculated as exit_rate × betweenness, prioritizing high-impact friction points.",
         "is_chokepoint": "Identifies high-friction points (top 10% by WSJF score)."
     }
     
@@ -292,19 +384,53 @@ def render_friction_table(df: pd.DataFrame):
     Args:
         df (pd.DataFrame): DataFrame with event chokepoints.
     """
-    st.header("🔥 Friction Points", help="Areas where users get stuck or exit")
+    # Top Pages Summary Section
+    st.subheader("Top 3 Pages by Friction Metric")
+    
+    # Dropdown for metric selection
+    metric_options = {
+        "Users Lost": "users_lost",
+        "Exit Rate": "exit_rate", 
+        "WSJF Score": "WSJF_Friction_Score"
+    }
+    selected_metric = st.selectbox("Select metric:", list(metric_options.keys()))
+    metric_column = metric_options[selected_metric]
+    
+    # Group by page and calculate aggregate metrics
+    page_metrics = df.groupby("page").agg({
+        "users_lost": "sum",
+        "exit_rate": "mean",
+        "WSJF_Friction_Score": "mean"
+    }).reset_index()
+    
+    # Get top 3 pages by selected metric
+    top_pages = page_metrics.sort_values(by=metric_column, ascending=False).head(3)
+    
+    # Display top pages in columns
+    cols = st.columns(3)
+    for i, (_, row) in enumerate(top_pages.iterrows()):
+        page_name = row["page"]
+        metric_value = row[metric_column]
+        
+        # Format the metric value based on the type
+        if metric_column == "exit_rate":
+            formatted_value = f"{metric_value:.2%}"
+        elif metric_column == "WSJF_Friction_Score":
+            formatted_value = f"{metric_value:.6f}"
+        else:
+            formatted_value = f"{int(metric_value):,}"
+            
+        cols[i].metric(
+            f"#{i+1}: {page_name}", 
+            formatted_value,
+            help=f"Page with #{i+1} highest {selected_metric}"
+        )
+    
+    # Main friction table
+    st.header("🔥 Friction Table")
+    st.write("The friction table shows event chokepoints ranked by friction score (WSJF).")
     
     try:
-        # Add summary metrics at the top
-        total_users_lost = df["users_lost"].sum()
-        avg_exit_rate = df["exit_rate"].mean()
-        avg_wsjf = df["WSJF_Friction_Score"].mean()
-        
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Total Users Lost", f"{total_users_lost:,}")
-        col2.metric("Avg. Exit Rate", f"{avg_exit_rate:.2%}")
-        col3.metric("Avg. WSJF Score", f"{avg_wsjf:.6f}")
-        
         # UI controls for filtering
         col1, col2, col3 = st.columns(3)
         
@@ -341,6 +467,16 @@ def render_friction_table(df: pd.DataFrame):
         if selected_percentile > 0:
             threshold = df["WSJF_Friction_Score"].quantile(selected_percentile / 100)
             filtered_df = filtered_df[filtered_df["WSJF_Friction_Score"] >= threshold]
+        
+        # Add summary metrics at the top based on filtered data
+        total_users_lost = filtered_df["users_lost"].sum()
+        avg_exit_rate = filtered_df["exit_rate"].mean()
+        avg_wsjf = filtered_df["WSJF_Friction_Score"].mean()
+        
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Total Users Lost", f"{total_users_lost:,}")
+        col2.metric("Avg. Exit Rate", f"{avg_exit_rate:.2%}")
+        col3.metric("Avg. WSJF Score", f"{avg_wsjf:.6f}")
         
         # Display the filtered table
         if len(filtered_df) > 0:
@@ -432,7 +568,8 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
         graph (nx.DiGraph): Directed graph of user journeys.
         score_map (Dict[str, float]): Dictionary mapping page names to WSJF scores.
     """
-    st.header("🌐 User Flow Heatmap", help="Visual map of user journeys with friction points highlighted")
+    st.header("🌐 User Journey Graph", help="Visualizes user journeys with friction nodes and their connecting flows")
+    st.write("This graph visualizes user journeys across multiple paths, highlighting high-friction chokepoints (nodes) and their connecting flows (edges).")
     
     try:
         # Compute thresholds for coloring
@@ -502,12 +639,10 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
         # Add a legend
         st.markdown("""
         **Legend:**
-        - 🔴 **Red nodes**: Top 10% friction points (highest WSJF scores)
-        - 🟠 **Orange nodes**: Top 20% friction points
-        - ⚪ **Gray nodes**: Lower friction points
-        - Hover over nodes and edges for more details
-        - Click nodes to see their connections
-        """)
+        - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#F87171;"></span> **Red**: Top 10% friction (highest WSJF scores)
+        - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#FBBF24;"></span> **Yellow**: Top 20% friction
+        - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#94A3B8;"></span> **Gray**: Lower friction
+        """, unsafe_allow_html=True)
     except Exception as e:
         st.error(f"Error in graph heatmap: {str(e)}")
         logger.error(f"Error in graph heatmap: {str(e)}")
@@ -754,8 +889,6 @@ def render_flow_summaries(flow_df: pd.DataFrame):
     Args:
         flow_df (pd.DataFrame): DataFrame containing fragile flows.
     """
-    st.header("🔁 Fragile Flows", help="User journeys with multiple friction points")
-    
     try:
         if len(flow_df) == 0:
             st.info("No fragile flows detected. A fragile flow contains 2 or more high-friction points.")
@@ -775,7 +908,7 @@ def render_flow_summaries(flow_df: pd.DataFrame):
         chokepoint_options = list(range(2, max_chokepoints + 1))
         
         # Filter controls
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         
         with col1:
             # Dropdown for flow length instead of slider
@@ -792,9 +925,32 @@ def render_flow_summaries(flow_df: pd.DataFrame):
                 options=chokepoint_options,
                 index=0  # Default to 2
             )
+            
+        with col3:
+            # Filter by top friction percentile
+            percentile_options = {
+                "All flows": 0,
+                "Top 25%": 75,
+                "Top 10%": 90,
+                "Top 5%": 95
+            }
+            selected_percentile_label = st.selectbox("Show:", list(percentile_options.keys()))
+            selected_percentile = percentile_options[selected_percentile_label]
         
         # Apply filters
         filtered_sessions = []
+        
+        # Calculate total WSJF score for each session for percentile filtering
+        session_scores = {}
+        for session_id in session_ids:
+            session_data = flow_df[flow_df["session_id"] == session_id]
+            session_scores[session_id] = session_data["WSJF_Friction_Score"].sum()
+        
+        # Apply percentile filter if selected
+        if selected_percentile > 0:
+            scores = list(session_scores.values())
+            percentile_threshold = np.percentile(scores, selected_percentile)
+            session_ids = [sid for sid, score in session_scores.items() if score >= percentile_threshold]
         
         for session_id in session_ids:
             session_data = flow_df[flow_df["session_id"] == session_id]
@@ -813,7 +969,7 @@ def render_flow_summaries(flow_df: pd.DataFrame):
         if not filtered_sessions:
             st.info("No flows match the selected filters.")
             return
-        
+            
         # Create a DataFrame with all filtered session data for export
         filtered_flow_df = flow_df[flow_df["session_id"].isin(filtered_sessions)].copy()
         
@@ -894,69 +1050,126 @@ def render_flow_summaries(flow_df: pd.DataFrame):
         logger.error(traceback.format_exc())
 
 def main():
-    """Main entry point for the dashboard."""
+    """Main function to run the dashboard."""
     # Configure dark theme
     configure_dark_theme()
     
-    # Add TeloMesh logo and title with better vertical layout
-    try:
-        # Try to load the logo
-        logo_path = "logos/telomesh logo.png"
-        encoded_logo = load_logo_base64(logo_path)
-        
-        if encoded_logo:
-            # Use flex column for vertical stacking of logo and title
-            st.markdown(f'''
-            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-                <img src="data:image/png;base64,{encoded_logo}" width="80" style="margin-bottom: 10px;" />
-                <h1 style="margin: 0; color: #F8FAFC; text-align: center;">TeloMesh User Flow Intelligence</h1>
-            </div>
-            ''', unsafe_allow_html=True)
-        else:
-            # If logo not found, use icon with text
-            st.markdown(f'''
-            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-                <div style="font-size: 48px; margin-bottom: 10px;">🔍</div>
-                <h1 style="margin: 0; color: #F8FAFC; text-align: center;">TeloMesh User Flow Intelligence</h1>
-            </div>
-            ''', unsafe_allow_html=True)
-    except Exception as e:
-        logger.error(f"Error displaying header: {str(e)}")
-        # Fallback to simple title
-        st.title("TeloMesh User Flow Intelligence")
+    # Display header with logo
+    logo_path = "logos/telomesh logo.png"
+    if os.path.exists(logo_path):
+        logo_html = f'<img src="data:image/png;base64,{load_logo_base64(logo_path)}" class="telomesh-logo">'
+        st.markdown(
+            f'<div class="telomesh-header" style="flex-direction: column; align-items: center;">{logo_html}<h1>TeloMesh User Flow Intelligence</h1></div>',
+            unsafe_allow_html=True
+        )
+    else:
+        st.title("🔍 TeloMesh User Flow Intelligence")
     
-    st.markdown("""
-    This dashboard helps product managers identify and prioritize UX improvements by analyzing user journeys and detecting friction points.
+    # Sidebar setup
+    st.sidebar.header("Dashboard Controls")
     
-    - **Friction Points**: Individual (page, event) pairs ranked by WSJF Friction Score
-    - **User Flow Heatmap**: Visual representation of user journeys with friction points highlighted
-    - **Fragile Flows**: User paths containing multiple high-friction points
-    """)
+    # Dataset selection
+    st.sidebar.subheader("Dataset Selection")
+    datasets, most_recent = discover_datasets()
     
-    # Load data
-    try:
-        event_df, flow_df, node_map, graph = load_friction_data()
-        
-        if event_df is not None and flow_df is not None and graph is not None:
-            # Create tabs
-            tabs = st.tabs(["Friction Points", "User Flow Heatmap", "Fragile Flows"])
+    if not datasets:
+        st.sidebar.warning("No datasets found. Please run the TeloMesh pipeline first.")
+        st.error("No datasets found in the outputs directory.")
+        st.info("To generate a dataset, run: `python main.py --dataset <name> --users <count> --events <count>`")
+        return
+    
+    # Filter to only valid datasets
+    valid_datasets = [d for d in datasets if is_valid_dataset(d)]
+    
+    if not valid_datasets:
+        st.sidebar.warning("No valid datasets found. Please run the TeloMesh pipeline first.")
+        st.error("No valid datasets found in the outputs directory.")
+        st.info("To generate a dataset, run: `python main.py --dataset <name> --users <count> --events <count>`")
+        return
+    
+    # Dataset info
+    selected_dataset = st.sidebar.selectbox(
+        "Select Dataset in /outputs",
+        valid_datasets,
+        index=valid_datasets.index(most_recent) if most_recent in valid_datasets else 0
+    )
+    
+    # Display dataset info if available
+    dataset_info_path = Path(f"outputs/{selected_dataset}/dataset_info.json")
+    if dataset_info_path.exists():
+        try:
+            with open(dataset_info_path, 'r') as f:
+                dataset_info = json.load(f)
             
-            with tabs[0]:
-                render_friction_table(event_df)
-                
-            with tabs[1]:
-                render_graph_heatmap(graph, node_map)
-                
-            with tabs[2]:
-                render_flow_summaries(flow_df)
-                
-        else:
-            st.error("Failed to load data. Please check the data files.")
+            # Format the timestamp if it exists
+            if "creation_timestamp" in dataset_info:
+                try:
+                    timestamp = datetime.fromisoformat(dataset_info["creation_timestamp"])
+                    dataset_info["creation_timestamp"] = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                except:
+                    pass  # Keep the original timestamp if parsing fails
             
-    except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
-        logger.error(f"Dashboard error: {str(e)}")
-        logger.error(traceback.format_exc())
+            # Show dataset info in an expander
+            with st.sidebar.expander("Dataset Info", expanded=False):
+                for key, value in dataset_info.items():
+                    if key == "dataset_name":
+                        continue  # Skip displaying dataset name since it's already shown in the selectbox
+                    key_display = key.replace("_", " ").title()
+                    st.write(f"**{key_display}:** {value}")
+        except Exception as e:
+            logger.error(f"Error loading dataset info: {str(e)}")
+    
+    # Load data based on selected dataset
+    friction_df, flow_df, node_map, G = load_friction_data(selected_dataset)
+    
+    if friction_df is None or flow_df is None or node_map is None or G is None:
+        st.error("Failed to load data. Please check the logs for details.")
+        return
+    
+    # Navigation tabs
+    tab1, tab2, tab3 = st.tabs(["Friction Analysis", "Flow Analysis", "User Journey Graph"])
+    
+    # Compute thresholds
+    top10_threshold = friction_df['WSJF_Friction_Score'].quantile(0.9)
+    top20_threshold = friction_df['WSJF_Friction_Score'].quantile(0.8)
+    
+    with tab1:
+        st.header("🔥 Friction Analysis")
+        st.write("The friction table shows event chokepoints ranked by friction score (WSJF).")
+        
+        # Add tooltips for the metrics
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.write(f"Exit Rate {render_tooltips('exit_rate')}")
+        with col2:
+            st.write(f"Betweenness {render_tooltips('betweenness')}")
+        with col3:
+            st.write(f"WSJF Friction {render_tooltips('wsjf')}")
+        
+        # Render friction table
+        render_friction_table(friction_df)
+    
+    with tab2:
+        st.header("🔁 User Flow Analysis", help="User journeys with multiple friction points")
+        st.write("""
+        * This analysis ranks user journeys by total WSJF scores along the path. 
+        * High scores indicate multiple high-friction chokepoints that can disrupt user flows and lead to increased drop-offs. 
+        * Flow length is defined as the number of page/event steps along a user journey path.
+        """)
+        
+        # Render flow summaries without an additional header
+        render_flow_summaries(flow_df)
+    
+    with tab3:
+        # The render_graph_heatmap function already has its own header with tooltip
+        render_graph_heatmap(G, node_map)
+    
+    # Footer
+    st.markdown("---")
+    st.markdown(
+        "TeloMesh User Flow Intelligence Dashboard | "
+        "Built with Streamlit, NetworkX, and PyVis"
+    )
 
 # Run the dashboard when this script is executed directly
 if __name__ == "__main__":

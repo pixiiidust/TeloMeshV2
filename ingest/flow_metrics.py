@@ -14,17 +14,22 @@ from collections import Counter
 # - Output test logs to logs/session_stats.log
 # - Raise warning if total sessions < 50 or nodes < 10
 
-def setup_logging():
-    """Set up logging to file and console."""
+def setup_logging(log_file="logs/session_stats.log"):
+    """
+    Set up logging to file and console.
+    
+    Args:
+        log_file (str): Path to the log file.
+    """
     # Ensure the logs directory exists
-    os.makedirs("logs", exist_ok=True)
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
     
     # Configure logging
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[
-            logging.FileHandler("logs/session_stats.log", encoding="utf-8"),
+            logging.FileHandler(log_file, encoding="utf-8"),
             logging.StreamHandler()
         ]
     )
@@ -161,19 +166,28 @@ def validate_graph(graph_pickle="outputs/user_graph.gpickle"):
     
     return stats
 
-def run_metrics():
-    """Run all validation metrics and save to file."""
-    setup_logging()
+def run_metrics(session_flows_csv="outputs/session_flows.csv", graph_pickle="outputs/user_graph.gpickle", 
+               metrics_json="logs/metrics.json", log_file="logs/session_stats.log"):
+    """
+    Run all validation metrics and save to file.
+    
+    Args:
+        session_flows_csv (str): Path to the session flows CSV file.
+        graph_pickle (str): Path to the graph pickle file.
+        metrics_json (str): Path to save the metrics JSON file.
+        log_file (str): Path to save the log file.
+    """
+    setup_logging(log_file)
     
     logging.info("=" * 50)
     logging.info("TeloMesh Flow Metrics Validation")
     logging.info("=" * 50)
     
     # Validate sessions
-    session_stats = validate_sessions()
+    session_stats = validate_sessions(session_flows_csv)
     
     # Validate graph
-    graph_stats = validate_graph()
+    graph_stats = validate_graph(graph_pickle)
     
     # Combine all stats
     all_stats = {**session_stats, **graph_stats}
@@ -185,9 +199,12 @@ def run_metrics():
     
     # Save stats as JSON
     try:
-        with open("logs/metrics.json", "w", encoding="utf-8") as f:
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(metrics_json), exist_ok=True)
+        
+        with open(metrics_json, "w", encoding="utf-8") as f:
             json.dump(all_stats, f, indent=2)
-        logging.info("Metrics saved to logs/metrics.json")
+        logging.info(f"Metrics saved to {metrics_json}")
     except Exception as e:
         logging.error(f"Error saving metrics to JSON: {e}")
     
@@ -199,38 +216,21 @@ def run_metrics():
     logging.info(f"Node count: {all_stats.get('node_count', 0)} (target: >= 10)")
     logging.info(f"Edge count: {all_stats.get('edge_count', 0)}")
     
-    # Report overall validation result
-    if (all_stats.get('sessions_per_user', 0) >= 1 and 
-        all_stats.get('avg_flow_length', 0) >= 3 and 
-        all_stats.get('node_count', 0) >= 10 and
-        all_stats.get('total_sessions', 0) >= 50 and
-        all_stats.get('unique_edge_events', 0) >= 2):
-        logging.info("PASS: All validation criteria met!")
-    else:
-        logging.warning("WARNING: Some validation criteria not met. See warnings above.")
+    return all_stats
 
 def main():
-    """Main function to run flow metrics validation."""
+    """Main function for the script."""
     import argparse
     
-    parser = argparse.ArgumentParser(description="Validate session and graph data")
-    parser.add_argument("--sessions", type=str, default="outputs/session_flows.csv", 
-                        help="Path to the session flows CSV file")
-    parser.add_argument("--graph", type=str, default="outputs/user_graph.gpickle", 
-                        help="Path to the graph pickle file")
+    parser = argparse.ArgumentParser(description="Validate session flows and graph")
+    parser.add_argument("--flows", type=str, default="outputs/session_flows.csv", help="Path to session flows CSV")
+    parser.add_argument("--graph", type=str, default="outputs/user_graph.gpickle", help="Path to graph pickle file")
+    parser.add_argument("--metrics", type=str, default="logs/metrics.json", help="Path to save metrics JSON")
+    parser.add_argument("--log", type=str, default="logs/session_stats.log", help="Path to save log file")
     
     args = parser.parse_args()
     
-    setup_logging()
-    
-    # Validate sessions
-    session_stats = validate_sessions(args.sessions)
-    
-    # Validate graph
-    graph_stats = validate_graph(args.graph)
-    
-    # Final message
-    print("Flow metrics validation complete. See logs/session_stats.log for details.")
+    run_metrics(args.flows, args.graph, args.metrics, args.log)
 
 if __name__ == "__main__":
     main() 

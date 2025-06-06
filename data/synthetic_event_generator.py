@@ -152,16 +152,16 @@ if __name__ == "__main__":
     # Save the events to CSV
     os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
     df.to_csv(args.output_path, index=False)
-    print(f"✅ Generated {len(df)} events for {args.n_users} users → {args.output_path}")
+    print(f"[OK] Generated {len(df)} events for {args.n_users} users -> {args.output_path}")
 
     if not args.fast:
         # Run full scaling test
         if args.n_users in [100, 1000, 10000]:
             expected_min = 5 * args.n_users
             actual = len(df)
-            assert actual >= expected_min, f"❌ Scaling test failed: {actual} < {expected_min} events"
-            print("✅ Scaling test passed.")
+            assert actual >= expected_min, f"[ERROR] Scaling test failed: {actual} < {expected_min} events"
+            print("[OK] Scaling test passed.")
         else:
-            print("⚠️ Skipped scaling test (unsupported n_users value).")
+            print("[WARN] Skipped scaling test (unsupported n_users value).")
     else:
-        print("⚡ FAST_MODE enabled: scaling test bypassed.") 
+        print("[FAST] FAST_MODE enabled: scaling test bypassed.") 
