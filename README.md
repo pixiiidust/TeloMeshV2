@@ -1,8 +1,8 @@
 # TeloMesh
 
-TeloMesh is a user journey analysis pipeline that processes session and event data to build a directed graph of user flows. 
-Provides actioable decision logic for product and UX managers to identify UX patterns, triage chokepoints, and prioritize high signal metrics.
-Efficently outputs optimization opportunities from user flow data.
+* TeloMesh is a user journey analysis pipeline that processes session and event data to build a directed graph of user flows. 
+* Provides actioable decision logic for product and UX managers to identify UX patterns, triage chokepoints, and prioritize high signal metrics.
+* Efficently outputs optimization opportunities from user flow data.
 
 **[📖 View the complete setup guide](setup_guide.md)** for detailed installation and usage instructions.
 
@@ -42,8 +42,17 @@ For more detailed setup instructions, see the [Setup Guide](setup_guide.md).
 
 ### 2. User Journey Graph
 - Visual representation of user journeys with friction highlighted
-- Color-coded nodes based on friction percentile (top 10%, top 20%)
+- Color-coded nodes based on friction percentile:
+  - Red: Top 10% friction (highest WSJF scores)
+  - Yellow: Top 20% friction 
+  - Green: Top 50% friction
+  - Gray: Lower friction nodes
+- Multiple layout options when physics is disabled:
+  - Friction Levels: Nodes arranged by friction severity
+  - Funnel Stages: Nodes arranged in entry-to-exit order
+  - Journey Centrality: Nodes arranged by betweenness centrality
 - Interactive graph visualization with tooltips and event details
+- Configurable physics settings with optimized gravitational constant
 
 ### 3. User Flow Analysis
 - Identifies user paths containing multiple high-friction points

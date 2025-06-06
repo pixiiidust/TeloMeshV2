@@ -222,6 +222,12 @@ The TeloMesh dashboard consists of three main tabs:
 1. **Friction Analysis**: Table of user event friction points ranked by user dropoffs, exit rate and WSJF score
 2. **User Flow Analysis**: Summaries of user journeys with multiple friction points across path steps
 3. **User Journey Graph**: Interactive visualization of user flow terrain with friction highlighted across connecting events
+   - Color-coded nodes by friction percentile (🔴 Top 10%, 🟠 Top 20%, 🟢 Top 50%, ⚪ Lower friction)
+   - Three layout options when physics is disabled:
+     - Friction Levels: Nodes arranged by friction severity (problems at top)
+     - Funnel Stages: Nodes arranged by user journey stage (entry → exit)
+     - Journey Centrality: Nodes arranged by betweenness centrality (hubs centered)
+   - Configurable physics settings with optimized parameters
 
 Each section includes detailed tooltips explaining the metrics and interactive elements for exploring the data.
 
