@@ -113,6 +113,12 @@ TeloMesh helps product managers by:
 
 By combining exit rates with structural importance, the WSJF scoring system ensures that improvements focus on areas with the highest impact on overall user experience.
 
+## Dashboard Screenshots
+![image](https://github.com/user-attachments/assets/fb7321df-d86f-4506-857e-60daae9e92c6)
+![image](https://github.com/user-attachments/assets/4eec77aa-8490-42c9-8a9e-63dbd8b31418)
+![image](https://github.com/user-attachments/assets/0e591fae-775d-490e-aeda-76ca0c1e8227)
+
+
 ## New in Version 2.1
 - Dataset organization and discovery
 - Enhanced dashboard with improved UI labels and descriptions
