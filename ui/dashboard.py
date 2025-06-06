@@ -577,16 +577,18 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
             scores = list(score_map.values())
             top10_threshold = np.percentile(scores, 90)
             top20_threshold = np.percentile(scores, 80)
+            top50_threshold = np.percentile(scores, 50)  # Add top 50% threshold
         else:
             top10_threshold = 1.0
             top20_threshold = 0.5
+            top50_threshold = 0.2  # Default value for top 50% threshold
         
         # Filter controls
         col1, col2 = st.columns(2)
         
         with col1:
             # Option to show only top friction nodes
-            show_options = ["All nodes", "Top 20% friction nodes", "Top 10% friction nodes"]
+            show_options = ["All nodes", "Top 50% friction nodes", "Top 20% friction nodes", "Top 10% friction nodes"]
             show_selection = st.selectbox("Show in graph:", show_options)
         
         with col2:
@@ -602,7 +604,7 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
                 st.warning("No nodes meet the top 10% threshold. Try showing all nodes or top 20%.")
                 return
             
-            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled)
+            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold)
         elif show_selection == "Top 20% friction nodes":
             # Filter to only include top 20% nodes
             filtered_nodes = {node: score for node, score in score_map.items() if score >= top20_threshold}
@@ -610,10 +612,18 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
                 st.warning("No nodes meet the top 20% threshold. Try showing all nodes.")
                 return
             
-            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled)
+            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold)
+        elif show_selection == "Top 50% friction nodes":
+            # Filter to only include top 50% nodes
+            filtered_nodes = {node: score for node, score in score_map.items() if score >= top50_threshold}
+            if not filtered_nodes:
+                st.warning("No nodes meet the top 50% threshold. Try showing all nodes.")
+                return
+            
+            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold)
         else:
             # Show all nodes
-            net = create_full_network(graph, score_map, top10_threshold, top20_threshold, physics_enabled)
+            net = create_full_network(graph, score_map, top10_threshold, top20_threshold, physics_enabled, top50_threshold)
         
         # Add export button for the graph
         export_container = st.container()
@@ -628,7 +638,7 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
         
         # Add export HTML button if we have content
         if html_content:
-            filtered_text = "top_10pct" if show_selection == "Top 10% friction nodes" else "top_20pct" if show_selection == "Top 20% friction nodes" else "all_nodes"
+            filtered_text = "top_10pct" if show_selection == "Top 10% friction nodes" else "top_20pct" if show_selection == "Top 20% friction nodes" else "top_50pct" if show_selection == "Top 50% friction nodes" else "all_nodes"
             filename = f"flow_heatmap_{filtered_text}"
             
             st.markdown(
@@ -641,6 +651,7 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
         **Legend:**
         - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#F87171;"></span> **Red**: Top 10% friction (highest WSJF scores)
         - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#FBBF24;"></span> **Yellow**: Top 20% friction
+        - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#A3E635;"></span> **Green**: Top 50% friction
         - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#94A3B8;"></span> **Gray**: Lower friction
         """, unsafe_allow_html=True)
     except Exception as e:
@@ -648,7 +659,7 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
         logger.error(f"Error in graph heatmap: {str(e)}")
         logger.error(traceback.format_exc())
 
-def create_full_network(graph, score_map, top10_threshold, top20_threshold, physics_enabled):
+def create_full_network(graph, score_map, top10_threshold, top20_threshold, physics_enabled, top50_threshold=None):
     """
     Create a network with all nodes.
     
@@ -658,6 +669,7 @@ def create_full_network(graph, score_map, top10_threshold, top20_threshold, phys
         top10_threshold (float): Threshold for top 10% nodes
         top20_threshold (float): Threshold for top 20% nodes
         physics_enabled (bool): Whether physics simulation is enabled
+        top50_threshold (float, optional): Threshold for top 50% nodes
         
     Returns:
         Network: PyVis network object
@@ -679,6 +691,10 @@ def create_full_network(graph, score_map, top10_threshold, top20_threshold, phys
         elif score >= top20_threshold:
             color = "#FBBF24"  # Warm amber for top 20%
             title = f"{node}<br>WSJF Score: {score:.6f}<br>Top 20% friction point"
+            node_colors[node] = color
+        elif top50_threshold and score >= top50_threshold:
+            color = "#A3E635"  # Lime green for top 50%
+            title = f"{node}<br>WSJF Score: {score:.6f}<br>Top 50% friction point"
             node_colors[node] = color
         else:
             color = "#94A3B8"  # Soft steel for low-friction nodes
@@ -768,7 +784,7 @@ def create_full_network(graph, score_map, top10_threshold, top20_threshold, phys
     net.set_options(json.dumps(options))
     return net
 
-def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled):
+def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold=None):
     """
     Create a network with only the filtered nodes.
     
@@ -778,6 +794,7 @@ def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_thresh
         top10_threshold (float): Threshold for top 10% nodes
         top20_threshold (float): Threshold for top 20% nodes
         physics_enabled (bool): Whether physics simulation is enabled
+        top50_threshold (float, optional): Threshold for top 50% nodes
         
     Returns:
         Network: PyVis network object
@@ -795,9 +812,17 @@ def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_thresh
                 color = "#F87171"  # Soft red for top 10%
                 title = f"{node}<br>WSJF Score: {score:.6f}<br>Top 10% friction point"
                 node_colors[node] = color
-            else:  # Must be top 20% if it's in filtered_nodes
+            elif score >= top20_threshold:
                 color = "#FBBF24"  # Warm amber for top 20%
                 title = f"{node}<br>WSJF Score: {score:.6f}<br>Top 20% friction point"
+                node_colors[node] = color
+            elif top50_threshold and score >= top50_threshold:
+                color = "#A3E635"  # Lime green for top 50%
+                title = f"{node}<br>WSJF Score: {score:.6f}<br>Top 50% friction point"
+                node_colors[node] = color
+            else:
+                color = "#94A3B8"  # Soft steel for low-friction nodes
+                title = f"{node}<br>WSJF Score: {score:.6f}"
                 node_colors[node] = color
             
             net.add_node(node, title=title, color=color, font={"color": "#FFFFFF"})
