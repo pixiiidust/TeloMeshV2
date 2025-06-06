@@ -20,7 +20,12 @@ This tool provides an actionable overview that helps product managers and UX des
    pip install -r requirements.txt
    ```
 
-3. Run the dashboard:
+3. Generate a dataset and run the pipeline:
+   ```bash
+   python main.py --dataset myproject --users 100 --events 50
+   ```
+
+4. Run the dashboard to analyze your data:
    ```bash
    streamlit run ui/dashboard.py
    ```
@@ -34,17 +39,23 @@ For more detailed setup instructions, see the [Setup Guide](setup_guide.md).
 - Calculates exit probability and lost user volume
 - Highlights structural weaknesses in the user journey
 
-### 2. User Flow Heatmap
+### 2. User Journey Graph
 - Visual representation of user journeys with friction highlighted
 - Color-coded nodes based on friction percentile (top 10%, top 20%)
 - Interactive graph visualization with tooltips and event details
 
-### 3. Fragile Flows Detection
+### 3. User Flow Analysis
 - Identifies user paths containing multiple high-friction points
 - Highlights sequences where users encounter cascading obstacles
 - Prioritizes flow improvements based on cumulative friction
 
-### 4. Analytics Converter Utility
+### 4. Dataset Organization
+- Create and manage multiple datasets with `--dataset` parameter
+- Dataset metadata tracking (users, events, sessions, timestamp)
+- Dataset discovery and selection in the dashboard UI
+- Isolated outputs for multiple projects/experiments
+
+### 5. Analytics Converter Utility
 - Convert data from Mixpanel, Amplitude, and Google Analytics 4
 - Automated column mapping for seamless integration
 - Sample data generation for testing
@@ -58,6 +69,7 @@ For more detailed setup instructions, see the [Setup Guide](setup_guide.md).
 - **Friction Analysis**: Identify chokepoints and fragile flows in user journeys
 - **Dashboard**: Interactive visualization of friction points and user flows
 - **Analytics Import**: Convert data from Mixpanel, Amplitude, and Google Analytics 4
+- **Dataset Management**: Create, discover, and switch between multiple datasets
 
 ## Theory & Methodology
 
@@ -89,11 +101,12 @@ TeloMesh helps product managers by:
 
 By combining exit rates with structural importance, the WSJF scoring system ensures that improvements focus on areas with the highest impact on overall user experience.
 
-## New in Version 2
-- Enhanced dashboard with export features
-- Friction Intelligence visualization
-- Dark theme with improved UX
-- Analytics Converter Utility for importing from major platforms
+## New in Version 2.1
+- Dataset organization and discovery
+- Enhanced dashboard with improved UI labels and descriptions
+- Customizable dark theme with improved visualization
+- Multi-dataset support for A/B testing comparison
+- Updated terminology for improved clarity
 
 ## Future Versions
 
@@ -131,7 +144,7 @@ If you're interested in contributing to any of these future features, please see
 - `analysis/` - Analysis of user flows and friction points
 - `ui/` - User interface dashboards
 - `utils/` - Utility scripts including the Analytics Converter
-- `outputs/` - Generated output files
+- `outputs/` - Generated output files, organized by dataset
 - `tests/` - Test files for the project
 - `logs/` - Logging and monitoring data
 
