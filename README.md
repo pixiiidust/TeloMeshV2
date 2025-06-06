@@ -1,7 +1,7 @@
 # TeloMesh
 
 TeloMesh is a user journey analysis pipeline that processes session and event data to build a directed graph of user flows. 
-This tool provides an actionable overview that helps product managers and UX designers identify patterns, triage chokepoints, and prioritize optimization opportunities in user journeys.
+This tool provides an actionable overview that helps product managers and UX designers identify patterns, triage chokepoints, and prioritize optimization opportunities in user flows.
 
 **[📖 View the complete setup guide](setup_guide.md)** for detailed installation and usage instructions.
 
