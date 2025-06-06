@@ -73,7 +73,9 @@ For more detailed setup instructions, see the [Setup Guide](setup_guide.md).
 
 ## Theory & Methodology
 
-TeloMesh uses graph theory and network analysis to identify friction points in user journeys and prioritizes them using WSJF. WSJF (Weighted Shortest Job First) is a prioritization method used in Agile and Lean development (especially the Scaled Agile Framework - SAFe) that ranks work items by dividing their value by their effort, so teams tackle the highest-value, lowest-effort tasks first:
+TeloMesh uses graph theory and network analysis to identify friction points in user journeys and prioritizes them using WSJF. 
+
+WSJF (Weighted Shortest Job First) is a prioritization method used in Agile and Lean development (especially the Scaled Agile Framework - SAFe) that ranks work items by dividing their value by their effort, so teams tackle the highest-value, lowest-effort tasks first:
 
 1. **Graph Construction**: User sessions are converted into directed graphs where:
    - Nodes represent pages/screens
@@ -117,7 +119,7 @@ The TeloMesh roadmap includes several enhancements planned for upcoming versions
 - **Prioritizes UX friction with high sensitivity**, for e.g., combining exit rate, user traffic, downstream conversion potential, and funnel-weighted structural importance.
 - **Highlights structurally critical nodes (high betweenness)**, with heavier weighting in mid-funnel stages to surface the most disruptive breakpoints.
 - **Enable small, leveraged UX interventions**, e.g. 2–5% improvements in cohort flows can drive incremental, outsized gains in North Star Metrics
-- **Quantify precise signals for positive/negative user flow cascades**, verified by percolation analysis + graph data 
+- **Quantify precise signals for positive/negative user flow cascades**, verified empircally by percolation analysis + graph data 
 
 ### Performance & Scale
 - **Large Session Testing**: Optimize the pipeline for analyzing datasets with millions of sessions
