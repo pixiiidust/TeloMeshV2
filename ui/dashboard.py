@@ -1162,15 +1162,6 @@ def main():
         st.header("🔥 Friction Analysis")
         st.write("The friction table shows event chokepoints ranked by friction score (WSJF).")
         
-        # Add tooltips for the metrics
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.write(f"Exit Rate {render_tooltips('exit_rate')}")
-        with col2:
-            st.write(f"Betweenness {render_tooltips('betweenness')}")
-        with col3:
-            st.write(f"WSJF Friction {render_tooltips('wsjf')}")
-        
         # Render friction table
         render_friction_table(friction_df)
     
