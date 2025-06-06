@@ -179,7 +179,7 @@ python main.py --stage analysis --dataset myproject
 
 ### Using the Analytics Converter
 
-TeloMesh includes a powerful utility to convert data from popular analytics platforms:
+TeloMesh includes a QOL utility to convert data from popular analytics platforms:
 
 ```bash
 # Convert data and make it ready for TeloMesh in one step
