@@ -1,7 +1,7 @@
 # TeloMesh
 
 TeloMesh is a user journey analysis pipeline that processes session and event data to build a directed graph of user flows. 
-This tool provides an actionable overview that helps product managers and UX designers identify patterns, triage chokepoints, and prioritize optimization opportunities in user flows.
+This tool provides an actionable overview that helps product managers and UX designers identify UX patterns, triage chokepoints, and prioritize optimization opportunities in user flows.
 
 **[📖 View the complete setup guide](setup_guide.md)** for detailed installation and usage instructions.
 
@@ -117,14 +117,18 @@ The TeloMesh roadmap includes several exciting enhancements planned for upcoming
 - **Distributed Processing**: Support for processing large datasets across multiple nodes
 - **Performance Benchmarks**: Standard tests to evaluate processing time across different dataset sizes
 
+### Optimizing UX via Machine Learning
+- **Mapping as graph native input** to machine learning agents via vector embeddings and knowledge graphs (eg.cognee).
+- **Structural user behavior analysis + AI reasoning** = Actionable optimization intelligence that scales across products and learns from every UX implementation.​​​​​​​​​​​​​​​​
+
 ### Enhanced User Interface
 - **Web-Based Upload Interface**: A frontend interface allowing users to directly upload analytics files
 - **Drag-and-Drop Data Import**: Intuitive interface for importing and mapping data
 - **Visualization Exports**: Additional export formats for reports and presentations
 
 ### Advanced Analytics
-- **Custom NSM Settings**: Allow Global Net Success Metrics to be defined for specific pages/events
-- **Journey Comparison**: Compare before/after journeys to measure improvement impact
+- **Custom NSM Settings**: Allow Global North Star Metrics to be defined for specific pages/events
+- **Journey Comparison**: Compare before/after journeys to measure A/B testing improvement impact
 - **Segmentation Analysis**: Filter friction analysis by user segments and cohorts
 - **Predictive Flow Modeling**: Predict potential friction points in proposed new user journeys
 
