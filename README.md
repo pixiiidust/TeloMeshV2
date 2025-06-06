@@ -1,8 +1,8 @@
-# TeloMesh
+# TeloMesh (Early Access Prototype)
 
 * TeloMesh is a user journey analysis pipeline that processes session and event data to build a directed graph of user flows. 
-* Provides actioable decision logic for product and UX managers to identify UX patterns, triage chokepoints, and prioritize high signal metrics.
-* Efficently outputs optimization opportunities from user flow data.
+* Provides actionable decision logic for product and UX managers to identify UX patterns, triage chokepoints, and prioritize high signal metrics.
+* Efficiently outputs optimization opportunities from user flow data.
 
 **[📖 View the complete setup guide](setup_guide.md)** for detailed installation and usage instructions.
 
@@ -112,6 +112,23 @@ TeloMesh helps product managers by:
 - Enabling before/after comparisons of UX changes
 
 By combining exit rates with structural importance, the WSJF scoring system ensures that improvements focus on areas with the highest impact on overall user experience.
+
+## Dashboard Screenshots
+Discover UX pain points:
+
+<img src="https://github.com/user-attachments/assets/fb7321df-d86f-4506-857e-60daae9e92c6" width="600"/>
+<br>
+
+Triage pain points along user flows:
+
+<img src="https://github.com/user-attachments/assets/4eec77aa-8490-42c9-8a9e-63dbd8b31418" width="600"/>
+<br>
+
+Map priorities with user journey graphs: 
+
+<img src="https://github.com/user-attachments/assets/0e591fae-775d-490e-aeda-76ca0c1e8227" width="600"/>
+<br>
+<img src="https://github.com/user-attachments/assets/d25e7827-298e-46b5-bd4d-af98c00c3c7c" width="600"/>
 
 ## New in Version 2.1
 - Dataset organization and discovery
