@@ -1,7 +1,8 @@
 # TeloMesh
 
 TeloMesh is a user journey analysis pipeline that processes session and event data to build a directed graph of user flows. 
-This tool provides an actionable overview that helps product managers and UX designers identify patterns, triage chokepoints, and prioritize optimization opportunities in user journeys.
+Provides actioable decision logic for product and UX managers to identify UX patterns, triage chokepoints, and prioritize high signal metrics.
+Efficently outputs optimization opportunities from user flow data.
 
 **[📖 View the complete setup guide](setup_guide.md)** for detailed installation and usage instructions.
 
@@ -73,7 +74,9 @@ For more detailed setup instructions, see the [Setup Guide](setup_guide.md).
 
 ## Theory & Methodology
 
-TeloMesh uses graph theory and network analysis to identify friction points in user journeys and prioritizes them using WSJF. WSJF (Weighted Shortest Job First) is a prioritization method used in Agile and Lean development (especially the Scaled Agile Framework - SAFe) that ranks work items by dividing their value by their effort, so teams tackle the highest-value, lowest-effort tasks first:
+TeloMesh uses graph theory and network analysis to identify friction points in user journeys and prioritizes them using WSJF. 
+
+WSJF (Weighted Shortest Job First) is a prioritization method used in Agile and Lean development (especially the Scaled Agile Framework - SAFe) that ranks work items by dividing their value by their effort, so teams tackle the highest-value, lowest-effort tasks first:
 
 1. **Graph Construction**: User sessions are converted into directed graphs where:
    - Nodes represent pages/screens
@@ -110,12 +113,23 @@ By combining exit rates with structural importance, the WSJF scoring system ensu
 
 ## Future Versions
 
-The TeloMesh roadmap includes several exciting enhancements planned for upcoming versions:
+The TeloMesh roadmap includes several enhancements planned for upcoming versions:
+
+### Customizable WSJF Friction Scoring Framework
+- **Custom metric inputs**, including revenue loss per exit, flow volume, touchpoint ROI, and continuity risk across the funnel.
+- **Detect UX friction with sensitivity across multiple touchpoints** e.g., user traffic combined with downstream conversion probabilities, and funnel-weighted structural importance
+- **Highlight structurally critical nodes (high betweenness)**, adaptively weighting early to mid-funnel stages to surface UX breakpoints: high-variance metrics like end funnel revenue often overlook small wins completely.
+- **Enable small, leveraged UX interventions**, e.g. 2–5% improvements in cohort flows can drive incremental, outsized gains in NSMs / OKRs
+- **Quantify precise signals for positive/negative user flow cascades**, verified empircally by percolation analysis + graph data 
 
 ### Performance & Scale
 - **Large Session Testing**: Optimize the pipeline for analyzing datasets with millions of sessions
 - **Distributed Processing**: Support for processing large datasets across multiple nodes
 - **Performance Benchmarks**: Standard tests to evaluate processing time across different dataset sizes
+
+### Optimizing UX via Machine Learning
+- **Mapping as graph native input** to machine learning agents via vector embeddings and knowledge graphs (eg.cognee).
+- **Structural user behavior analysis + AI reasoning** = Actionable optimization intelligence that scales across products and learns from every UX implementation.​​​​​​​​​​​​​​​​
 
 ### Enhanced User Interface
 - **Web-Based Upload Interface**: A frontend interface allowing users to directly upload analytics files
@@ -123,8 +137,8 @@ The TeloMesh roadmap includes several exciting enhancements planned for upcoming
 - **Visualization Exports**: Additional export formats for reports and presentations
 
 ### Advanced Analytics
-- **Custom NSM Settings**: Allow Global Net Success Metrics to be defined for specific pages/events
-- **Journey Comparison**: Compare before/after journeys to measure improvement impact
+- **Custom NSM Settings**: Allow Global North Star Metrics to be defined for specific pages/events
+- **Journey Comparison**: Compare before/after journeys to measure A/B testing improvement impact
 - **Segmentation Analysis**: Filter friction analysis by user segments and cohorts
 - **Predictive Flow Modeling**: Predict potential friction points in proposed new user journeys
 
