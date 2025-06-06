@@ -3,24 +3,29 @@
 TeloMesh is a user journey analysis pipeline that processes session and event data to build a directed graph of user flows. 
 This tool provides an actionable overview that helps product managers and UX designers identify patterns, triage chokepoints, and prioritize optimization opportunities in user journeys.
 
-## Theory & Methodology
+**[📖 View the complete setup guide](setup_guide.md)** for detailed installation and usage instructions.
 
-TeloMesh uses graph theory and network analysis to identify friction points in user journeys and prioritizes them using WSJF. WSJF (Weighted Shortest Job First) is a prioritization method used in Agile and Lean development (especially the Scaled Agile Framework - SAFe) that ranks work items by dividing their value by their effort, so teams tackle the highest-value, lowest-effort tasks first.:
+## Getting Started
 
-1. **Graph Construction**: User sessions are converted into directed graphs where:
-   - Nodes represent pages/screens
-   - Edges represent user actions (events)
-   - Edge weights correspond to transition frequency
+### Installation
 
-2. **Friction Detection Algorithm**: TeloMesh identifies problem areas using a composite scoring system:
-   - **Exit Rate**: Percentage of users who abandon their journey at a specific (page, event) pair
-   - **Betweenness Centrality**: Measures how critical a node is to the overall flow structure
-   - **WSJF Friction Score**: Calculated as `exit_rate × betweenness`, prioritizing high-impact friction points
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/TeloMesh.git
+   cd TeloMesh
+   ```
 
-3. **Percolation Analysis**: Inspired by network percolation theory, TeloMesh identifies:
-   - Critical junctions where small improvements yield large UX gains
-   - Cascading failure patterns where multiple friction points compound
-   - Fragile flows where users encounter multiple high-WSJF obstacles
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Run the dashboard:
+   ```bash
+   streamlit run ui/dashboard.py
+   ```
+
+For more detailed setup instructions, see the [Setup Guide](setup_guide.md).
 
 ## Key Features
 
@@ -38,6 +43,40 @@ TeloMesh uses graph theory and network analysis to identify friction points in u
 - Identifies user paths containing multiple high-friction points
 - Highlights sequences where users encounter cascading obstacles
 - Prioritizes flow improvements based on cumulative friction
+
+### 4. Analytics Converter Utility
+- Convert data from Mixpanel, Amplitude, and Google Analytics 4
+- Automated column mapping for seamless integration
+- Sample data generation for testing
+
+## Features
+
+- **Synthetic Event Generation**: Generate realistic synthetic user event data
+- **Session Parsing**: Extract structured session paths from event data
+- **Graph Building**: Create a directed, event-typed graph of user flows
+- **Flow Metrics**: Validate session and graph quality metrics
+- **Friction Analysis**: Identify chokepoints and fragile flows in user journeys
+- **Dashboard**: Interactive visualization of friction points and user flows
+- **Analytics Import**: Convert data from Mixpanel, Amplitude, and Google Analytics 4
+
+## Theory & Methodology
+
+TeloMesh uses graph theory and network analysis to identify friction points in user journeys and prioritizes them using WSJF. WSJF (Weighted Shortest Job First) is a prioritization method used in Agile and Lean development (especially the Scaled Agile Framework - SAFe) that ranks work items by dividing their value by their effort, so teams tackle the highest-value, lowest-effort tasks first:
+
+1. **Graph Construction**: User sessions are converted into directed graphs where:
+   - Nodes represent pages/screens
+   - Edges represent user actions (events)
+   - Edge weights correspond to transition frequency
+
+2. **Friction Detection Algorithm**: TeloMesh identifies problem areas using a composite scoring system:
+   - **Exit Rate**: Percentage of users who abandon their journey at a specific (page, event) pair
+   - **Betweenness Centrality**: Measures how critical a node is to the overall flow structure
+   - **WSJF Friction Score**: Calculated as `exit_rate × betweenness`, prioritizing high-impact friction points
+
+3. **Percolation Analysis**: Inspired by network percolation theory, TeloMesh identifies:
+   - Critical junctions where small improvements yield large UX gains
+   - Cascading failure patterns where multiple friction points compound
+   - Fragile flows where users encounter multiple high-WSJF obstacles
 
 ## For Product Managers
 
@@ -58,59 +97,16 @@ By combining exit rates with structural importance, the WSJF scoring system ensu
 
 ## Repository Structure
 
-The repository is organized into the following components:
-
 ### Core Directories
 
-#### `/data`
-Contains input data and data generation tools:
-- `events.csv` - Raw event log containing user interactions (synthetic or imported)
-- `synthetic_event_generator.py` - Python script that generates realistic test data with configurable parameters
-
-#### `/ingest`
-Pipeline components for transforming raw events into structured session data:
-- `parse_sessions.py` - Converts raw CSV events into structured user sessions
-- `build_graph.py` - Creates a directed graph representation of user journeys
-- `flow_metrics.py` - Validates sessions and graph quality metrics
-
-#### `/analysis`
-Advanced analysis components for discovering insights:
-- `event_chokepoints.py` - Identifies friction points by computing exit rates and betweenness centrality
-
-#### `/ui`
-User interface components:
-- `dashboard.py` - Streamlit dashboard with interactive visualizations, filtering, and data export capabilities
-
-#### `/utils`
-Utility scripts and tools:
-- `analytics_converter.py` - Tool for converting data from Mixpanel, Amplitude, and GA4 to TeloMesh format
-
-#### `/outputs`
-Generated data files:
-- `session_flows.csv` - Processed session data in tabular format
-- `user_graph.gpickle` - Serialized NetworkX graph with user journey information
-- `event_chokepoints.csv` - Identified friction points with WSJF scores
-- `high_friction_flows.csv` - User journeys that contain multiple high-friction points
-- `friction_node_map.json` - Mapping of pages to WSJF scores for visualization
-
-#### `/logs`
-Logging and monitoring data:
-- `session_stats.log` - Log file with session validation details
-- `metrics.json` - Summary metrics for quality assessment
-
-#### `/tests`
-Test suites for each component:
-- `test_synthetic_events.py` - Tests for data generation
-- `test_parse_sessions.py` - Tests for session parsing
-- `test_build_graph.py` - Tests for graph construction
-- `test_flow_metrics.py` - Tests for metrics calculation
-- `test_event_chokepoints.py` - Tests for friction point identification
-- `test_dashboard_ui.py` - Tests for UI components
-
-#### `/logos`
-Brand assets and visual elements:
-- `Telomesh logo.png` - Primary logo for application header
-- `telomesh logo white.png` - White version of logo for dark backgrounds
+- `data/` - Data generation tools and input data storage
+- `ingest/` - Data ingestion and session parsing
+- `analysis/` - Analysis of user flows and friction points
+- `ui/` - User interface dashboards
+- `utils/` - Utility scripts including the Analytics Converter
+- `outputs/` - Generated output files
+- `tests/` - Test files for the project
+- `logs/` - Logging and monitoring data
 
 ### Key Files
 
@@ -120,89 +116,5 @@ Brand assets and visual elements:
 - `README.md` - Project documentation (this file)
 - `.streamlit/config.toml` - Streamlit configuration for dark theme and UI settings
 - `.gitignore` - Configuration for Git to exclude temporary files
-
-## Features
-
-- **Synthetic Event Generation**: Generate realistic synthetic user event data
-- **Session Parsing**: Extract structured session paths from event data
-- **Graph Building**: Create a directed, event-typed graph of user flows
-- **Flow Metrics**: Validate session and graph quality metrics
-- **Friction Analysis**: Identify chokepoints and fragile flows in user journeys
-- **Dashboard**: Interactive visualization of friction points and user flows
-- **Analytics Import**: Convert data from Mixpanel, Amplitude, and Google Analytics 4
-
-## Usage
-
-### Running the Full Pipeline
-
-```bash
-python main.py --users 100 --events 50
-```
-
-This will:
-1. Generate synthetic events
-2. Parse events into sessions
-3. Build a user journey graph
-4. Validate flow metrics
-5. Analyze friction points
-6. Prepare data for dashboard
-
-### Running the Dashboard
-
-```bash
-streamlit run ui/dashboard.py
-```
-
-This will launch the TeloMesh User Flow Intelligence Dashboard with the following features:
-- Friction Points table with export to CSV
-- User Flow Heatmap with export to HTML
-- Fragile Flows visualization with export to CSV
-
-### Running Individual Stages
-
-You can run individual stages of the pipeline:
-
-```bash
-# Generate synthetic events
-python main.py --stage synthetic --users 100 --events 50
-
-# Parse events into sessions
-python main.py --stage parse
-
-# Build user journey graph
-python main.py --stage graph
-
-# Validate flow metrics
-python main.py --stage metrics
-
-# Analyze friction points
-python main.py --stage analysis
-```
-
-### Using the Analytics Converter
-
-TeloMesh includes a powerful utility to convert data from popular analytics platforms:
-
-```bash
-# Convert data and make it ready for TeloMesh in one step
-python utils/analytics_converter.py --input your_analytics_export.csv --output data/events.csv --format [platform] --telomesh-format
-
-# Where [platform] is one of: mixpanel, amplitude, ga4
-```
-
-#### Supported Platforms:
-
-- **Mixpanel**: Convert event exports with user, timestamp, and page information
-- **Amplitude**: Convert Amplitude CSV exports with event data
-- **Google Analytics 4**: Convert GA4 event exports with page and user data
-
-#### Generate Sample Data:
-
-If you don't have real analytics data, you can generate realistic sample data:
-
-```bash
-# Generate sample data ready for TeloMesh
-python utils/analytics_converter.py --generate-sample --format amplitude --output data/events.csv --telomesh-format
-```
-
-For detailed documentation on analytics conversion, see the [Analytics Converter Guide](utils/GUIDE.md).
+- `utils/analytics_converter.py` - Tool for converting data from analytics platforms
+- `utils/GUIDE.md` - Detailed guide for using the Analytics Converter
