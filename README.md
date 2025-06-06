@@ -110,7 +110,14 @@ By combining exit rates with structural importance, the WSJF scoring system ensu
 
 ## Future Versions
 
-The TeloMesh roadmap includes several exciting enhancements planned for upcoming versions:
+The TeloMesh roadmap includes several enhancements planned for upcoming versions:
+
+### Customizable WSJF Friction Scoring Framework
+- **Supports flexible metric inputs**, including revenue loss per exit, flow volume, ROI, and continuity risk across the funnel.
+- **Prioritizes UX friction with high sensitivity**, for e.g., combining exit rate, user traffic, downstream conversion potential, and funnel-weighted structural importance.
+- **Highlights structurally critical nodes (high betweenness)**, with heavier weighting in mid-funnel stages to surface the most disruptive breakpoints.
+- **Enable small, leveraged UX interventions**, e.g. 2–5% improvements in cohort flows can drive incremental, outsized gains in North Star Metrics
+- **Quantify precise signals for positive/negative user flow cascades**, verified by percolation analysis + graph data 
 
 ### Performance & Scale
 - **Large Session Testing**: Optimize the pipeline for analyzing datasets with millions of sessions
