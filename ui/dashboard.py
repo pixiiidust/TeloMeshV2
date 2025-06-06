@@ -106,7 +106,7 @@ def get_html_download_link(html_content, filename, button_text="Export HTML"):
 def configure_dark_theme():
     """Configure dark theme using native Streamlit + minimal CSS."""
     # Set page config (NO theme parameter - use config.toml instead)
-    logo_path = "telomesh logo.png"
+    logo_path = "logos/telomesh logo.png"
     if os.path.exists(logo_path):
         st.set_page_config(
             page_title="TeloMesh Friction Intelligence",
@@ -901,7 +901,7 @@ def main():
     # Add TeloMesh logo and title with better vertical layout
     try:
         # Try to load the logo
-        logo_path = "telomesh logo.png"
+        logo_path = "logos/telomesh logo.png"
         encoded_logo = load_logo_base64(logo_path)
         
         if encoded_logo:
