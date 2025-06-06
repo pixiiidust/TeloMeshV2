@@ -219,9 +219,9 @@ Where:
 
 The TeloMesh dashboard consists of three main tabs:
 
-1. **Friction Analysis**: Table of friction points ranked by WSJF score
-2. **User Flow Analysis**: Summaries of user journeys with multiple friction points
-3. **User Journey Graph**: Interactive visualization of user flows with friction highlighted
+1. **Friction Analysis**: Table of user event friction points ranked by user dropoffs, exit rate and WSJF score
+2. **User Flow Analysis**: Summaries of user journeys with multiple friction points across path steps
+3. **User Journey Graph**: Interactive visualization of user flow terrain with friction highlighted across connecting events
 
 Each section includes detailed tooltips explaining the metrics and interactive elements for exploring the data.
 
@@ -246,7 +246,7 @@ TeloMesh now supports managing multiple datasets:
 ## Next Steps
 
 After identifying friction points, consider:
-1. Prioritizing improvements based on WSJF scores
+1. Prioritizing UX improvements based on WSJF scores (consider node importance and metric tradeoffs)
 2. Running A/B tests on identified problematic flows
 3. Creating multiple datasets to compare before/after changes
 4. Monitoring metrics over time to track progress
