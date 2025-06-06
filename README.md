@@ -1,7 +1,8 @@
 # TeloMesh
 
 TeloMesh is a user journey analysis pipeline that processes session and event data to build a directed graph of user flows. 
-This tool provides actionable decision logic that helps product managers and UX designers identify UX patterns, triage chokepoints, and prioritize high signal metrics to enhance optimization opportunities in user flows.
+Provides actioable decision logic for product and UX managers to identify UX patterns, triage chokepoints, and prioritize high signal metrics.
+Efficently outputs optimization opportunities from user flow data.
 
 **[📖 View the complete setup guide](setup_guide.md)** for detailed installation and usage instructions.
 
@@ -115,10 +116,10 @@ By combining exit rates with structural importance, the WSJF scoring system ensu
 The TeloMesh roadmap includes several enhancements planned for upcoming versions:
 
 ### Customizable WSJF Friction Scoring Framework
-- **Supports flexible metric inputs**, including revenue loss per exit, flow volume, ROI, and continuity risk across the funnel.
-- **Prioritizes UX friction with high sensitivity**, for e.g., combining exit rate, user traffic, downstream conversion potential, and funnel-weighted structural importance.
-- **Highlights structurally critical nodes (high betweenness)**, with heavier weighting in mid-funnel stages to surface the most disruptive breakpoints.
-- **Enable small, leveraged UX interventions**, e.g. 2–5% improvements in cohort flows can drive incremental, outsized gains in North Star Metrics
+- **Custom metric inputs**, including revenue loss per exit, flow volume, touchpoint ROI, and continuity risk across the funnel.
+- **Detect UX friction with sensitivity across multiple touchpoints** e.g., user traffic combined with downstream conversion probabilities, and funnel-weighted structural importance
+- **Highlight structurally critical nodes (high betweenness)**, adaptively weighting early to mid-funnel stages to surface UX breakpoints: high-variance metrics like end funnel revenue often overlook small wins completely.
+- **Enable small, leveraged UX interventions**, e.g. 2–5% improvements in cohort flows can drive incremental, outsized gains in NSMs / OKRs
 - **Quantify precise signals for positive/negative user flow cascades**, verified empircally by percolation analysis + graph data 
 
 ### Performance & Scale
