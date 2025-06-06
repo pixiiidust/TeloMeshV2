@@ -5,4 +5,5 @@ matplotlib>=3.4.0
 streamlit>=1.9.0
 pyvis>=0.2.1
 numpy>=1.20.0
-scipy>=1.7.0 
+scipy>=1.7.0
+python-dateutil>=2.8.2 

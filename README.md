@@ -53,6 +53,7 @@ By combining exit rates with structural importance, the WSJF scoring system ensu
 - Enhanced dashboard with export features
 - Friction Intelligence visualization
 - Dark theme with improved UX
+- Analytics Converter Utility for importing from major platforms
 
 ## Repository Structure
 
@@ -78,6 +79,10 @@ Advanced analysis components for discovering insights:
 #### `/ui`
 User interface components:
 - `dashboard.py` - Streamlit dashboard with interactive visualizations, filtering, and data export capabilities
+
+#### `/utils`
+Utility scripts and tools:
+- `analytics_converter.py` - Tool for converting data from Mixpanel, Amplitude, and GA4 to TeloMesh format
 
 #### `/outputs`
 Generated data files:
@@ -123,6 +128,7 @@ Brand assets and visual elements:
 - **Flow Metrics**: Validate session and graph quality metrics
 - **Friction Analysis**: Identify chokepoints and fragile flows in user journeys
 - **Dashboard**: Interactive visualization of friction points and user flows
+- **Analytics Import**: Convert data from Mixpanel, Amplitude, and Google Analytics 4
 
 ## Usage
 
@@ -146,7 +152,7 @@ This will:
 streamlit run ui/dashboard.py
 ```
 
-This will launch the TeloMesh Friction Intelligence Dashboard with the following features:
+This will launch the TeloMesh User Flow Intelligence Dashboard with the following features:
 - Friction Points table with export to CSV
 - User Flow Heatmap with export to HTML
 - Fragile Flows visualization with export to CSV
@@ -171,3 +177,23 @@ python main.py --stage metrics
 # Analyze friction points
 python main.py --stage analysis
 ```
+
+### Using the Analytics Converter
+
+TeloMesh includes a utility to convert data from popular analytics platforms:
+
+```bash
+# Convert Mixpanel data
+python utils/analytics_converter.py --input mixpanel_export.csv --output data/events.csv --format mixpanel
+
+# Convert Amplitude data
+python utils/analytics_converter.py --input amplitude_export.csv --output data/events.csv --format amplitude
+
+# Convert Google Analytics 4 data
+python utils/analytics_converter.py --input ga4_export.csv --output data/events.csv --format ga4
+
+# Generate sample data if you don't have real analytics data
+python utils/analytics_converter.py --generate-sample --format amplitude --output data/events.csv
+```
+
+For more details on analytics conversion, see the [Analytics Converter Documentation](utils/README.md).
