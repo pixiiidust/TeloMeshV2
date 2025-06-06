@@ -454,7 +454,7 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
         
         with col2:
             # Option to adjust physics
-            physics_enabled = st.checkbox("Enable physics (movable nodes)", value=False)
+            physics_enabled = st.checkbox("Enable physics for movable nodes\n(toggle to re-center graph)", value=False)
         
         # Create and configure the network based on filters
         html_content = ""
