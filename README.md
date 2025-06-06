@@ -1,4 +1,4 @@
-# TeloMesh
+# TeloMesh (Early Access Prototype)
 
 * TeloMesh is a user journey analysis pipeline that processes session and event data to build a directed graph of user flows. 
 * Provides actionable decision logic for product and UX managers to identify UX patterns, triage chokepoints, and prioritize high signal metrics.
