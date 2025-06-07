@@ -133,7 +133,7 @@ Map priorities with user journey graphs:
 ## New in Version 2.1
 - Dataset organization and discovery
 - Enhanced dashboard with improved UI labels and descriptions
-- Customizable dark theme with improved visualization
+- Improved visualization for dark theme
 - Multi-dataset support for A/B testing comparison
 - Updated terminology for improved clarity
 
