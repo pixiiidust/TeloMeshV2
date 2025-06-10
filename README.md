@@ -69,8 +69,9 @@ TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA
    pip install -r requirements.txt
    ```
 
-3. Generate a dataset and run the pipeline:
+3. Generate a dataset or import your own analytics data:
    ```bash
+   # Generate synthetic data with different options
    # Standard analysis
    python main.py --dataset myproject --users 100 --events 50
    
@@ -82,6 +83,11 @@ TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA
    
    # Control the number of unique pages (nodes) in the graph
    python main.py --dataset node_control --users 100 --events 50 --pages 32
+   
+   # Import your own analytics data
+   python utils/analytics_converter.py --source mixpanel --input your_data.json --output mydata
+   python utils/analytics_converter.py --source ga4 --input your_data.csv --output mydata
+   python utils/analytics_converter.py --source amplitude --input your_data.json --output mydata
    ```
 
 4. Run the dashboard to analyze your data:
