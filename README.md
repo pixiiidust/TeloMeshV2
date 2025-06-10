@@ -107,38 +107,41 @@ TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA
 
 ## Theory & Methodology
 
-TeloMesh uses graph theory and network analysis to identify friction points in user journeys and prioritizes them using WSJF. 
+TeloMesh applies network science and graph theory to user experience analysis, creating a systematic approach to prioritizing UX improvements:
 
-WSJF (Weighted Shortest Job First) is a prioritization method used in Agile and Lean development (especially the Scaled Agile Framework - SAFe) that ranks work items by dividing their value by their effort, so teams tackle the highest-value, lowest-effort tasks first:
+### Core Framework: WSJF Prioritization
+**WSJF** (Weighted Shortest Job First) is an Agile prioritization method that ranks work by value-to-effort ratio, helping teams focus on high-impact, low-effort improvements. TeloMesh extends this concept to UX optimization:
 
-1. **Graph Construction**: User sessions are converted into directed graphs where:
-   - Nodes represent pages/screens
-   - Edges represent user actions (events)
-   - Edge weights correspond to transition frequency
-   - MultiDiGraph option preserves all individual transitions
+### 1. Journey Mapping & Analysis
+- **Graph Construction**: Convert user sessions into directed graphs where:
+  - Nodes represent pages/screens
+  - Edges represent user actions (events)
+  - Edge weights correspond to transition frequency
+  - MultiDiGraph option preserves individual transitions
 
-2. **Friction Detection Algorithm**: TeloMesh identifies problem areas using a composite scoring system:
-   - **Exit Rate**: Percentage of users who abandon their journey at a specific (page, event) pair
-   - **Betweenness Centrality**: Measures how critical a node is to the overall flow structure
-   - **WSJF Friction Score**: Calculated as `exit_rate × betweenness`, prioritizing high-impact friction points
+- **Friction Detection**: Identify problem areas using a composite scoring system:
+  - **Exit Rate**: Percentage of users abandoning at specific (page, event) pairs
+  - **Betweenness Centrality**: Measures node importance in the overall flow structure
+  - **WSJF Friction Score**: Calculated as `exit_rate × betweenness`, highlighting high-impact friction points
 
-3. **Advanced Network Analysis**: TeloMesh employs sophisticated network science techniques:
-   - **Fractal Dimension**: Measures the complexity of user navigation patterns (1.0-3.0)
-   - **Power-law Alpha**: Quantifies the degree distribution characteristics (typically 2.0-5.0)
-   - **Clustering Coefficient**: Measures how interconnected pages are (0.0-1.0)
-   - **Percolation Threshold**: Identifies the critical point at which the network collapses (0.0-1.0)
-   - **Fractal Betweenness**: Enhanced centrality measure that considers repeating subgraph patterns
+### 2. Pattern Recognition & Structural Analysis
+- **UX Pattern Recognition**: Identify common interaction patterns:
+  - Linear bottlenecks: Sequential paths with high friction
+  - Hub-and-spoke structures: Central pages with multiple connections
+  - Tree hierarchies: Navigational branches with varying friction
+  - Complex meshes: Interconnected page networks requiring simplification
 
-4. **UX Pattern Recognition**: The system identifies common UI/UX patterns:
-   - Linear bottlenecks: Sequential paths with high friction
-   - Hub-and-spoke structures: Central pages with multiple connections
-   - Tree hierarchies: Navigational branches with varying friction
-   - Complex meshes: Interconnected page networks requiring simplification
+- **Percolation Analysis**: Identify critical network components:
+  - Critical junctions where small improvements yield large UX gains
+  - Cascading failure patterns where multiple friction points compound
+  - Fragile flows where users encounter multiple high-WSJF obstacles
 
-5. **Percolation Analysis**: Inspired by network percolation theory, TeloMesh identifies:
-   - Critical junctions where small improvements yield large UX gains
-   - Cascading failure patterns where multiple friction points compound
-   - Fragile flows where users encounter multiple high-WSJF obstacles
+### 3. Advanced Network Metrics
+- **Fractal Dimension** (1.0-3.0): Measures the complexity of user navigation patterns
+- **Power-law Alpha** (2.0-5.0): Quantifies degree distribution characteristics
+- **Clustering Coefficient** (0.0-1.0): Measures how interconnected pages are
+- **Percolation Threshold** (0.0-1.0): Identifies critical points for network collapse
+- **Fractal Betweenness**: Enhanced centrality measure that considers repeating subgraph patterns
 
 ## For Product Managers
 
