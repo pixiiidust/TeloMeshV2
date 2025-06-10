@@ -183,11 +183,11 @@ By combining exit rates with structural importance, the WSJF scoring system ensu
 <img src="https://github.com/user-attachments/assets/ebb8c6d1-e694-4f20-8bd0-d8e331661d3c" width="100%"/>
 
 ### WIP Preview of Advanced Metrics dashboard: 
-Advanced metrics leverages network science techniques to provide deeper structural insights into your user flows, enabling strategic insights for advanced users.
+Advanced metrics leverages network science techniques to provide deeper structural insights into complex user flows, enabling strategic insights for advanced users.
 
-* Analyzes complex user journeys that branch and repeat at multiple scales, from linear paths to complex nested navigation patterns  (Fractal Dimension) 
+* Analyzes user journeys that branch and repeat at multiple scales, from linear paths to complex nested navigation patterns  (Fractal Dimension) 
 * Hierarchical structure (Power-Law Alpha) 
-* System stability (Percolation Threshold) with visual risk indicators: 
+* System stability (Percolation Threshold) with visual risk indicators
 
 <img src="https://github.com/user-attachments/assets/7f7c5666-77f5-4ca9-a8be-70671f1d755b" width="100%"/>
 <br>
