@@ -66,7 +66,7 @@ def generate_dataset_metadata(dataset_name, data_dir, output_dir, users_count=0,
     
     return metadata
 
-def run_all_stages(dataset_name="default", users=100, events_per_user=50, input_file=None):
+def run_all_stages(dataset_name="default", users=100, events_per_user=50, input_file=None, multi=False, fast=False):
     """
     Run all stages of the TeloMesh pipeline.
     
@@ -75,6 +75,8 @@ def run_all_stages(dataset_name="default", users=100, events_per_user=50, input_
         users (int): Number of users to generate in synthetic data.
         events_per_user (int): Average number of events per user.
         input_file (str): Path to input events file (instead of generating synthetic data)
+        multi (bool): Create MultiDiGraph that preserves multiple edge types
+        fast (bool): Skip slow scaling tests and detailed output
     """
     print("\n[SIMPLE] TeloMesh Pipeline - SIMPLE Stage")
     print("=" * 50)
@@ -128,12 +130,27 @@ def run_all_stages(dataset_name="default", users=100, events_per_user=50, input_
     print("\n[Stage 3] Building user journey graph...")
     start_time = time.time()
     graph_path = f"{output_dir}/user_graph.gpickle"
-    G = build_graph(session_flows_path, graph_path)
+    G = build_graph(session_flows_path, graph_path, multi_graph=multi)
     num_nodes = len(G.nodes)
-    num_edges = len(G.edges)
+    num_edges = len(G.edges) if not multi else G.number_of_edges()
     print(f"[OK] Graph built with {num_nodes} nodes and {num_edges} edges.")
     print(f"[OK] Output saved to {graph_path}")
     print(f"[TIME] Time taken: {time.time() - start_time:.2f} seconds")
+    
+    # Build multi-graph for enhanced analysis (only if not already built)
+    if not multi:
+        print("\n[Stage 3b] Building multi-graph for enhanced analysis...")
+        start_time = time.time()
+        graph_multi_path = f"{output_dir}/user_graph_multi.gpickle"
+        G_multi = build_graph(session_flows_path, graph_multi_path, multi_graph=True)
+        num_nodes_multi = len(G_multi.nodes)
+        num_edges_multi = G_multi.number_of_edges()
+        print(f"[OK] Multi-graph built with {num_nodes_multi} nodes and {num_edges_multi} edges.")
+        print(f"[OK] Output saved to {graph_multi_path}")
+        print(f"[TIME] Time taken: {time.time() - start_time:.2f} seconds")
+    else:
+        # If multi=True, we'll use the same graph for both standard and multi-graph analysis
+        graph_multi_path = graph_path
     
     # Stage 4: Flow metrics validation
     print("\n[Stage 4] Validating flow metrics...")
@@ -153,12 +170,26 @@ def run_all_stages(dataset_name="default", users=100, events_per_user=50, input_
     # Stage 5: Event chokepoints analysis
     print("\n[Stage 5] Analyzing event chokepoints...")
     start_time = time.time()
-    friction_df, fragile_flows_df, node_map = run_chokepoints(session_flows_path, graph_path, output_dir, fast=True)
+    
+    # Path to multi-graph
+    graph_multi_path = f"{output_dir}/user_graph_multi.gpickle"
+    
+    friction_df, fragile_flows_df, node_map = run_chokepoints(
+        session_flows_path, 
+        graph_path, 
+        graph_multi_path,
+        output_dir, 
+        fast=fast
+    )
+    
     print(f"[OK] Event chokepoints analysis complete.")
     print(f"[OK] Outputs saved to:")
     print(f"  - {output_dir}/event_chokepoints.csv")
     print(f"  - {output_dir}/high_friction_flows.csv")
     print(f"  - {output_dir}/friction_node_map.json")
+    print(f"  - {output_dir}/decision_table.csv")
+    print(f"  - {output_dir}/final_report.json")
+    print(f"  - {output_dir}/final_report.csv")
     print(f"[TIME] Time taken: {time.time() - start_time:.2f} seconds")
     
     # Generate dataset metadata
@@ -183,10 +214,15 @@ def run_all_stages(dataset_name="default", users=100, events_per_user=50, input_
     print(f"  - {events_path}")
     print(f"  - {session_flows_path}")
     print(f"  - {graph_path}")
+    if not multi:
+        print(f"  - {graph_multi_path}")
     print(f"  - {stats_path}")
     print(f"  - {output_dir}/event_chokepoints.csv")
     print(f"  - {output_dir}/high_friction_flows.csv")
     print(f"  - {output_dir}/friction_node_map.json")
+    print(f"  - {output_dir}/decision_table.csv")
+    print(f"  - {output_dir}/final_report.json")
+    print(f"  - {output_dir}/final_report.csv")
     print(f"  - {output_dir}/dataset_info.json")
     print("\n[DASHBOARD] To view the dashboard:")
     print("  streamlit run ui/dashboard.py")
@@ -199,6 +235,7 @@ def main():
     parser.add_argument("--users", type=int, default=100, help="Number of users to generate")
     parser.add_argument("--events", type=int, default=50, help="Average number of events per user")
     parser.add_argument("--fast", action="store_true", help="Skip slow scaling tests and detailed output")
+    parser.add_argument("--multi", action="store_true", help="Create MultiDiGraph that preserves multiple edge types")
     parser.add_argument("--dataset", type=str, default="default", help="Name of the dataset to create")
     parser.add_argument("--input", type=str, help="Path to input events file (instead of generating synthetic data)")
     
@@ -213,7 +250,7 @@ def main():
     data_dir, output_dir = create_dataset_directories(args.dataset)
     
     if args.stage == "all":
-        run_all_stages(args.dataset, args.users, args.events, args.input)
+        run_all_stages(args.dataset, args.users, args.events, args.input, args.multi, args.fast)
     elif args.stage == "synthetic":
         print("[STAGE] Generating synthetic events...")
         # Create dataset directories
@@ -245,8 +282,18 @@ def main():
         session_flows_path = f"{output_dir}/session_flows.csv"
         graph_path = f"{output_dir}/user_graph.gpickle"
         # Build graph
-        G = build_graph(session_flows_path, graph_path)
-        print(f"[OK] Graph built with {len(G.nodes)} nodes and {len(G.edges)} edges -> {graph_path}")
+        G = build_graph(session_flows_path, graph_path, multi_graph=args.multi)
+        num_nodes = len(G.nodes)
+        num_edges = len(G.edges) if not args.multi else G.number_of_edges()
+        print(f"[OK] Graph built with {num_nodes} nodes and {num_edges} edges -> {graph_path}")
+        
+        # Build multi-graph for enhanced analysis if not already built
+        if not args.multi:
+            graph_multi_path = f"{output_dir}/user_graph_multi.gpickle"
+            G_multi = build_graph(session_flows_path, graph_multi_path, multi_graph=True)
+            num_nodes_multi = len(G_multi.nodes)
+            num_edges_multi = G_multi.number_of_edges()
+            print(f"[OK] Multi-graph built with {num_nodes_multi} nodes and {num_edges_multi} edges -> {graph_multi_path}")
     elif args.stage == "metrics":
         print("[STAGE] Validating flow metrics...")
         # Create dataset directories
@@ -266,8 +313,20 @@ def main():
         # Define input and output paths
         session_flows_path = f"{output_dir}/session_flows.csv"
         graph_path = f"{output_dir}/user_graph.gpickle"
+        
+        # Check if multi-graph exists or use standard graph if multi=True
+        if args.multi:
+            graph_multi_path = graph_path
+        else:
+            graph_multi_path = f"{output_dir}/user_graph_multi.gpickle"
+            # Check if multi-graph exists, create if not
+            if not os.path.exists(graph_multi_path):
+                print("Multi-graph not found, creating one...")
+                G_multi = build_graph(session_flows_path, graph_multi_path, multi_graph=True)
+                print(f"[OK] Multi-graph created -> {graph_multi_path}")
+        
         # Run chokepoints analysis
-        run_chokepoints(session_flows_path, graph_path, output_dir, fast=args.fast)
+        run_chokepoints(session_flows_path, graph_path, graph_multi_path, output_dir, fast=args.fast)
         print(f"[OK] Event chokepoints analysis complete -> {output_dir}/event_chokepoints.csv")
     elif args.stage == "dashboard":
         print("[DASHBOARD] To run the dashboard:")

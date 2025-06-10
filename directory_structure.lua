@@ -23,7 +23,7 @@
 │   └── parse_sessions(input_csv: str, output_csv: str) -> pd.DataFrame
 │
 ├── build_graph.py            # Builds session path graph
-│   └── build_graph(input_csv: str, output_graph: str) -> nx.DiGraph
+│   └── build_graph(input_csv: str, output_graph: str, multi_graph: bool) -> nx.DiGraph or nx.MultiDiGraph
 │
 ├── flow_metrics.py           # Validates sessions and graph
 │   └── validate_sessions(session_flows_csv: str) -> dict
@@ -41,6 +41,15 @@
 │   └── compute_wsjf_friction(exit_df, centrality_dict) -> pd.DataFrame
 │   └── detect_fragile_flows(session_df: pd.DataFrame) -> pd.DataFrame
 │   └── export_chokepoints(df, flow_df, node_map) -> None
+│   └── convert_to_digraph(G: nx.MultiDiGraph) -> nx.DiGraph
+│   └── compute_fractal_dimension(G: nx.DiGraph, max_radius: int = 10) -> float
+│   └── compute_power_law_alpha(G: nx.DiGraph) -> float
+│   └── detect_repeating_subgraphs(G: nx.DiGraph, max_length: int = 4) -> List[List[str]]
+│   └── simulate_percolation(G: nx.DiGraph, ranked_nodes: List = None, threshold: float = 0.5, fast: bool = False) -> float
+│   └── compute_fractal_betweenness(G: nx.DiGraph, repeating_subgraphs: List = None, centrality: Dict = None) -> Dict[str, float]
+│   └── build_decision_table(G: nx.DiGraph, D: float, alpha: float, FB: Dict, threshold: float, chokepoints: pd.DataFrame, cc: float = None) -> pd.DataFrame
+│   └── compute_clustering_coefficient(G: nx.DiGraph) -> float
+│   └── main(input_flows: str, input_graph: str, input_graph_multi: str, output_dir: str, fast: bool = False) -> Tuple[pd.DataFrame, pd.DataFrame, Dict]
 │
 ├── friction_analysis.md      # Documentation about friction analysis
 
@@ -74,12 +83,17 @@
 ├── [dataset_name]/           # Dataset-specific outputs
 │   ├── session_flows.csv         # From parse_sessions.py
 │   ├── user_graph.gpickle        # From build_graph.py
+│   ├── user_graph_multi.gpickle  # From build_graph.py (for advanced analysis)
 │   ├── event_chokepoints.csv     # From event_chokepoints.py
 │   ├── high_friction_flows.csv   # From event_chokepoints.py
 │   ├── friction_node_map.json    # From event_chokepoints.py
+│   ├── decision_table.csv        # From event_chokepoints.py (UX recommendations)
+│   ├── final_report.json         # From event_chokepoints.py (network metrics)
+│   ├── final_report.csv          # From event_chokepoints.py (tabular metrics)
 │   ├── dataset_info.json         # Dataset metadata
 │   ├── metrics.json              # From flow_metrics.py
 │   └── session_stats.log         # From flow_metrics.py
+├── analysis_results.md           # Documentation about output files
 
 # ────────────────────────────────────────────────────────────────
 
@@ -94,7 +108,7 @@
 ├── test_parse_sessions.py
 ├── test_build_graph.py
 ├── test_flow_metrics.py
-├── test_event_chokepoints.py
+├── test_event_chokepoints.py    # Tests for all event_chokepoints.py functions
 ├── test_dashboard_ui.py
 ├── test_analytics_converter.py
 ├── test_dataset_organization.py  # Tests for dataset organization
@@ -108,7 +122,7 @@
 # ────────────────────────────────────────────────────────────────
 
 main.py                       # Pipeline entrypoint
-└── run_all_stages(dataset_name: str, users: int, events_per_user: int, input_file: str) -> None
+└── run_all_stages(dataset_name: str, users: int, events_per_user: int, input_file: str, multi: bool = False, fast: bool = False) -> None
 └── create_dataset_directories(dataset_name: str) -> Tuple[str, str]
 └── generate_dataset_metadata(dataset_name: str, data_dir: str, output_dir: str, users_count: int, events_count: int, sessions_count: int) -> Dict
 

@@ -1,0 +1,85 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Only proceed when 95% confident of succeeding, otherwise, please ask clarifying questions.
+Only use Powershell-compatible commands when running terminal tools.
+Use semicolons (;) instead of && to chain commands in PowerShell
+For PowerShell-specific operations, use cmdlets with their proper syntax (e.g., Get-ChildItem instead of ls)
+Always use relative paths with proper PowerShell path separators (\)
+Remember that PowerShell uses different environment variable syntax ($env:VARIABLE instead of $VARIABLE)
+For command output redirection, use PowerShell operators like | and > with cmdlet syntax
+
+FOR TEST DRIVEN APPROACH: 
+WRITE TESTS FIRST BEFORE CODE FILES. 
+CODE FILES MUST BE WRITTEN UNTIL IT PASSES THE TEST WRITTEN.
+NOT THE OTHER WAY ROUND WHERE YOU EDIT TEST TO PASS CODE FILE.
+
+🔁 #Cursor Rule: Directory Hygiene Enforcement Loop
+Purpose: Prevent sprawl, orphan files, and undocumented logic by enforcing alignment with the canonical structure.
+
+Rule:
+Before creating or modifying a file:
+
+Reference Check:
+Load directory_structure.lua as the source of truth.
+Ensure the file path and filename are listed with an associated function: block.
+
+If not listed, reject and raise:
+"❌ FILE NOT DECLARED IN directory_structure.lua. Please define function and role before proceeding."
+
+Dependency Validation:
+Confirm any file importing from or writing to another has its upstream/downstream connection declared in directory_structure.lua's produces: or depends_on: block.
+
+If not declared, raise:
+"❌ UNDECLARED DEPENDENCY. Please register in directory_structure.lua under the relevant file node."
+
+Test Coverage Assertion:
+Ensure /tests/test_<filename>.py or equivalent exists for every non-UI or utility file.
+Confirm the test targets a core function or output of the file.
+
+If missing, raise:
+"❌ MISSING TEST. Every new logic file must be covered by a corresponding test in /tests."
+Folder Approval Lock:
+
+Prevent any new folder creation unless explicitly pre-declared in directory_structure.lua.
+
+Raise if violated:
+"❌ UNAUTHORIZED FOLDER. All folders must be predefined in the canonical map."
+
+# Cursor Auto Enforcement Rule
+
+For every new file:
+- Match its location against `directory_structure.lua`
+- Enforce existence of a test case with matching test_prefix (T1–T4)
+- If test is missing or structure deviates → abort with fix suggestion
+
+
+#cursorRule
+
+As an AI developer assistant, always:
+- Propose small feature increments.
+- Write a test first that fails for the feature.
+- Then implement the minimal code to make the test pass.
+- Run the test and analyze failure reasons if it fails.
+- Repeat until the test passes.
+- Only then suggest code commit or user review.
+
+Never write full feature code before writing the test.
+Never skip the test-execution loop.
+
+#cursorRule
+
+Always follow a Test-Driven Development (TDD) loop in small, testable increments:
+1. Define a small, well-scoped feature or task.
+2. Write a failing test that describes the expected behavior.
+3. Generate only enough code to pass the test.
+4. Run the test.
+5. If the test fails, analyze the failure, revise the code, and repeat steps 3–4.
+6. Once the test passes, commit the change and move to the next increment.
+
+Do not write large amounts of code without first writing the test.
+Prefer test-first, code-second workflows, even for UI and API logic.
+
+If there is Extra Cursor Guidance in MD files provided, please take note of them each time when writing code. 

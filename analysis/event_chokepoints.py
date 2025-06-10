@@ -243,28 +243,38 @@ def export_chokepoints(df, flow_df, node_map, output_dir="outputs"):
         df (pd.DataFrame): DataFrame with WSJF Friction Scores.
         flow_df (pd.DataFrame): DataFrame containing fragile flows.
         node_map (dict): Dictionary mapping page names to WSJF scores.
-        output_dir (str): Directory to save the output files.
+        output_dir (str): Directory to save output files.
         
     Returns:
         None
     """
-    print("Exporting results...")
-    
-    # Ensure output directory exists
+    # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     
-    # Export event_chokepoints.csv
-    df.to_csv(f"{output_dir}/event_chokepoints.csv", index=False)
-    print(f"Exported event_chokepoints.csv with {len(df)} rows.")
+    # Export WSJF Friction Scores
+    chokepoints_path = os.path.join(output_dir, "event_chokepoints.csv")
+    df.to_csv(chokepoints_path, index=False)
+    print(f"Exported {len(df)} chokepoints to {chokepoints_path}")
     
-    # Export high_friction_flows.csv
-    flow_df.to_csv(f"{output_dir}/high_friction_flows.csv", index=False)
-    print(f"Exported high_friction_flows.csv with {len(flow_df)} rows.")
+    # Export fragile flows
+    flows_path = os.path.join(output_dir, "high_friction_flows.csv")
+    if flow_df is not None and len(flow_df) > 0:
+        flow_df.to_csv(flows_path, index=False)
+        print(f"Exported {flow_df['session_id'].nunique()} fragile flows to {flows_path}")
+    else:
+        # Create an empty file with column headers to ensure file exists
+        empty_df = pd.DataFrame(columns=[
+            'session_id', 'step_index', 'page', 'event', 
+            'WSJF_Friction_Score', 'is_chokepoint', 'user_id'
+        ])
+        empty_df.to_csv(flows_path, index=False)
+        print(f"Exported empty fragile flows file to {flows_path} (no fragile flows detected)")
     
-    # Export friction_node_map.json
-    with open(f"{output_dir}/friction_node_map.json", 'w') as f:
+    # Export node map
+    node_map_path = os.path.join(output_dir, "friction_node_map.json")
+    with open(node_map_path, 'w') as f:
         json.dump(node_map, f, indent=2)
-    print(f"Exported friction_node_map.json with {len(node_map)} nodes.")
+    print(f"Exported node map with {len(node_map)} pages to {node_map_path}")
 
 def create_node_map(df):
     """
@@ -286,80 +296,729 @@ def create_node_map(df):
     
     return node_map
 
+def convert_to_digraph(G):
+    """
+    Convert a MultiDiGraph to a DiGraph by collapsing multiple edges.
+    
+    Args:
+        G: nx.Graph or nx.DiGraph or nx.MultiDiGraph
+        
+    Returns:
+        nx.DiGraph: Collapsed graph with summed weights
+    """
+    if isinstance(G, nx.MultiDiGraph):
+        DG = nx.DiGraph()
+        
+        # Copy nodes and their attributes
+        for node, data in G.nodes(data=True):
+            DG.add_node(node, **data)
+        
+        # Collapse edges, summing weights
+        for u, v in G.edges():
+            # Get all edges between u and v
+            all_edges = G.get_edge_data(u, v)
+            
+            # Sum weights across all edges
+            total_weight = sum(data.get('weight', 1) for data in all_edges.values())
+            
+            # Add edge with summed weight
+            DG.add_edge(u, v, weight=total_weight)
+            
+        return DG
+    elif isinstance(G, nx.DiGraph):
+        return G
+    else:
+        # If it's an undirected graph, convert to directed
+        return nx.DiGraph(G)
+
+def compute_fractal_dimension(G, max_radius=10):
+    """
+    Compute the fractal dimension of a graph using box-counting.
+    
+    Args:
+        G: nx.Graph or nx.DiGraph or nx.MultiDiGraph
+        max_radius: Maximum radius for box-counting
+        
+    Returns:
+        float: Estimated fractal dimension D, typically in [1.0, 2.0]
+    """
+    import numpy as np
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    
+    # Convert to DiGraph if needed
+    G = convert_to_digraph(G)
+    
+    # Check if graph is too small for reliable calculation
+    if len(G.nodes()) < 10:
+        logger.warning(f"Graph too small ({len(G.nodes())} nodes) for reliable fractal dimension. Using default D=1.0")
+        return 1.0
+    
+    # Try to use pyunicorn if available
+    try:
+        from pyunicorn import Network
+        # Convert NetworkX graph to pyunicorn Network
+        adj_matrix = nx.to_numpy_array(G)
+        network = Network(adjacency=adj_matrix)
+        D = float(network.fractal_dimension())
+        # Ensure value is positive and in reasonable range
+        if D <= 0 or not np.isfinite(D):
+            logger.warning(f"Invalid fractal dimension {D} from pyunicorn. Using fallback method.")
+            raise ValueError("Invalid fractal dimension")
+        return D
+    except (ImportError, ValueError) as e:
+        if isinstance(e, ImportError):
+            logger.warning("pyunicorn not available, using fallback box-counting method")
+        
+        # Fallback: Custom box-counting implementation
+        radii = np.logspace(0, np.log10(max_radius), 10)
+        box_counts = []
+        
+        # Get distance matrix
+        try:
+            dist_matrix = dict(nx.all_pairs_shortest_path_length(G))
+        except Exception as e:
+            logger.warning(f"Error computing distance matrix: {e}. Using default D=1.0")
+            return 1.0
+        
+        for radius in radii:
+            # Count minimum number of boxes needed to cover the graph
+            covered = set()
+            boxes = 0
+            
+            nodes = list(G.nodes())
+            while len(covered) < len(nodes):
+                # Find the node that covers the most uncovered nodes
+                best_node = None
+                best_coverage = 0
+                best_coverage_set = set()
+                
+                for node in nodes:
+                    if node in covered:
+                        continue
+                    
+                    # Count nodes within radius of this node
+                    coverage = set()
+                    for other in nodes:
+                        if other in covered:
+                            continue
+                        try:
+                            if dist_matrix[node][other] <= radius:
+                                coverage.add(other)
+                        except KeyError:
+                            # If there's no path, ignore
+                            pass
+                    
+                    if len(coverage) > best_coverage:
+                        best_node = node
+                        best_coverage = len(coverage)
+                        best_coverage_set = coverage
+                
+                # Add the best box
+                if best_node is not None:
+                    covered.update(best_coverage_set)
+                    boxes += 1
+                else:
+                    # If we can't cover more nodes, break
+                    break
+            
+            box_counts.append(boxes)
+        
+        # Linear regression on log-log plot
+        log_radii = np.log(radii)
+        log_counts = np.log(box_counts)
+        
+        # Use only valid points (non-zero counts)
+        valid = np.isfinite(log_counts)
+        if np.sum(valid) < 2:
+            logger.warning("Not enough valid points for fractal dimension calculation. Using default D=1.0")
+            return 1.0
+        
+        try:
+            # Try np.polyfit which returns a polynomial coefficients array
+            coefficients = np.polyfit(log_radii[valid], log_counts[valid], 1)
+            slope = coefficients[0]  # First coefficient is the slope
+            D = float(-slope)
+            
+            # Validate result and ensure it's in the typical range
+            if D <= 0 or not np.isfinite(D):
+                logger.warning(f"Invalid fractal dimension D={D}. Using default D=1.0")
+                return 1.0
+                
+            # Clamp to reasonable range
+            if D > 3.0:  # No real-world network should exceed D=3
+                logger.warning(f"Unusually high fractal dimension D={D}. Clamping to D=3.0")
+                return 3.0
+                
+            return D
+        except Exception as e:
+            logger.warning(f"Error in polyfit: {e}")
+            # Fallback to a simpler calculation if polyfit fails
+            if len(log_radii[valid]) > 0:
+                # Use first and last point to estimate slope
+                first_idx = np.where(valid)[0][0]
+                last_idx = np.where(valid)[0][-1]
+                slope = (log_counts[last_idx] - log_counts[first_idx]) / (log_radii[last_idx] - log_radii[first_idx])
+                D = float(-slope)
+                
+                # Validate result
+                if D <= 0 or not np.isfinite(D):
+                    logger.warning(f"Invalid fractal dimension D={D} from fallback. Using default D=1.0")
+                    return 1.0
+                    
+                # Clamp to reasonable range
+                if D > 3.0:
+                    logger.warning(f"Unusually high fractal dimension D={D}. Clamping to D=3.0")
+                    return 3.0
+                    
+                return D
+            else:
+                logger.warning("No valid points for fractal dimension calculation. Using default D=1.0")
+                return 1.0  # Default value if all else fails
+
+def compute_power_law_alpha(G):
+    """
+    Compute the power-law exponent alpha for the degree distribution.
+    
+    Args:
+        G: nx.Graph or nx.DiGraph or nx.MultiDiGraph
+        
+    Returns:
+        float: Estimated power-law exponent alpha, typically in range [1.5, 3.0]
+    """
+    import numpy as np
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    
+    # Convert to DiGraph if needed
+    G = convert_to_digraph(G)
+    
+    # Check if graph is too small for reliable calculation
+    if len(G.nodes()) < 10:
+        logger.warning(f"Graph too small ({len(G.nodes())} nodes) for reliable power-law fit. Using default α=2.5")
+        return 2.5
+    
+    # Get degrees
+    degrees = [d for _, d in G.degree()]
+    
+    # Check if we have enough unique degree values
+    unique_degrees = set(degrees)
+    if len(unique_degrees) < 3:
+        logger.warning(f"Not enough unique degree values ({len(unique_degrees)}) for power-law fit. Using default α=2.5")
+        return 2.5
+    
+    # Try to use powerlaw package
+    try:
+        import powerlaw
+        try:
+            fit = powerlaw.Fit(degrees)
+            alpha = float(fit.power_law.alpha)
+            
+            # Validate result
+            if not np.isfinite(alpha) or alpha <= 1.0:
+                logger.warning(f"Invalid power-law exponent α={alpha}. Using default α=2.5")
+                return 2.5
+                
+            # Clamp to reasonable range
+            if alpha > 5.0:  # Extremely rare to see alpha > 5 in real networks
+                logger.warning(f"Unusually high power-law exponent α={alpha}. Clamping to α=5.0")
+                return 5.0
+                
+            return alpha
+        except Exception as e:
+            logger.warning(f"Error in powerlaw fit: {e}. Using fallback method.")
+            # Continue to fallback method
+    except ImportError:
+        logger.warning("powerlaw package not available, using fallback method")
+    
+    # Fallback: Use linear regression on log-log plot
+    from scipy import stats
+    
+    # Count degree frequencies
+    degree_counts = {}
+    for d in degrees:
+        if d not in degree_counts:
+            degree_counts[d] = 0
+        degree_counts[d] += 1
+    
+    # Calculate P(k)
+    n = len(degrees)
+    pk = {k: count/n for k, count in degree_counts.items()}
+    
+    # Get log-log data points
+    ks = sorted(pk.keys())
+    # Filter out zeros to avoid log(0)
+    ks = [k for k in ks if k > 0 and pk[k] > 0]
+    
+    # Check if we have enough data points after filtering
+    if len(ks) < 2:
+        logger.warning(f"Not enough data points for power-law fit after filtering. Using default α=2.5")
+        return 2.5
+        
+    log_ks = np.log(ks)
+    log_pks = np.log([pk[k] for k in ks])
+    
+    # Linear regression
+    try:
+        slope, intercept, r_value, p_value, std_err = stats.linregress(log_ks, log_pks)
+        
+        # Alpha is negative slope + 1
+        alpha = float(-slope + 1)
+        
+        # Validate result
+        if not np.isfinite(alpha) or alpha <= 1.0:
+            logger.warning(f"Invalid power-law exponent α={alpha} from regression. Using default α=2.5")
+            return 2.5
+            
+        # Clamp to reasonable range
+        if alpha > 5.0:
+            logger.warning(f"Unusually high power-law exponent α={alpha}. Clamping to α=5.0")
+            return 5.0
+            
+        return alpha
+    except Exception as e:
+        logger.warning(f"Error in linear regression: {e}. Using default α=2.5")
+        return 2.5
+
+def detect_repeating_subgraphs(G, max_length=4):
+    """
+    Detect recurring subgraphs in the graph, focusing on cycles and repeated paths.
+    
+    Args:
+        G: nx.Graph or nx.DiGraph or nx.MultiDiGraph
+        max_length: Maximum subgraph size to detect
+        
+    Returns:
+        List[Tuple]: List of node tuples that form recurring subgraphs
+    """
+    # Convert to DiGraph if needed
+    G = convert_to_digraph(G)
+    
+    repeating_subgraphs = []
+    
+    # Detect cycles of length 2 (back-and-forth patterns)
+    for u, v in G.edges():
+        if G.has_edge(v, u):
+            repeating_subgraphs.append((u, v))
+    
+    # Detect cycles of length 3
+    if max_length >= 3:
+        for u in G.nodes():
+            for v in G.neighbors(u):
+                for w in G.neighbors(v):
+                    if G.has_edge(w, u):
+                        repeating_subgraphs.append((u, v, w))
+    
+    # Detect cycles of length 4
+    if max_length >= 4:
+        for u in G.nodes():
+            for v in G.neighbors(u):
+                for w in G.neighbors(v):
+                    if w == u:
+                        continue  # Skip 2-cycles
+                    for x in G.neighbors(w):
+                        if x == v or x == u:
+                            continue  # Skip 2-cycles and 3-cycles
+                        if G.has_edge(x, u):
+                            repeating_subgraphs.append((u, v, w, x))
+    
+    return repeating_subgraphs
+
+def simulate_percolation(G, ranked_nodes=None, threshold=0.5, fast=False):
+    """
+    Simulate percolation by removing nodes in order and finding when the graph collapses.
+    
+    Args:
+        G: nx.Graph or nx.DiGraph or nx.MultiDiGraph
+        ranked_nodes: List of nodes in order of removal (default: by betweenness)
+        threshold: Collapse threshold as fraction of original size
+        fast: If True, use sampling for faster approximation
+        
+    Returns:
+        float: Percolation threshold (fraction of nodes removed when collapse occurs)
+    """
+    # Convert to DiGraph if needed
+    G = convert_to_digraph(G)
+    
+    # If no ranked_nodes provided, rank by betweenness
+    if ranked_nodes is None:
+        betweenness = nx.betweenness_centrality(G, weight='weight')
+        ranked_nodes = sorted(betweenness.keys(), key=lambda n: betweenness[n], reverse=True)
+    
+    # Get original largest component size
+    original_size = len(max(nx.weakly_connected_components(G), key=len))
+    target_size = original_size * threshold
+    
+    # Create working copy of the graph
+    G_copy = G.copy()
+    
+    # Track progress
+    step_size = 1
+    if fast and len(ranked_nodes) > 100:
+        step_size = len(ranked_nodes) // 20  # Check only 20 points
+    
+    nodes_removed = 0
+    for i in range(0, len(ranked_nodes), step_size):
+        nodes_to_remove = ranked_nodes[i:i+step_size]
+        G_copy.remove_nodes_from(nodes_to_remove)
+        nodes_removed += len(nodes_to_remove)
+        
+        # Check if graph has collapsed
+        if len(G_copy) == 0:
+            return 1.0  # All nodes removed
+        
+        components = list(nx.weakly_connected_components(G_copy))
+        if not components:
+            return 1.0  # No components left
+            
+        largest_component = max(components, key=len)
+        if len(largest_component) <= target_size:
+            return nodes_removed / len(G)
+    
+    return 1.0  # Graph never collapsed
+
+def compute_fractal_betweenness(G, repeating_subgraphs=None, centrality=None):
+    """
+    Compute fractal betweenness by combining betweenness centrality with subgraph membership.
+    
+    Args:
+        G: nx.Graph or nx.DiGraph or nx.MultiDiGraph
+        repeating_subgraphs: List of recurring subgraphs (if None, will be computed)
+        centrality: Dict of betweenness centrality values (if None, will be computed)
+        
+    Returns:
+        Dict: Fractal betweenness scores for each node
+    """
+    # Convert to DiGraph if needed
+    G = convert_to_digraph(G)
+    
+    # Compute repeating subgraphs if not provided
+    if repeating_subgraphs is None:
+        repeating_subgraphs = detect_repeating_subgraphs(G)
+    
+    # Compute betweenness centrality if not provided
+    if centrality is None:
+        centrality = nx.betweenness_centrality(G, weight='weight')
+    
+    # Count subgraph membership for each node
+    subgraph_counts = {node: 0 for node in G.nodes()}
+    for subgraph in repeating_subgraphs:
+        for node in subgraph:
+            subgraph_counts[node] += 1
+    
+    # Combine with betweenness centrality
+    fractal_betweenness = {}
+    for node in G.nodes():
+        # FB(n) = betweenness(n) × subgraph_count(n)
+        fb = centrality.get(node, 0) * (1 + subgraph_counts.get(node, 0))
+        fractal_betweenness[node] = fb
+    
+    return fractal_betweenness
+
+def build_decision_table(G, D, alpha, FB, threshold, chokepoints, cc=None):
+    """
+    Build a decision table with UX recommendations based on graph metrics.
+    
+    Args:
+        G: nx.Graph or nx.DiGraph or nx.MultiDiGraph
+        D: float - Fractal dimension
+        alpha: float - Power-law exponent
+        FB: dict - Fractal betweenness scores
+        threshold: float - Percolation threshold
+        chokepoints: pd.DataFrame - DataFrame with WSJF Friction Scores
+        cc: float - Clustering coefficient (optional)
+        
+    Returns:
+        pd.DataFrame: Decision table with UX recommendations
+    """
+    # Create a new DataFrame
+    table = []
+    
+    # Get node-level WSJF scores (max per page)
+    node_scores = {}
+    for page in chokepoints['page'].unique():
+        node_scores[page] = chokepoints[chokepoints['page'] == page]['WSJF_Friction_Score'].max()
+    
+    # Add all nodes from the graph
+    for node in G.nodes():
+        # Skip non-string nodes (should be rare in real data)
+        if not isinstance(node, str):
+            continue
+            
+        # Get metrics for this node
+        wsjf_score = node_scores.get(node, 0)
+        fb_score = FB.get(node, 0)
+        
+        # Determine if node is critical based on percolation
+        # Nodes with high betweenness are typically critical
+        is_critical = fb_score > (sum(FB.values()) / len(FB)) if FB else False
+        
+        # Determine UX label based on network properties
+        ux_label = "standard"
+        suggested_action = "No action needed"
+        
+        # Use fractal dimension to determine flow type
+        if D <= 1.2:
+            # Linear/simple paths
+            ux_label = "linear bottleneck" if wsjf_score > 0.1 else "linear path"
+            suggested_action = "Redesign with high priority" if wsjf_score > 0.1 else "Monitor usage patterns"
+        elif D <= 1.7:
+            # Tree-like structure
+            ux_label = "tree bottleneck" if wsjf_score > 0.1 else "tree branch"
+            suggested_action = "Add shortcuts" if wsjf_score > 0.1 else "Consider simplifying"
+        else:
+            # Complex structure
+            ux_label = "complex hub" if wsjf_score > 0.1 else "complex connector"
+            suggested_action = "Simplify navigation" if wsjf_score > 0.1 else "Consider restructuring"
+        
+        # Adjust based on clustering coefficient if provided
+        if cc is not None:
+            if cc < 0.2:
+                # Low clustering means disjointed experience
+                if wsjf_score > 0.1:
+                    ux_label = "disjointed bottleneck"
+                    suggested_action = "Improve connections between related features"
+            elif cc > 0.6:
+                # High clustering means potentially redundant paths
+                if wsjf_score > 0.1:
+                    ux_label = "redundant bottleneck"
+                    suggested_action = "Consolidate duplicate functionality"
+        
+        # Create table row
+        table.append({
+            "node": node,
+            "D": D,
+            "alpha": alpha,
+            "FB": fb_score,
+            "percolation_role": "critical" if is_critical else "standard",
+            "wsjf_score": wsjf_score,
+            "ux_label": ux_label,
+            "suggested_action": suggested_action
+        })
+    
+    # Convert to DataFrame
+    result = pd.DataFrame(table)
+    
+    # If empty, return an empty DataFrame with correct columns
+    if result.empty:
+        return pd.DataFrame(columns=[
+            "node", "D", "alpha", "FB", "percolation_role", 
+            "wsjf_score", "ux_label", "suggested_action"
+        ])
+    
+    # Sort by WSJF score
+    result = result.sort_values("wsjf_score", ascending=False)
+    
+    return result
+
+def compute_clustering_coefficient(G):
+    """
+    Compute the average clustering coefficient of a graph.
+    
+    The clustering coefficient measures how interconnected the graph is,
+    based on the ratio of triangles to connected triples.
+    
+    Args:
+        G: nx.Graph or nx.DiGraph or nx.MultiDiGraph
+        
+    Returns:
+        float: Average clustering coefficient, typically in range [0, 1]
+    """
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    
+    # Convert to DiGraph if needed
+    G = convert_to_digraph(G)
+    
+    # Check if graph is too small
+    if len(G.nodes()) < 3:
+        logger.warning(f"Graph too small ({len(G.nodes())} nodes) for clustering coefficient. Using default 0.0")
+        return 0.0
+    
+    try:
+        # For directed graphs, consider the underlying undirected graph
+        undirected = G.to_undirected()
+        
+        # Calculate the clustering coefficient
+        clustering = nx.average_clustering(undirected)
+        
+        # Check if valid
+        if clustering < 0 or clustering > 1:
+            logger.warning(f"Invalid clustering coefficient {clustering}. Using default 0.0")
+            return 0.0
+            
+        return float(clustering)
+    except Exception as e:
+        logger.warning(f"Error calculating clustering coefficient: {e}. Using default 0.0")
+        return 0.0
+
 def main(input_flows="outputs/session_flows.csv", 
          input_graph="outputs/user_graph.gpickle",
+         input_graph_multi="outputs/user_graph_multi.gpickle",
          output_dir="outputs",
          fast=False):
     """
     Main function to run the event chokepoints analysis.
     
     Args:
-        input_flows (str): Path to the input session flows CSV.
-        input_graph (str): Path to the input graph pickle file.
-        output_dir (str): Directory to save the output files.
-        fast (bool): Whether to run in fast mode (skip certain validations).
+        input_flows (str): Path to the session flows CSV.
+        input_graph (str): Path to the user graph pickle.
+        input_graph_multi (str): Path to the multi-graph pickle (for enhanced analysis).
+        output_dir (str): Directory to save output files.
+        fast (bool): Whether to use fast mode for performance optimization.
         
     Returns:
-        None
+        Tuple: (friction_df, fragile_flows_df, node_map)
     """
     print("\n[ANALYSIS] TeloMesh Event Chokepoints Analysis")
-    print("=" * 50)
+    print("==================================================")
     
-    # Load the session flows data
+    # Create directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Set up logging
+    import logging
+    logging.basicConfig(
+        level=logging.WARNING,
+        format='%(asctime)s [%(levelname)s] %(name)s:%(filename)s:%(lineno)d %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    
+    # Load session flows
     print(f"Loading session flows from {input_flows}...")
     session_df = pd.read_csv(input_flows)
     print(f"Loaded {len(session_df)} steps from {session_df['session_id'].nunique()} sessions.")
     
-    # Load the graph data
+    # Load user graph
     print(f"Loading graph from {input_graph}...")
     with open(input_graph, 'rb') as f:
         G = pickle.load(f)
-    print(f"Loaded graph with {len(G.nodes)} nodes and {len(G.edges)} edges.")
+    print(f"Loaded graph with {len(G.nodes())} nodes and {len(G.edges())} edges.")
+    
+    # Load multi-graph if available (for enhanced analysis)
+    multi_G = None
+    if os.path.exists(input_graph_multi):
+        print(f"Loading multi-graph from {input_graph_multi}...")
+        with open(input_graph_multi, 'rb') as f:
+            multi_G = pickle.load(f)
+        print(f"Loaded multi-graph with {len(multi_G.nodes())} nodes and {len(multi_G.edges())} edges.")
     
     # Compute exit rates
+    print("Computing exit rates...")
     exit_df = compute_exit_rates(session_df)
     
     # Compute betweenness centrality
-    centrality_dict = compute_betweenness(G)
+    print("Computing betweenness centrality...")
+    centrality = compute_betweenness(G)
     
     # Compute WSJF Friction Score
-    friction_df = compute_wsjf_friction(exit_df, centrality_dict)
-    
-    # Create node map for visualization
-    node_map = create_node_map(friction_df)
+    print("Computing WSJF Friction Scores...")
+    chokepoints_df = compute_wsjf_friction(exit_df, centrality)
     
     # Detect fragile flows
-    fragile_flows_df = detect_fragile_flows(session_df, friction_df)
+    print("Detecting fragile flows...")
+    fragile_flows_df = detect_fragile_flows(session_df, chokepoints_df)
+    
+    # Create node map
+    node_map = create_node_map(chokepoints_df)
+    
+    # Advanced network analysis
+    # Compute fractal dimension
+    print("Computing fractal dimension...")
+    D = compute_fractal_dimension(G)
+    print(f"Fractal dimension D = {D:.3f}")
+    
+    # Compute power law exponent
+    print("Computing power-law exponent...")
+    alpha = compute_power_law_alpha(G)
+    # Use 'a' instead of the Greek alpha character to avoid encoding issues
+    print(f"Power-law exponent a = {alpha:.3f}")
+    
+    # Compute clustering coefficient
+    print("Computing clustering coefficient...")
+    cc = compute_clustering_coefficient(G)
+    print(f"Clustering coefficient = {cc:.3f}")
+    
+    # Detect repeating subgraphs
+    print("Detecting repeating subgraphs...")
+    repeating_subgraphs = detect_repeating_subgraphs(G, max_length=4)
+    print(f"Detected {len(repeating_subgraphs)} repeating subgraphs.")
+    
+    # Simulate percolation
+    print("Simulating percolation...")
+    threshold = simulate_percolation(G, threshold=0.5, fast=fast)
+    print(f"Percolation threshold = {threshold:.3f}")
+    
+    # Compute fractal betweenness
+    print("Computing fractal betweenness...")
+    FB = compute_fractal_betweenness(G, repeating_subgraphs, centrality)
+    print(f"Fractal betweenness computed for {len(FB)} nodes.")
+    
+    # Build decision table
+    print("Building decision table...")
+    decision_table = build_decision_table(G, D, alpha, FB, threshold, chokepoints_df, cc)
+    print(f"Decision table built with {len(decision_table)} rows.")
     
     # Export results
-    export_chokepoints(friction_df, fragile_flows_df, node_map, output_dir)
+    print("Exporting results...")
     
-    print("\n[OK] Event chokepoints analysis complete!")
-    print("=" * 50)
+    # Make sure output directory exists for this dataset
+    os.makedirs(output_dir, exist_ok=True)
     
-    if not fast:
-        # Print some statistics
-        total_pages = len(friction_df['page'].unique())
-        total_events = len(friction_df['event'].unique())
-        total_page_events = len(friction_df)
-        top_friction_threshold = friction_df['WSJF_Friction_Score'].quantile(0.9)
-        top_friction_count = sum(friction_df['WSJF_Friction_Score'] >= top_friction_threshold)
-        
-        print("\nSummary Statistics:")
-        print(f"Total pages: {total_pages}")
-        print(f"Total event types: {total_events}")
-        print(f"Total (page, event) pairs: {total_page_events}")
-        print(f"Top 10% friction threshold: {top_friction_threshold:.6f}")
-        print(f"Number of high-friction points: {top_friction_count}")
-        print(f"Number of fragile flows: {fragile_flows_df['session_id'].nunique()}")
-        
-        # Print top 5 friction points
-        print("\nTop 5 Friction Points:")
-        top5 = friction_df.head(5)
-        for _, row in top5.iterrows():
-            print(f"  {row['page']} ({row['event']}): {row['WSJF_Friction_Score']:.6f}")
+    # Export chokepoints
+    chokepoints_df.to_csv(os.path.join(output_dir, "event_chokepoints.csv"), index=False)
     
-    return friction_df, fragile_flows_df, node_map
+    # Export fragile flows
+    if not fragile_flows_df.empty:
+        fragile_flows_df.to_csv(os.path.join(output_dir, "high_friction_flows.csv"), index=False)
+    else:
+        # Create an empty file to indicate analysis was run
+        with open(os.path.join(output_dir, "high_friction_flows.csv"), 'w') as f:
+            f.write("session_id,step_index,page,event,WSJF_Friction_Score,is_chokepoint,user_id\n")
+    
+    # Export node map
+    with open(os.path.join(output_dir, "friction_node_map.json"), 'w') as f:
+        json.dump(node_map, f, indent=2)
+    
+    # Export decision table
+    decision_table.to_csv(os.path.join(output_dir, "decision_table.csv"), index=False)
+    
+    # Create final report with key metrics
+    final_report = {
+        "fractal_dimension": D,
+        "power_law_alpha": alpha,
+        "clustering_coefficient": cc,
+        "percolation_threshold": threshold,
+        "top_fb_nodes": [(node, score) for node, score in sorted(FB.items(), key=lambda x: x[1], reverse=True)[:5]],
+        "top_chokepoints": chokepoints_df.iloc[:5][['page', 'event', 'WSJF_Friction_Score']].values.tolist()
+    }
+    
+    # Export final report as JSON
+    with open(os.path.join(output_dir, "final_report.json"), 'w') as f:
+        json.dump(final_report, f, indent=2)
+    
+    # Export final report as CSV for easier reading
+    report_df = pd.DataFrame([
+        {"metric": "Fractal Dimension", "value": D},
+        {"metric": "Power Law Alpha", "value": alpha},
+        {"metric": "Clustering Coefficient", "value": cc},
+        {"metric": "Percolation Threshold", "value": threshold},
+        {"metric": "Top FB Node", "value": final_report["top_fb_nodes"][0][0] if final_report["top_fb_nodes"] else "N/A"},
+        {"metric": "Top Chokepoint", "value": f"{final_report['top_chokepoints'][0][0]}:{final_report['top_chokepoints'][0][1]}" if final_report["top_chokepoints"] else "N/A"}
+    ])
+    report_df.to_csv(os.path.join(output_dir, "final_report.csv"), index=False)
+    
+    print(f"Exported {len(chokepoints_df)} chokepoints to {output_dir}\\event_chokepoints.csv")
+    print(f"Exported {'no' if fragile_flows_df.empty else fragile_flows_df['session_id'].nunique()} fragile flows to {output_dir}\\high_friction_flows.csv")
+    print(f"Exported node map with {len(node_map)} pages to {output_dir}\\friction_node_map.json")
+    print(f"Exported decision table to {output_dir}\\decision_table.csv")
+    print(f"Exported final report to {output_dir}\\final_report.json and {output_dir}\\final_report.csv")
+    print("\n")
+    
+    return chokepoints_df, fragile_flows_df, node_map
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="TeloMesh Event Chokepoints Analysis")
@@ -367,10 +1026,11 @@ if __name__ == "__main__":
     parser.add_argument("--events_per_user", type=int, default=6, help="Average events per user")
     parser.add_argument("--input_flows", type=str, default="outputs/session_flows.csv", help="Path to session flows CSV")
     parser.add_argument("--input_graph", type=str, default="outputs/user_graph.gpickle", help="Path to graph pickle")
+    parser.add_argument("--input_graph_multi", type=str, default="outputs/user_graph_multi.gpickle", help="Path to multi-graph pickle")
     parser.add_argument("--output_path", type=str, default="outputs", help="Output directory")
     parser.add_argument("--fast", action="store_true", help="Skip detailed statistics output")
     
     args = parser.parse_args()
     
     # Run the main function
-    main(args.input_flows, args.input_graph, args.output_path, args.fast)
+    main(args.input_flows, args.input_graph, args.input_graph_multi, args.output_path, args.fast)
