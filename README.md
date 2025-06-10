@@ -78,7 +78,7 @@ TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA
 - Prioritizes flow improvements based on cumulative friction
 - Filters by path length steps and chokepoint count
 
-### 4. Advanced Network Analysis
+### 4. Advanced Network Analysis (WIP / Testing Bugs)
 - Fractal dimension calculation to measure user journey complexity
 - Power-law alpha exponent to quantify network degree distribution
 - Percolation threshold simulation to assess network robustness
@@ -89,7 +89,7 @@ TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA
 - Node participation analysis showing which pages appear most frequently in recurring patterns
 - Network statistics dashboard with node/edge ratios and connectivity metrics
 
-### 5. UX Recommendations Engine
+### 5. UX Recommendations Engine (WIP: Part of Advanced Metrics)
 - Decision table with actionable UX insights based on network metrics
 - Quadrant-based prioritization system (High Priority, User Friction Only, Structural Only, Low Priority)
 - Automatic classification of pages into critical and standard roles
