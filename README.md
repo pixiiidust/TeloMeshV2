@@ -78,39 +78,29 @@ TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA
 - Prioritizes flow improvements based on cumulative friction
 - Filters by path length steps and chokepoint count
 
-### 4. Advanced Network Analysis (WIP / Testing Bugs)
-- Fractal dimension calculation to measure user journey complexity
-- Power-law alpha exponent to quantify network degree distribution
-- Percolation threshold simulation to assess network robustness
-- Fractal betweenness centrality combining structural importance with network structure
-- Interactive FB vs WSJF Priority Matrix with customizable visualization options
-- Recurring patterns detection to identify common navigation loops
-- Exit path analysis with exit rate tracking for dropout sequences
-- Node participation analysis showing which pages appear most frequently in recurring patterns
-- Network statistics dashboard with node/edge ratios and connectivity metrics
+### 4. Advanced Network Analysis & UX Recommendations
+- **Network Structure Metrics:** Fractal dimension (journey complexity), Power-law alpha (hierarchy), and Percolation threshold (stability)
+- **Decision Table:** Actionable UX insights with quadrant-based prioritization (High Priority, User Friction Only, Structural Only, Low Priority)
+- **Priority Matrix:** Interactive visualization of structural importance vs user friction
+- **Pattern Detection:** Identify recurring navigation loops and common exit paths
+- **Critical Pages Analysis:** Automatic classification of pages into critical vs standard roles with specific improvement suggestions
+- **Network Statistics:** Measure system connectivity, resilience, and node participation metrics
+- **Comprehensive Metrics Glossary:** Detailed explanations for advanced users
 
-### 5. UX Recommendations Engine (WIP: Part of Advanced Metrics)
-- Decision table with actionable UX insights based on network metrics
-- Quadrant-based prioritization system (High Priority, User Friction Only, Structural Only, Low Priority)
-- Automatic classification of pages into critical and standard roles
-- Specific improvement suggestions tailored to page characteristics
-- Network pattern recognition for identifying UI/UX optimization opportunities
-- Comprehensive metrics glossary with detailed explanations of all metrics
-
-### 6. Dataset Organization
+### 5. Dataset Organization
 - Create and manage multiple datasets with `--dataset` parameter
 - Dataset metadata tracking (users, events, sessions, timestamp)
 - Dataset discovery and selection in the dashboard UI
 - Isolated outputs for multiple projects/experiments
 
-### 7. Performance Optimization
+### 6. Performance Optimization
 - Fast mode for processing large datasets efficiently
 - Optimized algorithms for pattern detection
 - Reduced computational complexity for network analysis
 - Processing time improvements of up to 70% for datasets with 1000+ users
 - Memory usage optimization for complex graphs
 
-### 8. Analytics Converter Utility
+### 7. Analytics Converter Utility
 - Convert data from Mixpanel, Amplitude, and Google Analytics 4
 - Automated column mapping for seamless integration
 - Sample data generation for testing
@@ -182,12 +172,18 @@ By combining exit rates with structural importance, the WSJF scoring system ensu
 <img src="https://github.com/user-attachments/assets/d592a20f-75e3-4f3e-b792-c8035031cdc9" width="100%"/>
 <img src="https://github.com/user-attachments/assets/ebb8c6d1-e694-4f20-8bd0-d8e331661d3c" width="100%"/>
 
-### WIP Preview of Advanced Metrics dashboard: 
-Advanced metrics leverages network science techniques to provide deeper structural insights into complex user flows, enabling strategic insights for advanced users.
+### WIP Preview of Advanced Metrics dashboard (Section 4): 
+Advanced Network Metrics leverages network science techniques to provide deeper structural insights into complex user flows:
 
-* Analyzes user journeys that branch and repeat at multiple scales, from linear paths to complex nested navigation patterns  (Fractal Dimension) 
-* Hierarchical structure (Power-Law Alpha) 
-* System stability (Percolation Threshold) with visual risk indicators
+* **Network Structure Metrics:** Analyze user journeys that branch and repeat at multiple scales (Fractal Dimension), hierarchical structure (Power-Law Alpha), and system stability (Percolation Threshold) with visual risk indicators
+
+* **Decision Table & Recommendations:** Receive specific UX improvement suggestions for each page based on its structural importance and friction score, sorted by priority
+
+* **Priority Matrix Visualization:** Plot pages by Fractal Betweenness (structural importance) vs. WSJF (user friction) to identify high-impact optimization opportunities
+
+* **Recurring Pattern Detection:** Uncover common navigation loops and repeated sequences that may indicate users getting stuck in circular journeys
+
+* **Network Stability Analysis:** Evaluate system resilience and identify critical pages that could disrupt the entire user experience if removed or modified
 
 <img src="https://github.com/user-attachments/assets/7f7c5666-77f5-4ca9-a8be-70671f1d755b" width="100%"/>
 <br>
