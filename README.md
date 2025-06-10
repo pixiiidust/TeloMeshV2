@@ -17,13 +17,13 @@
 
 ## Overview
 
-TeloMesh is a user journey analysis pipeline that processes session and event data to build a directed graph of user flows. It provides:
+TeloMesh is a user-journey analysis pipeline that transforms session and event data into a directed graph of user flows. It provides:
 
-* Actionable decision logic for product and UX managers to identify UX patterns, triage chokepoints, and prioritize improvements
-* Efficient identification of optimization opportunities using advanced network analysis metrics
-* Performance optimization for large datasets with specific UX recommendations
+- **Actionable decision logic** for product and UX managers to identify patterns, triage chokepoints, and prioritize improvements  
+- **Efficient opportunity detection** using advanced network-analysis metrics  
+- **Scalable performance** for large datasets, with tailored UX recommendations  
 
-TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA4 by turning exported session data into graph-based UX diagnostics—revealing where friction clusters, why users drop off, and which fixes matter most.
+By turning exported session data from Mixpanel, Amplitude, or GA4 into graph-based diagnostics, TeloMesh reveals where friction clusters, why users drop off, and which fixes matter most.
 
 **[📖 View comparison with other analytics tools](comparison.md)**
 
@@ -88,6 +88,9 @@ TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA
    python utils/analytics_converter.py --source mixpanel --input your_data.json --output mydata --telomesh-format
    python utils/analytics_converter.py --source ga4 --input your_data.csv --output mydata --telomesh-format
    python utils/analytics_converter.py --source amplitude --input your_data.json --output mydata --telomesh-format
+   
+   # Then run analysis on the imported data
+   python main.py --dataset mydata
    ```
 
 4. Run the dashboard to analyze your data:
