@@ -164,27 +164,27 @@ TeloMesh helps product managers by:
 By combining exit rates with structural importance, the WSJF scoring system ensures that improvements focus on areas with the highest impact on overall user experience.
 
 ## Dashboard Screenshots
-Discover UX pain points:
+### Discover UX pain points:
 
 <img src="https://github.com/user-attachments/assets/f0ab3ebb-2e4a-416f-acd1-73c43a6eaa86" width="600"/>
 <br>
 
-Triage pain points along user session flows:
+### Triage pain points along user session flows:
 
 <img src="https://github.com/user-attachments/assets/89b9ec34-8b80-48a5-b74d-33cb7321fc3a" width="600"/>
 <br>
 <img src="https://github.com/user-attachments/assets/b6a5893e-fc6d-45ac-a98a-05c0ffbbef36" width="600"/>
 
-
-Map priorities with user journey graphs: 
+### Map priorities with user journey graphs: 
 
 <img src="https://github.com/user-attachments/assets/7b5da3a3-6cb3-4cfc-9052-1ee6972a198c" width="600"/>
 <br>
 <img src="https://github.com/user-attachments/assets/d592a20f-75e3-4f3e-b792-c8035031cdc9" width="600"/>
 <img src="https://github.com/user-attachments/assets/ebb8c6d1-e694-4f20-8bd0-d8e331661d3c" width="600"/>
 
-WIP Preview of Advanced Metrics dashboard which leverages network science techniques to provide deeper insights into your user flows.
-Network Structure Metrics enable strategic insights for advanced users:
+### WIP Preview of Advanced Metrics dashboard: 
+Advanced metrics leverages network science techniques to provide deeper structural insights into your user flows, enabling strategic insights for advanced users.
+
 **Analyzes complex user journeys that branch and repeat at multiple scales, from linear paths to complex nested navigation patterns  (Fractal Dimension) 
 **Hierarchical structure (Power-Law Alpha) 
 **System stability (Percolation Threshold) with visual risk indicators: 
