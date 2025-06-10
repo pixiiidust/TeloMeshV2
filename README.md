@@ -7,13 +7,11 @@
 
 ## Why use TeloMesh? 
 
-**[📖View comparison.md to find out more](comparison.md).**
-
 TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA4 by turning exported session data into graph-based UX diagnostics—revealing where friction clusters, why users drop off, and which fixes matter most.
 
-## Getting Started
+**[📖View comparison.md to find out more](comparison.md).**
 
-**[📖 View the complete setup guide](setup_guide.md)** for detailed installation and usage instructions.
+## Getting Started
 
 ### Quick Installation
 
@@ -48,7 +46,7 @@ TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA
    streamlit run ui/dashboard.py
    ```
 
-For more detailed setup instructions and command-line parameters, see the [Setup Guide](setup_guide.md).
+**[📖 View the complete setup guide](setup_guide.md)** for detailed installation and usage instructions.
 
 ## Key Features
 
