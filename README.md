@@ -154,18 +154,18 @@ TeloMesh helps product managers by:
 By combining exit rates with structural importance, the WSJF scoring system ensures that improvements focus on areas with the highest impact on overall user experience.
 
 ## Dashboard Screenshots
-### Discover UX pain points:
+### Identify and rank UX pain points by WSJF score, exit rate, and user abandonment:
 
 <img src="https://github.com/user-attachments/assets/f0ab3ebb-2e4a-416f-acd1-73c43a6eaa86" width="100%"/>
 <br>
 
-### Triage pain points along user session flows:
+### Triage critical chokepoints that lead to user dropoffs across multi-step journey sequences:
 
 <img src="https://github.com/user-attachments/assets/89b9ec34-8b80-48a5-b74d-33cb7321fc3a" width="100%"/>
 <br>
 <img src="https://github.com/user-attachments/assets/b6a5893e-fc6d-45ac-a98a-05c0ffbbef36" width="100%"/>
 
-### Map priorities with user journey graphs: 
+### Visualize high-impact UX optimization targets with WSJF-prioritized journey graphs:
 
 <img src="https://github.com/user-attachments/assets/7b5da3a3-6cb3-4cfc-9052-1ee6972a198c" width="100%"/>
 <br>
