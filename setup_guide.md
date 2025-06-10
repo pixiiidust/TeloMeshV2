@@ -246,10 +246,9 @@ python utils/analytics_converter.py --generate-sample --format amplitude --outpu
 
 For detailed documentation on analytics conversion, see the [Analytics Converter Guide](utils/README.md).
 
-For generating large datasets; these are the current runtimes for 10k, 20k, and 100k users for 20 events, 30 page nodes:
+For generating large datasets; these recently tested runtimes for 10k, 20k, and 100k users, 20 events, 30 page nodes:
 <img src="https://github.com/user-attachments/assets/bb028836-7b6e-47d5-af1d-1b32320dde53" width="100%"/>
 <br>
-
 
 ## Analysis Methodology
 
