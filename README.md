@@ -118,7 +118,7 @@ By turning exported session data from Mixpanel, Amplitude, or GA4 into graph-bas
 <img src="https://github.com/user-attachments/assets/7b5da3a3-6cb3-4cfc-9052-1ee6972a198c" width="100%"/>
 <br>
 <img src="https://github.com/user-attachments/assets/7cb71141-b814-4730-86db-35fa1f687b2c" width="100%"/>
-<img src="https://github.com/user-attachments/assets/ebb8c6d1-e694-4f20-8bd0-d8e331661d3c" width="100%"/>
+<img src="https://github.com/user-attachments/assets/e682477b-41db-4385-9c04-0971a3bc03fc" width="100%"/>
 
 ### WIP Preview of Advanced Metrics dashboard (Section 4): 
 Advanced Network Metrics leverages network science techniques to provide deeper structural insights into complex user flows:
