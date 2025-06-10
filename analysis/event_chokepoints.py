@@ -1156,6 +1156,191 @@ def compute_clustering_coefficient(G):
     
     return clustering
 
+def generate_flow_signature(flow_data):
+    """
+    Generate a signature for a user flow based on the page sequences.
+    
+    Args:
+        flow_data (pd.DataFrame): DataFrame containing a single user flow.
+        
+    Returns:
+        tuple: Tuple of (page, event) pairs representing the flow.
+    """
+    # Sort by step_index to ensure correct order
+    flow_data = flow_data.sort_values('step_index')
+    
+    # Extract page-event pairs as a tuple
+    page_event_pairs = tuple(zip(flow_data['page'].tolist(), flow_data['event'].tolist()))
+    
+    return page_event_pairs
+
+def extract_flow_patterns(flow_df):
+    """
+    Extract common flow patterns from user sessions.
+    
+    Args:
+        flow_df (pd.DataFrame): DataFrame containing session flows.
+        
+    Returns:
+        dict: Dictionary mapping pattern signatures to lists of session IDs.
+    """
+    # Initialize dictionary to store patterns
+    pattern_groups = {}
+    
+    # Handle empty DataFrame
+    if len(flow_df) == 0:
+        return pattern_groups
+    
+    # For each session, generate a flow signature
+    for session_id in flow_df["session_id"].unique():
+        session_data = flow_df[flow_df["session_id"] == session_id]
+        
+        # Generate flow signature
+        pattern = generate_flow_signature(session_data)
+        
+        # Initialize pattern group if not exists
+        if pattern not in pattern_groups:
+            pattern_groups[pattern] = []
+        
+        # Add session to pattern group
+        pattern_groups[pattern].append(session_id)
+        
+    return pattern_groups
+
+def extract_transition_pairs(flow_df):
+    """
+    Extract page transition pairs (A→B) from session flows.
+    
+    This function identifies common page transitions across sessions, which is 
+    more intuitive and provides more actionable insights than full path patterns.
+    
+    Args:
+        flow_df (pd.DataFrame): DataFrame containing session flows with chokepoints.
+        
+    Returns:
+        dict: Dictionary with transition pairs and their frequencies and details.
+    """
+    # Dictionary to store transition pairs
+    transitions = {}
+    
+    # Handle empty DataFrame
+    if len(flow_df) == 0:
+        return transitions
+    
+    # For each session, extract the page transition pairs
+    for session_id in flow_df["session_id"].unique():
+        session_data = flow_df[flow_df["session_id"] == session_id].sort_values("step_index")
+        
+        # Skip sessions with only one step (no transitions)
+        if len(session_data) < 2:
+            continue
+        
+        # Extract transitions as (from_page, to_page) pairs
+        for i in range(len(session_data) - 1):
+            from_page = session_data.iloc[i]["page"]
+            to_page = session_data.iloc[i + 1]["page"]
+            from_event = session_data.iloc[i]["event"]
+            to_event = session_data.iloc[i + 1]["event"]
+            from_chokepoint = session_data.iloc[i]["is_chokepoint"] == 1
+            to_chokepoint = session_data.iloc[i + 1]["is_chokepoint"] == 1
+            
+            # Create a unique key for this transition
+            transition_key = (from_page, to_page)
+            
+            # If this is a new transition, initialize it
+            if transition_key not in transitions:
+                transitions[transition_key] = {
+                    "count": 0,
+                    "session_ids": set(),
+                    "from_page": from_page,
+                    "to_page": to_page,
+                    "examples": [],
+                    "contains_chokepoint": False,
+                    "friction_score": 0.0
+                }
+            
+            # Update the transition data
+            transitions[transition_key]["count"] += 1
+            transitions[transition_key]["session_ids"].add(session_id)
+            
+            # Store an example of this transition (up to 5)
+            if len(transitions[transition_key]["examples"]) < 5:
+                transitions[transition_key]["examples"].append({
+                    "session_id": session_id,
+                    "from_event": from_event,
+                    "to_event": to_event,
+                    "from_chokepoint": from_chokepoint,
+                    "to_chokepoint": to_chokepoint
+                })
+            
+            # Update chokepoint status
+            if from_chokepoint or to_chokepoint:
+                transitions[transition_key]["contains_chokepoint"] = True
+            
+            # Add friction score from the steps
+            from_friction = session_data.iloc[i]["WSJF_Friction_Score"]
+            to_friction = session_data.iloc[i + 1]["WSJF_Friction_Score"]
+            transitions[transition_key]["friction_score"] += from_friction + to_friction
+    
+    # Convert the session_ids sets to lists for JSON serialization
+    for key in transitions:
+        transitions[key]["session_ids"] = list(transitions[key]["session_ids"])
+    
+    return transitions
+
+def calculate_pattern_metrics(pattern_groups, flow_df):
+    """
+    Calculate metrics for each pattern group.
+    
+    Args:
+        pattern_groups (dict): Dictionary mapping pattern signatures to lists of session IDs.
+        flow_df (pd.DataFrame): DataFrame containing session flows with chokepoints.
+        
+    Returns:
+        list: List of dictionaries containing metrics for each pattern.
+    """
+    pattern_metrics = []
+    
+    # Handle empty input
+    if not pattern_groups or len(flow_df) == 0:
+        return pattern_metrics
+    
+    for pattern, session_ids in pattern_groups.items():
+        # Calculate frequency (number of sessions with this pattern)
+        frequency = len(session_ids)
+        
+        # Get a representative session for this pattern
+        representative_session_id = session_ids[0]
+        representative_flow = flow_df[flow_df["session_id"] == representative_session_id].sort_values("step_index")
+        
+        # Calculate total WSJF score for this pattern
+        total_wsjf = 0
+        for session_id in session_ids:
+            session_data = flow_df[flow_df["session_id"] == session_id]
+            total_wsjf += session_data["WSJF_Friction_Score"].sum()
+        
+        # Calculate average WSJF score
+        avg_wsjf = total_wsjf / frequency
+        
+        # Count chokepoints
+        chokepoint_count = representative_flow["is_chokepoint"].sum()
+        
+        # Store pattern data
+        pattern_data = {
+            "pattern": list(pattern),  # Convert tuple to list for JSON serialization
+            "frequency": frequency,
+            "session_ids": session_ids,
+            "representative_flow": representative_flow,
+            "total_wsjf": total_wsjf,
+            "avg_wsjf": avg_wsjf,
+            "chokepoint_count": chokepoint_count,
+            "flow_length": len(representative_flow)
+        }
+        
+        pattern_metrics.append(pattern_data)
+    
+    return pattern_metrics
+
 def build_decision_table(G, D, alpha, FB, threshold, chokepoints, cc=None):
     """
     Build a decision table for product managers.

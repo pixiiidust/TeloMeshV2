@@ -387,7 +387,7 @@ def render_friction_table(df: pd.DataFrame):
         df (pd.DataFrame): DataFrame with event chokepoints.
     """
     # Top Pages Summary Section
-    st.subheader("Top 3 Pages by Friction Metric")
+    st.subheader("Top 3 Pages by Aggregate Friction Metric")
     
     # Dropdown for metric selection
     metric_options = {
@@ -425,13 +425,13 @@ def render_friction_table(df: pd.DataFrame):
         cols[i].metric(
             f"#{i+1}: {page_name}", 
             formatted_value,
-            help=f"Page with #{i+1} highest {selected_metric}"
+            help=f"Page with #{i+1} highest {selected_metric} (Users Lost: summed across all events, Exit Rate & WSJF: averaged across all events)"
         )
     
     # Main friction table
-    st.header("🔥 Friction Table")
+    st.header("Friction Table: By Specific Page-Level Events")
     st.write("""
-    * Event chokepoints ranked by friction metrics. 
+    * Friction points by page and specific event metrics (exit rate, users lost, betweenness, and WSJF score).
     * Filter by page, event, and percentile. 
     * Mouse over column headers for metric definitions.
         """)
@@ -1150,7 +1150,7 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
         
         with col2:
             # Option to adjust physics
-            physics_enabled = st.checkbox("Enable Physics", value=False)
+            physics_enabled = st.checkbox("Enable Physics", value=True)
         
         with col3:
             # NEW: Layout type selection
@@ -1268,7 +1268,7 @@ def render_flow_summaries(flow_df: pd.DataFrame):
         with col1:
             # Dropdown for flow length instead of slider
             selected_length = st.selectbox(
-                "Minimum flow length:",
+                "Minimum flow length steps:",
                 options=flow_length_options,
                 index=0  # Default to minimum
             )
@@ -1285,9 +1285,9 @@ def render_flow_summaries(flow_df: pd.DataFrame):
             # Filter by top friction percentile
             percentile_options = {
                 "All flows": 0,
-                "Top 25%": 75,
-                "Top 10%": 90,
-                "Top 5%": 95
+                "Top 25% of flows by total WSJF score": 75,
+                "Top 10% of flows by total WSJF score": 90,
+                "Top 5% of flows by total WSJF score": 95
             }
             selected_percentile_label = st.selectbox("Show:", list(percentile_options.keys()))
             selected_percentile = percentile_options[selected_percentile_label]
@@ -2793,6 +2793,179 @@ def render_advanced_metrics_tab(metrics_data):
     st.markdown("---")
     render_developer_controls(metrics_data.get("dataset_name", "default"))
 
+def render_transition_pairs(flow_df: pd.DataFrame):
+    """
+    Render analysis of page transition pairs (A→B) to identify common patterns across sessions.
+    
+    Args:
+        flow_df (pd.DataFrame): DataFrame containing session flows with chokepoints.
+    """
+    try:
+        if len(flow_df) == 0:
+            st.info("No flow data available for transition pair analysis.")
+            return
+        
+        # Fix import path by adding parent directory to sys.path
+        import os
+        import sys
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+        
+        # Extract transition pairs from the flow data
+        from analysis.event_chokepoints import extract_transition_pairs
+        
+        # Convert the transitions dictionary to a DataFrame for easier manipulation
+        transitions = extract_transition_pairs(flow_df)
+        
+        if not transitions:
+            st.info("No transition pairs found in the data.")
+            return
+            
+        # Convert transitions dictionary to DataFrame
+        transitions_data = []
+        for key, data in transitions.items():
+            # Calculate average friction per occurrence
+            avg_friction = data["friction_score"] / data["count"] if data["count"] > 0 else 0
+            
+            # Determine if source and destination are chokepoints from the examples
+            # We'll look at the first example as representative since all examples for the same transition
+            # pair should have consistent chokepoint markings
+            from_chokepoint = False
+            to_chokepoint = False
+            if data["examples"]:
+                from_chokepoint = data["examples"][0]["from_chokepoint"]
+                to_chokepoint = data["examples"][0]["to_chokepoint"]
+            
+            transitions_data.append({
+                "from_page": data["from_page"],
+                "to_page": data["to_page"],
+                "frequency": data["count"],
+                "session_count": len(data["session_ids"]),
+                "from_chokepoint": from_chokepoint,
+                "to_chokepoint": to_chokepoint,
+                "friction_score": data["friction_score"],
+                "avg_friction": avg_friction
+                # Removed 'examples' field to prevent [object Object] in the table
+            })
+        
+        transitions_df = pd.DataFrame(transitions_data)
+        
+        # Total transitions
+        total_transitions = transitions_df["frequency"].sum()
+        total_unique_transitions = len(transitions_df)
+        
+        # Display summary metrics
+        st.markdown(f"**Found {total_unique_transitions} unique page transitions across {total_transitions} total transitions**")
+        
+        # Create two columns for the filter controls
+        filter_col1, filter_col2, filter_col3 = st.columns(3)
+        
+        with filter_col1:
+            # Sort by frequency by default (most common first)
+            sort_options = {
+                "Frequency (highest first)": "frequency",
+                "Total WSJF Score (highest first)": "friction_score" if "friction_score" in transitions_df.columns else "frequency"
+            }
+            
+            # Allow user to select sort method
+            selected_sort = st.selectbox("Sort transitions by:", list(sort_options.keys()))
+            sort_column = sort_options[selected_sort]
+        
+        # Add page filters
+        with filter_col2:
+            # Get unique from_pages and add "All" option
+            from_pages = ["All"] + sorted(transitions_df["from_page"].unique().tolist())
+            selected_from_page = st.selectbox("Filter by start page:", from_pages)
+        
+        with filter_col3:
+            # Get unique to_pages and add "All" option
+            to_pages = ["All"] + sorted(transitions_df["to_page"].unique().tolist())
+            selected_to_page = st.selectbox("Filter by end page:", to_pages)
+        
+        # Sort the DataFrame
+        if sort_column in transitions_df.columns:
+            transitions_df = transitions_df.sort_values(by=sort_column, ascending=False)
+        
+        # Apply page filters
+        filtered_df = transitions_df.copy()
+        if selected_from_page != "All":
+            filtered_df = filtered_df[filtered_df["from_page"] == selected_from_page]
+        if selected_to_page != "All":
+            filtered_df = filtered_df[filtered_df["to_page"] == selected_to_page]
+        
+        # Filter to transitions with chokepoints if requested
+        show_any_chokepoint = st.checkbox("Show only transitions with either 'From' *or* 'To' chokepoint", value=False)
+        show_both_chokepoints = st.checkbox("Show only transitions with both 'From' *and* 'To' as chokepoints", value=False)
+        
+        # Apply filters based on chokepoints
+        if show_both_chokepoints:
+            # Filter to transitions where both source and destination are chokepoints
+            filtered_df = filtered_df[(filtered_df["from_chokepoint"] == True) & (filtered_df["to_chokepoint"] == True)]
+            if len(filtered_df) == 0:
+                st.info("No transitions with both endpoints as chokepoints found matching your filters.")
+                return
+        elif show_any_chokepoint:
+            # Filter to transitions with at least one chokepoint (either from or to)
+            filtered_df = filtered_df[(filtered_df["from_chokepoint"] == True) | (filtered_df["to_chokepoint"] == True)]
+            if len(filtered_df) == 0:
+                st.info("No transitions with chokepoints found matching your filters.")
+                return
+        
+        # Show transitions in a table
+        st.markdown("### Transition Pairs Analysis")
+        
+        if len(filtered_df) == 0:
+            st.info("No transitions found matching your filters.")
+            return
+        
+        # Configure columns for display
+        column_config = {
+            "from_page": st.column_config.TextColumn("From Page"),
+            "to_page": st.column_config.TextColumn("To Page"),
+            "frequency": st.column_config.NumberColumn("Frequency"),
+            "session_count": st.column_config.NumberColumn("Session Count"),
+            "from_chokepoint": st.column_config.CheckboxColumn(
+                "From Chokepoint", 
+                help="Indicates whether the source page/event in this transition is a chokepoint (top 10% by WSJF score)"
+            ),
+            "to_chokepoint": st.column_config.CheckboxColumn(
+                "To Chokepoint", 
+                help="Indicates whether the destination page/event in this transition is a chokepoint (top 10% by WSJF score)"
+            )
+        }
+        
+        # Add friction columns if available
+        if "friction_score" in transitions_df.columns:
+            column_config["friction_score"] = st.column_config.NumberColumn(
+                "Total WSJF Score",
+                format="%.6f",
+                help="Sum of WSJF scores for this transition - higher values indicate more problematic transitions"
+            )
+        
+        if "avg_friction" in transitions_df.columns:
+            column_config["avg_friction"] = st.column_config.NumberColumn(
+                "Avg WSJF per Transition",
+                format="%.6f",
+                help="Average WSJF per occurrence of this transition"
+            )
+        
+        # Display the dataframe with all transitions
+        st.dataframe(
+            filtered_df,
+            column_config=column_config,
+            use_container_width=True
+        )
+        
+                # Add export button
+        st.markdown(
+            f'<div class="download-container">{get_csv_download_link(filtered_df, "transition_pairs", "📥 Export Transitions")}</div>',
+            unsafe_allow_html=True
+        )
+    
+    except Exception as e:
+        st.error(f"Error in transition pairs analysis: {str(e)}")
+        logger.error(f"Error in transition pairs analysis: {str(e)}")
+        logger.error(traceback.format_exc())
+
 def main():
     """Main function to run the dashboard."""
     configure_dark_theme()
@@ -2802,7 +2975,7 @@ def main():
     if os.path.exists(logo_path):
         logo_html = f'<img src="data:image/png;base64,{load_logo_base64(logo_path)}" class="telomesh-logo">'
         st.markdown(
-            f'<div class="telomesh-header" style="flex-direction: column; align-items: center;">{logo_html}<h1>User Journey Intelligence</h1></div>',
+            f'<div class="telomesh-header" style="flex-direction: column; align-items: center;">{logo_html}<h1>UX Journey Intelligence</h1></div>',
             unsafe_allow_html=True
         )
     else:
@@ -2917,7 +3090,7 @@ def main():
     
     with tab1:
         st.header("🔥 Friction Analysis Overview")
-        st.write("Select to display top 3 pages ranked by users lost, exit rate or WSJF score")
+        st.write("Displays top 3 pages with highest friction when all events on each page are aggregated together")
         
         # Render friction table
         render_friction_table(friction_df)
@@ -2925,14 +3098,31 @@ def main():
     with tab2:
         st.header("🔁 User Flow Analysis", help="User journeys with multiple friction points")
         st.write("""
-        * This analysis ranks user journeys by total WSJF scores along the path. 
-        * High scores indicate multiple high-friction chokepoints that can disrupt user flows and lead to increased drop-offs. 
-        * Flow length is defined as the number of page/event steps along a user journey path.
+        * Identifies problematic user journey patterns by analyzing paths with high WSJF scores and chokepoints.
+        * **Flow Sequences** shows multi-step user journey sessions containing 2+ chokepoints, filterable by path length steps and total WSJF score ranking to identify unique path problems.
+        * **Transition Pairs** reveals common page-to-page transitions across sessions, pinpointing specific navigation patterns that cause user friction.
             """)
+            
+        # Add a clear explanation of chokepoints in an info box
+        st.info("""
+        **What are chokepoints?** 
         
-        # Render flow summaries without an additional header
-        render_flow_summaries(flow_df)
+        Chokepoints are the top 10% of (page, event) pairs with the highest WSJF Friction Scores. 
+        A WSJF score combines exit rate (how often users leave) and betweenness centrality (how critical the page is to user flows).
+        Pages with high scores are both structurally important and problematic for users.
+        """, icon="ℹ️")
         
+        # Create sub-tabs for different flow analysis views
+        flow_tab1, flow_tab2 = st.tabs(["Flow Sequences", "Transition Pairs"])
+        
+        with flow_tab1:
+            # Render the traditional flow summaries in the first tab
+            render_flow_summaries(flow_df)
+            
+        with flow_tab2:
+            # Render the transition pairs in the second tab
+            render_transition_pairs(flow_df)
+    
     with tab3:
         # The render_graph_heatmap function already has its own header with tooltip
         render_graph_heatmap(G, node_map)

@@ -61,6 +61,7 @@
 │   └── render_friction_table(df: pd.DataFrame)
 │   └── render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float])
 │   └── render_flow_summaries(flow_df: pd.DataFrame)
+│   └── render_transition_pairs(flow_df: pd.DataFrame)
 │   └── load_advanced_metrics(dataset: str = None) -> Dict
 │   └── render_fb_vs_wsjf_chart(metrics_data: Dict)
 │   └── render_recurring_patterns(metrics_data: Dict)
@@ -70,7 +71,7 @@
 │   └── discover_datasets() -> List[str]
 │   └── load_dataset_metadata(dataset_name: str) -> Dict
 │
-├── dashboard_v2.py           # Backup of latest dashboard with advanced metrics
+├── dashboard_backup.py       # Backup of the latest dashboard version
 │
 ├── dashboard_components.md   # Documentation about dashboard components
 

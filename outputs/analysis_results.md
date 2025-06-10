@@ -9,6 +9,7 @@ This folder contains the generated data files that serve as inputs to the TeloMe
 - `event_chokepoints.csv`: Ranked friction points with WSJF scores
 - `high_friction_flows.csv`: User flows containing multiple high-friction points
 - `friction_node_map.json`: Node scoring data for visualization heat mapping
+- `transition_pairs.json`: Common page-to-page transitions with frequency and friction metrics
 - `decision_table.csv`: UX recommendations based on network analysis
 - `recurring_patterns.json`: Detected recurring sequences and loops in user journeys
 - `recurring_exit_paths.json`: Sequences that lead to users leaving the site with exit rates
@@ -28,6 +29,7 @@ outputs/
     ├── event_chokepoints.csv       # Friction point rankings
     ├── high_friction_flows.csv     # Problematic user flows
     ├── friction_node_map.json      # Node score mapping
+    ├── transition_pairs.json       # Page-to-page transition analysis
     ├── recurring_patterns.json     # Recurring sequences with node participation counts
     ├── recurring_exit_paths.json   # Sequences leading to exits with exit rates
     ├── decision_table.csv          # UX recommendations
@@ -45,6 +47,23 @@ The new output files include detailed network analytics:
 - **Node Loop Counts**: Frequency of node participation in recurring patterns
 - **Exit Path Analysis**: Sequences leading to user exits with associated rates
 - **UX Recommendations**: Actionable insights based on network properties
+- **Transition Pairs Analysis**: Common page-to-page navigation patterns with friction metrics
+
+## Flow Analysis Features
+The system now provides two complementary approaches to analyzing user flows:
+
+1. **Flow Sequences**: Complete user journeys containing multiple high-friction points
+   - Identifies multi-step user journeys with 2+ chokepoints
+   - Shows complete paths where users encounter obstacles
+   - Filters by flow length steps and total WSJF score
+
+2. **Transition Pairs**: Direct page-to-page transitions across all sessions
+   - Isolates specific navigation patterns between pages
+   - Identifies transitions with chokepoints (from, to, or both)
+   - Calculates frequency, session count, and total friction score
+   - Helps pinpoint the most problematic navigation patterns
+
+These complementary views allow product managers to analyze both complete user journeys and specific problematic transitions.
 
 ## Usage
 To generate all outputs for a specific dataset:

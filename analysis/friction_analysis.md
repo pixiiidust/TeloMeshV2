@@ -8,6 +8,7 @@ This folder contains the core analytical components of TeloMesh that identify fr
 - Betweenness centrality calculations for page importance
 - Exit rate analysis for identifying abandonment points
 - User flow analysis for multi-point journey failures
+- Transition pairs analysis for page-to-page navigation patterns
 - Dataset-specific analysis outputs
 
 ## Advanced Network Analysis
@@ -75,6 +76,23 @@ outputs/
 
 Each dataset maintains its own analysis results, allowing for comparison between different user groups or before/after UX changes.
 
+## Advanced Flow Analysis
+The system now provides two complementary approaches to analyzing user flows:
+
+1. **Flow Sequences**: 
+   - Identifies multi-step user journey sessions containing 2+ chokepoints
+   - Shows complete paths where users encounter multiple friction points
+   - Filterable by path length steps and total WSJF score ranking
+
+2. **Transition Pairs**:
+   - Extracts common page-to-page transitions (A→B) across sessions
+   - Identifies specific navigation patterns with chokepoints
+   - Calculates transition frequency, session count, and total WSJF score
+   - Helps pinpoint problematic navigation patterns between pages
+   - Distinguishes between "from" chokepoints and "to" chokepoints in transitions
+
+These complementary views help product managers understand both the complete user journeys (Flow Sequences) and the specific problematic transitions between pages (Transition Pairs).
+
 ## Usage
 Run the analysis with advanced network metrics:
 ```bash
@@ -86,4 +104,4 @@ The `--fast` flag enables optimized processing for large datasets.
 To view the analysis results with the interactive dashboard:
 ```bash
 streamlit run ui/dashboard.py
-``` 
+```

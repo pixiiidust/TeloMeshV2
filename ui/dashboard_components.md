@@ -16,7 +16,7 @@ The main file `dashboard.py` provides a comprehensive Streamlit interface for pr
 
 ## Dashboard Tabs
 - **Friction Analysis**: Table of friction points ranked by WSJF score
-- **User Flow Analysis**: Summaries of user journeys with multiple friction points
+- **Flow Analysis**: Analysis of user journeys with multiple friction points and transition patterns
 - **User Journey Graph**: Interactive visualization of user flows with friction highlighted
 - **Advanced Metrics**: Network analysis metrics with interactive visualizations
 
@@ -105,11 +105,18 @@ The Developer Controls section is accessible from the Advanced Metrics tab and p
   - For comparing algorithm versions without regenerating synthetic data
 
 ## Flow Analysis Features
-- Filter flows by minimum length
-- Filter by minimum number of chokepoints (friction points)
-- Focus on top percentage of flows by friction score
-- Visualize complete user journeys with highlighted friction points
-- Export filtered flows to CSV with detailed metrics
+- **Flow Sequences tab**:
+  - Filter flows by minimum flow length steps
+  - Filter by minimum number of chokepoints (friction points)
+  - Focus on top percentage of flows by total WSJF score
+  - Visualize multi-step user journey sessions with highlighted chokepoints
+  - Export filtered flows to CSV with detailed metrics
+- **Transition Pairs tab**:
+  - Analyze common page-to-page transitions across sessions
+  - Filter by "from" page and "to" page
+  - Filter by transitions with chokepoints (from, to, or both)
+  - Sort by frequency, session count, or total WSJF score
+  - Export transition data to CSV
 
 ## Sidebar Components
 - **Advanced Metrics Glossary**: Detailed explanations of all metrics and their interpretations

@@ -1,4 +1,4 @@
-﻿"""
+"""
 TeloMesh User Flow Intelligence Dashboard - LOVABLE Stage
 
 This module provides a Streamlit dashboard for visualizing friction points in user journeys.
@@ -17,7 +17,7 @@ from pyvis.network import Network
 import tempfile
 import streamlit.components.v1 as components
 import numpy as np
-from typing import Tuple, Dict, List, Optional
+from typing import Tuple, Dict
 import time
 import logging
 import traceback
@@ -27,6 +27,15 @@ import io
 from datetime import datetime
 import plotly.express as px
 import plotly.graph_objects as go
+
+# CURSOR RULE: PM-FACING DASHBOARD CONSTRUCTION
+# - Build a PM-intuitive, dark-themed Streamlit dashboard
+# - Use pre-computed files only (no recomputation in dashboard)
+#   - Friction Table: Sortable by WSJF_Friction_Score, filterable by page/event
+#   - Flow Summary: Shows fragile flows with ≥2 high-friction points
+#   - Graph Heatmap: Dark-themed node-link graph with top 10%/20% highlighting
+#   - Click-to-Drilldown: Shows event breakdown, users lost, incoming/outgoing links
+#   - Tooltips: Explain metrics in PM-friendly terms
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -90,10 +99,10 @@ def get_html_download_link(html_content, filename, button_text="Export HTML"):
 
 # Tooltip Fix Tests (Manual Acceptance Criteria)
 # 1. Hover over a metric label in the friction table (e.g., "Exit Rate")
-# 2. âœ… Tooltip icon (â„¹ï¸) should be visible (white on dark)
-# 3. âœ… Tooltip bubble should show with dark background and white text
-# 4. âœ… No white-on-white or missing content
-# 5. âœ… Tooltip border should be visible and styled (optional accent)
+# 2. ✅ Tooltip icon (ℹ️) should be visible (white on dark)
+# 3. ✅ Tooltip bubble should show with dark background and white text
+# 4. ✅ No white-on-white or missing content
+# 5. ✅ Tooltip border should be visible and styled (optional accent)
 # 6. Regression: tooltips should still appear when hovering over table headers or metrics
 
 def configure_dark_theme():
@@ -110,7 +119,7 @@ def configure_dark_theme():
     else:
         st.set_page_config(
             page_title="TeloMesh User Flow Intelligence",
-            page_icon="ðŸ”",
+            page_icon="🔍",
             layout="wide", 
             initial_sidebar_state="expanded"
         )
@@ -363,8 +372,8 @@ def render_tooltips(metric: str) -> str:
         "exit_rate": "% of users who leave after this event. Higher values indicate user abandonment points.",
         "betweenness": "How central this page is in user flows. Higher values indicate pages that many users pass through.",
         "users_lost": "Number of users who exited after this event and didn't return within the same session.",
-        "WSJF_Friction_Score": "WSJF Friction Score is calculated as exit_rate Ã— betweenness, prioritizing high-impact friction points.",
-        "wsjf": "WSJF Friction Score is calculated as exit_rate Ã— betweenness, prioritizing high-impact friction points.",
+        "WSJF_Friction_Score": "WSJF Friction Score is calculated as exit_rate × betweenness, prioritizing high-impact friction points.",
+        "wsjf": "WSJF Friction Score is calculated as exit_rate × betweenness, prioritizing high-impact friction points.",
         "is_chokepoint": "Identifies high-friction points (top 10% by WSJF score)."
     }
     
@@ -378,7 +387,7 @@ def render_friction_table(df: pd.DataFrame):
         df (pd.DataFrame): DataFrame with event chokepoints.
     """
     # Top Pages Summary Section
-    st.subheader("Top 3 Pages by Friction Metric")
+    st.subheader("Top 3 Pages by Aggregate Friction Metric")
     
     # Dropdown for metric selection
     metric_options = {
@@ -416,16 +425,16 @@ def render_friction_table(df: pd.DataFrame):
         cols[i].metric(
             f"#{i+1}: {page_name}", 
             formatted_value,
-            help=f"Page with #{i+1} highest {selected_metric}"
+            help=f"Page with #{i+1} highest {selected_metric} (Users Lost: summed across all events, Exit Rate & WSJF: averaged across all events)"
         )
     
     # Main friction table
-    st.header("ðŸ”¥ Friction Table")
+    st.header("Friction Table: By Specific Page-Level Events")
     st.write("""
-    * Event chokepoints ranked by friction metrics. 
+    * Friction points by page and specific event metrics (exit rate, users lost, betweenness, and WSJF score).
     * Filter by page, event, and percentile. 
     * Mouse over column headers for metric definitions.
-    """)
+        """)
     try:
         # UI controls for filtering
         col1, col2, col3 = st.columns(3)
@@ -480,7 +489,7 @@ def render_friction_table(df: pd.DataFrame):
             export_container = st.container()
             with export_container:
                 st.markdown(
-                    f'<div class="download-container">{get_csv_download_link(filtered_df, "friction_points", "ðŸ“¥ Export Filtered Data")}</div>',
+                    f'<div class="download-container">{get_csv_download_link(filtered_df, "friction_points", "📥 Export Filtered Data")}</div>',
                     unsafe_allow_html=True
                 )
             
@@ -687,8 +696,8 @@ def apply_multipartite_layout(graph, score_map, layout_type="friction_levels", s
     """
     Apply layout to graph using multipartite or force-directed arrangement.
     
-    - funnel_stages: leftâ†’right (vertical alignment â†’ x = stage)
-    - friction_levels: topâ†’bottom (horizontal alignment â†’ y = friction)
+    - funnel_stages: left→right (vertical alignment → x = stage)
+    - friction_levels: top→bottom (horizontal alignment → y = friction)
     - betweenness_tiers: force-directed hub-spoke layout
     """
 
@@ -724,11 +733,11 @@ def apply_multipartite_layout(graph, score_map, layout_type="friction_levels", s
 
         # Set correct axis-based scaling
         if align == "vertical":
-            # Subset controls X-axis (leftâ†’right)
+            # Subset controls X-axis (left→right)
             scale_x = scale * 0.6
             scale_y = scale * 0.6
         else:
-            # Subset controls Y-axis (topâ†’bottom)
+            # Subset controls Y-axis (top→bottom)
             scale_x = scale * 0.4
             scale_y = scale * 0.6
 
@@ -741,13 +750,13 @@ def apply_multipartite_layout(graph, score_map, layout_type="friction_levels", s
         if pos:
             xs = [p[0] for p in pos.values()]
             ys = [p[1] for p in pos.values()]
-            print(f"[Layout: {layout_type}] X range: {min(xs):.1f} â†’ {max(xs):.1f}")
-            print(f"[Layout: {layout_type}] Y range: {min(ys):.1f} â†’ {max(ys):.1f}")
+            print(f"[Layout: {layout_type}] X range: {min(xs):.1f} → {max(xs):.1f}")
+            print(f"[Layout: {layout_type}] Y range: {min(ys):.1f} → {max(ys):.1f}")
 
         return pos
 
     except Exception as e:
-        print(f"âš ï¸ Layout fallback due to error: {e}")
+        print(f"⚠️ Layout fallback due to error: {e}")
         return nx.spring_layout(graph, k=3, iterations=100, seed=42)
 
 
@@ -764,7 +773,7 @@ def render_enhanced_legend(layout_type="friction_levels", physics_enabled=False)
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        st.markdown("### ðŸ“Š Node Colors")
+        st.markdown("### 📊 Node Colors")
         st.markdown("""
         - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#F87171;"></span> **Red**: Top 10% friction (highest WSJF scores)
         - <span style="display:inline-block;width:15px;height:15px;border-radius:50%;background-color:#FBBF24;"></span> **Yellow**: Top 20% friction
@@ -774,29 +783,29 @@ def render_enhanced_legend(layout_type="friction_levels", physics_enabled=False)
     
     with col2:
         if not physics_enabled:
-            st.markdown("### ðŸ“ Layout Arrangement")
+            st.markdown("### 📐 Layout Arrangement")
             
             if layout_type == "friction_levels":
                 st.markdown("""
                 - **Top Layer**: Highest friction (urgent)
                 - **Middle Layers**: Medium friction (monitor)  
                 - **Lowest Layer**: Low friction (stable)
-                """)
+                    """)
             elif layout_type == "funnel_stages":
                 st.markdown("""
                 **User Funnel Stages:**
-                - ðŸšª **Left**: Entry points
-                - âš™ï¸ **Middle**: Conversion steps
-                - ðŸšª **Right**: Exit points
-                """)
+                - 🚪 **Left**: Entry points
+                - ⚙️ **Middle**: Conversion steps
+                - 🚪 **Right**: Exit points
+                    """)
             elif layout_type == "betweenness_tiers":
                 st.markdown("""
                 **Journey Centrality Structure:**
-                - ðŸ“ **Edges**: Peripheral nodes
-                - ðŸŽ¯ **Center**: Hub nodes
-                """)
+                - 📍 **Edges**: Peripheral nodes
+                - 🎯 **Center**: Hub nodes
+                    """)
         else:
-            st.markdown("### â„¹ï¸ Physics Mode")
+            st.markdown("### ℹ️ Physics Mode")
             st.markdown("Nodes move freely. Layout arrangement disabled.")
 
 # ============================================================================
@@ -1116,7 +1125,7 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
         graph (nx.DiGraph): Directed graph of user journeys.
         score_map (Dict[str, float]): Dictionary mapping page names to WSJF scores.
     """
-    st.header("ðŸŒ User Journey Graph", help="Visualizes user journeys with friction nodes and their connecting flows")
+    st.header("🌐 User Journey Graph", help="Visualizes user journeys with friction nodes and their connecting flows")
     st.write("Visualize user journeys across multiple paths, with high-friction chokepoints (nodes) and connecting flows (edges) highlighted.")
     
     try:
@@ -1141,7 +1150,7 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
         
         with col2:
             # Option to adjust physics
-            physics_enabled = st.checkbox("Enable Physics", value=False)
+            physics_enabled = st.checkbox("Enable Physics", value=True)
         
         with col3:
             # NEW: Layout type selection
@@ -1162,9 +1171,9 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
         # Display current configuration info
         if not physics_enabled:
             layout_descriptions = {
-                "friction_levels": "ðŸ“Š Nodes arranged by friction level (problems at top)",
-                "funnel_stages": "ðŸ”„ Nodes arranged by user funnel stages (entry â†’ exit)",
-                "betweenness_tiers": "ðŸŽ¯ Nodes arranged by journey centrality (hubs centered)"
+                "friction_levels": "📊 Nodes arranged by friction level (problems at top)",
+                "funnel_stages": "🔄 Nodes arranged by user funnel stages (entry → exit)",
+                "betweenness_tiers": "🎯 Nodes arranged by journey centrality (hubs centered)"
             }
             st.info(f"**Active Layout**: {layout_descriptions.get(layout_type, 'Custom arrangement')}")
         
@@ -1215,7 +1224,7 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
             filename = f"flow_heatmap_{filtered_text}_{layout_type}"
             
             st.markdown(
-                f'<div class="download-container">{get_html_download_link(html_content, filename, "ðŸ“¥ Export Graph as HTML")}</div>',
+                f'<div class="download-container">{get_html_download_link(html_content, filename, "📥 Export Graph as HTML")}</div>',
                 unsafe_allow_html=True
             )
         
@@ -1259,7 +1268,7 @@ def render_flow_summaries(flow_df: pd.DataFrame):
         with col1:
             # Dropdown for flow length instead of slider
             selected_length = st.selectbox(
-                "Minimum flow length:",
+                "Minimum flow length steps:",
                 options=flow_length_options,
                 index=0  # Default to minimum
             )
@@ -1276,9 +1285,9 @@ def render_flow_summaries(flow_df: pd.DataFrame):
             # Filter by top friction percentile
             percentile_options = {
                 "All flows": 0,
-                "Top 25%": 75,
-                "Top 10%": 90,
-                "Top 5%": 95
+                "Top 25% of flows by total WSJF score": 75,
+                "Top 10% of flows by total WSJF score": 90,
+                "Top 5% of flows by total WSJF score": 95
             }
             selected_percentile_label = st.selectbox("Show:", list(percentile_options.keys()))
             selected_percentile = percentile_options[selected_percentile_label]
@@ -1323,7 +1332,7 @@ def render_flow_summaries(flow_df: pd.DataFrame):
         export_container = st.container()
         with export_container:
             st.markdown(
-                f'<div class="download-container">{get_csv_download_link(filtered_flow_df, "fragile_flows", "ðŸ“¥ Export Filtered Flows")}</div>',
+                f'<div class="download-container">{get_csv_download_link(filtered_flow_df, "fragile_flows", "📥 Export Filtered Flows")}</div>',
                 unsafe_allow_html=True
             )
         
@@ -1343,7 +1352,7 @@ def render_flow_summaries(flow_df: pd.DataFrame):
                 # Display the flow path
                 st.markdown("### Flow Path")
                 
-                # Format as page â†’ event â†’ page â†’ event...
+                # Format as page → event → page → event...
                 path_parts = []
                 for _, row in session_data.iterrows():
                     page = row["page"]
@@ -1356,7 +1365,7 @@ def render_flow_summaries(flow_df: pd.DataFrame):
                     else:
                         path_parts.append(f"{page} (_{event}_)")
                 
-                path_str = " â†’ ".join(path_parts)
+                path_str = " → ".join(path_parts)
                 st.markdown(path_str)
                 
                 # Display metrics for this flow
@@ -1373,7 +1382,7 @@ def render_flow_summaries(flow_df: pd.DataFrame):
                 # Format DataFrame for display
                 display_df = session_data.copy()
                 display_df["WSJF_Friction_Score"] = display_df["WSJF_Friction_Score"].apply(lambda x: f"{x:.6f}")
-                display_df["is_chokepoint"] = display_df["is_chokepoint"].apply(lambda x: "âœ…" if x == 1 else "")
+                display_df["is_chokepoint"] = display_df["is_chokepoint"].apply(lambda x: "✅" if x == 1 else "")
                 
                 # Reorder and rename columns
                 display_df = display_df[["step_index", "page", "event", "WSJF_Friction_Score", "is_chokepoint"]]
@@ -1383,7 +1392,7 @@ def render_flow_summaries(flow_df: pd.DataFrame):
                 
                 # Add individual flow export option
                 st.markdown(
-                    f'<div class="download-container">{get_csv_download_link(session_data, f"flow_{session_id}", f"ðŸ“¥ Export Flow {session_id}")}</div>',
+                    f'<div class="download-container">{get_csv_download_link(session_data, f"flow_{session_id}", f"📥 Export Flow {session_id}")}</div>',
                     unsafe_allow_html=True
                 )
         
@@ -1405,7 +1414,9 @@ def load_advanced_metrics(dataset=None) -> Dict:
     Returns:
         Dict containing:
         - decision_table: DataFrame with decision table data
-        - final_report: DataFrame with network metrics in tabular format
+        - fractal_dimension: Fractal dimension of the graph
+        - power_law_alpha: Power law exponent of the graph
+        - percolation_threshold: Percolation threshold of the graph
         - network_metrics: Dictionary with additional metrics (if available)
     """
     try:
@@ -1420,40 +1431,55 @@ def load_advanced_metrics(dataset=None) -> Dict:
         
         # Check if required files exist
         decision_table_path = dataset_dir / "decision_table.csv"
-        final_report_path = dataset_dir / "final_report.csv"
         final_report_json_path = dataset_dir / "final_report.json"
+        recurring_patterns_path = dataset_dir / "recurring_patterns.json"
+        recurring_exit_paths_path = dataset_dir / "recurring_exit_paths.json"
         
-        if not decision_table_path.exists():
+        # Initialize metrics data dictionary
+        metrics_data = {}
+        
+        # Load decision table
+        if decision_table_path.exists():
+            metrics_data["decision_table"] = pd.read_csv(decision_table_path)
+        else:
             st.warning(f"Decision table not found: {decision_table_path}")
             # Create empty DataFrame with expected columns
-            decision_table = pd.DataFrame(columns=[
-                "node", "D", "alpha", "FB", "percolation_role", 
+            metrics_data["decision_table"] = pd.DataFrame(columns=[
+                "node", "FB", "percolation_role", 
                 "wsjf_score", "ux_label", "suggested_action"
             ])
-        else:
-            # Load decision table
-            decision_table = pd.read_csv(decision_table_path)
         
-        if not final_report_path.exists():
-            st.warning(f"Final report CSV not found: {final_report_path}")
-            # Create empty DataFrame with expected columns
-            final_report = pd.DataFrame(columns=["metric", "value"])
-        else:
-            # Load final report
-            final_report = pd.read_csv(final_report_path)
-        
-        # Load JSON metrics if available for additional data
+        # Load final report JSON for network metrics
         network_metrics = {}
         if final_report_json_path.exists():
             try:
                 with open(final_report_json_path, 'r') as f:
                     network_metrics = json.load(f)
+                    
+                    # Extract global metrics
+                    metrics_data["fractal_dimension"] = network_metrics.get("fractal_dimension", 0)
+                    metrics_data["power_law_alpha"] = network_metrics.get("power_law_alpha", 0)
+                    metrics_data["percolation_threshold"] = network_metrics.get("percolation_threshold", 0)
+                    metrics_data["clustering_coefficient"] = network_metrics.get("clustering_coefficient", 0)
             except Exception as e:
                 logger.error(f"Error loading network metrics JSON: {str(e)}")
                 st.warning(f"Error loading network metrics: {str(e)}")
+                
+                # Set default values for global metrics
+                metrics_data["fractal_dimension"] = 0
+                metrics_data["power_law_alpha"] = 0
+                metrics_data["percolation_threshold"] = 0
+                metrics_data["clustering_coefficient"] = 0
+        else:
+            st.warning(f"Final report JSON not found: {final_report_json_path}")
+            
+            # Set default values for global metrics
+            metrics_data["fractal_dimension"] = 0
+            metrics_data["power_law_alpha"] = 0
+            metrics_data["percolation_threshold"] = 0
+            metrics_data["clustering_coefficient"] = 0
         
         # Try to load recurring patterns if available
-        recurring_patterns_path = dataset_dir / "recurring_patterns.json"
         if recurring_patterns_path.exists():
             try:
                 with open(recurring_patterns_path, 'r') as f:
@@ -1461,759 +1487,1283 @@ def load_advanced_metrics(dataset=None) -> Dict:
             except Exception as e:
                 logger.error(f"Error loading recurring patterns: {str(e)}")
         
+        # Try to load recurring exit paths if available
+        if recurring_exit_paths_path.exists():
+            try:
+                with open(recurring_exit_paths_path, 'r') as f:
+                    network_metrics["recurring_exit_paths"] = json.load(f)
+            except Exception as e:
+                logger.error(f"Error loading recurring exit paths: {str(e)}")
+        
         # Count critical nodes (nodes with percolation_role = "critical")
         try:
-            network_metrics["critical_nodes_count"] = len(decision_table[decision_table["percolation_role"] == "critical"])
+            network_metrics["critical_nodes_count"] = len(metrics_data["decision_table"][
+                metrics_data["decision_table"]["percolation_role"] == "critical"
+            ])
         except Exception as e:
             logger.error(f"Error counting critical nodes: {str(e)}")
             network_metrics["critical_nodes_count"] = 0
         
-        return {
-            "decision_table": decision_table,
-            "final_report": final_report,
-            "network_metrics": network_metrics
-        }
+        # Add network metrics to the data dictionary
+        metrics_data["network_metrics"] = network_metrics
+        
+        return metrics_data
     
     except Exception as e:
         st.error(f"Error loading advanced metrics: {str(e)}")
         logger.error(f"Error loading advanced metrics: {str(e)}")
         logger.error(traceback.format_exc())
+        
+        # Return empty data structures on error
         return {
             "decision_table": pd.DataFrame(columns=[
-                "node", "D", "alpha", "FB", "percolation_role", 
+                "node", "FB", "percolation_role", 
                 "wsjf_score", "ux_label", "suggested_action"
             ]),
-            "final_report": pd.DataFrame(columns=["metric", "value"]),
+            "fractal_dimension": 0,
+            "power_law_alpha": 0,
+            "percolation_threshold": 0,
+            "clustering_coefficient": 0,
             "network_metrics": {}
         }
 
 def render_top_metrics(metrics_data):
     """
-    Render the top metrics panel.
+    Render the top metrics panel showing global network metrics with diagnostic badges.
     
     Args:
         metrics_data (Dict): Dictionary containing metrics data.
     """
-    st.subheader("ðŸ“Š Network Structure Metrics", help="Key metrics describing the graph structure")
+    st.subheader("📊 Network Structure Metrics", help="Key metrics describing the graph structure")
     
-    # Extract metrics from the final report
-    if "final_report" not in metrics_data or metrics_data["final_report"].empty:
+    # Extract metrics from the data
+    if not metrics_data:
         st.info("No network metrics available for this dataset.")
         return
     
-    # Create a mapping of metrics
-    metrics = {}
-    for _, row in metrics_data["final_report"].iterrows():
-        metrics[row['metric']] = row['value']
+    # Get global network metrics
+    fractal_dim = metrics_data.get("fractal_dimension", 0)
+    power_law = metrics_data.get("power_law_alpha", 0)
+    percolation = metrics_data.get("percolation_threshold", 0)
+    critical_nodes = metrics_data.get("network_metrics", {}).get("critical_nodes_count", 0)
     
-    # Format metrics for display
-    try:
-        # Get global network metrics
-        fractal_dim = float(metrics.get('Fractal Dimension', 0))
-        power_law = float(metrics.get('Power Law Alpha', 0))
-        percolation = float(metrics.get('Percolation Threshold', 0))
-        
-        # Display global metrics in columns with gauges
-        cols = st.columns(3)
-        
-        with cols[0]:
-            st.metric(
-                label="Fractal Dimension (D)", 
-                value=f"{fractal_dim:.2f}",
-                help="Measures how space-filling the graph is. Higher values indicate more complex user navigation paths."
-            )
-            
-            # Visual indicator
-            if fractal_dim > 1.5:
-                st.markdown("```diff\n- âš ï¸ System may be overly complex\n```")
-            elif fractal_dim < 1.2:
-                st.markdown("```diff\n+ â„¹ï¸ Simple, linear structure\n```")
-            else:
-                st.markdown("```diff\n+ âœ“ Balanced complexity\n```")
-        
-        with cols[1]:
-            st.metric(
-                label="Power-Law Alpha (Î±)", 
-                value=f"{power_law:.2f}",
-                help="Exponent of degree distribution. Lower values indicate stronger hierarchy with hub nodes."
-            )
-            
-            # Visual indicator
-            if power_law < 2.5:
-                st.markdown("```diff\n- âš ï¸ Vulnerable to single-node failure\n```")
-            elif power_law > 3.0:
-                st.markdown("```diff\n+ â„¹ï¸ More uniform structure\n```")
-            else:
-                st.markdown("```diff\n+ âœ“ Balanced scale-free properties\n```")
-        
-        with cols[2]:
-            st.metric(
-                label="Percolation Threshold", 
-                value=f"{percolation:.2f}",
-                help="Fraction of top nodes that can be removed before network collapses."
-            )
-            
-            # Visual indicator
-            critical_nodes = metrics_data.get("network_metrics", {}).get("critical_nodes_count", 0)
-            if percolation < 0.3:
-                st.markdown(f"```diff\n- âš ï¸ Fragile ({critical_nodes} critical nodes)\n```")
-            elif percolation > 0.7:
-                st.markdown(f"```diff\n+ âœ“ Robust ({critical_nodes} critical nodes)\n```")
-            else:
-                st.markdown(f"```diff\n+ âœ“ Moderate ({critical_nodes} critical nodes)\n```")
+    # Display global metrics in columns with diagnostic badges
+    cols = st.columns(3)
     
-    except Exception as e:
-        st.error(f"Error displaying metrics: {e}")
+    with cols[0]:
+        st.metric(
+            label="Fractal Dimension (D)", 
+            value=f"{fractal_dim:.2f}",
+            help="Measures how space-filling the graph is. Higher values indicate more complex user navigation paths."
+        )
+        
+        # Visual indicator based on thresholds
+        if fractal_dim > 2.6 or fractal_dim <= 0.8:
+            st.markdown("❌ Severe Risk: Extreme complexity or oversimplification")
+        elif 2.2 < fractal_dim <= 2.6:
+            st.markdown("⚠️ Needs Review: Moderately complex structure")
+        else:
+            st.markdown("✅ Healthy: Balanced complexity")
+    
+    with cols[1]:
+        st.metric(
+            label="Power-Law Alpha (α)", 
+            value=f"{power_law:.2f}",
+            help="Exponent of degree distribution. Lower values indicate stronger hierarchy with hub nodes."
+        )
+        
+        # Visual indicator based on thresholds
+        if power_law < 1.5 or power_law > 3.5:
+            st.markdown("❌ Severe Risk: Extreme hierarchy or lack of structure")
+        elif 1.5 <= power_law < 1.8 or power_law > 2.6:
+            st.markdown("⚠️ Needs Review: Moderate structural concern")
+        else:
+            st.markdown("✅ Healthy: Balanced scale-free properties")
+    
+    with cols[2]:
+        st.metric(
+            label="Percolation Threshold", 
+            value=f"{percolation:.2f}",
+            help="Fraction of top nodes that can be removed before network collapses."
+        )
+        
+        # Visual indicator based on thresholds
+        if percolation < 0.3:
+            st.markdown(f"❌ Severe Risk: Fragile ({critical_nodes} critical nodes)")
+        elif 0.3 <= percolation <= 0.5:
+            st.markdown(f"⚠️ Needs Review: Moderate ({critical_nodes} critical nodes)")
+        else:
+            st.markdown(f"✅ Healthy: Robust ({critical_nodes} critical nodes)")
+            
+    # Add explanatory text
+    st.markdown("""
+    <div style="font-size: 0.9em; color: #888;">
+    These metrics help identify structural issues in your user flow graph:
+    <ul>
+        <li><b>Fractal Dimension (D):</b> 1.0-2.2 is optimal. Higher values indicate overly complex paths.</li>
+        <li><b>Power-Law Alpha (α):</b> 1.8-2.6 is optimal. Lower values indicate vulnerable hub-dependent structure.</li>
+        <li><b>Percolation Threshold:</b> >0.5 is optimal. Lower values indicate network fragility.</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
 def render_decision_table(metrics_data):
     """
-    Render the decision table explorer.
+    Render the decision table explorer with filters.
     
     Args:
         metrics_data (Dict): Dictionary containing metrics data.
     """
-    st.subheader("ðŸ§  Decision Table & Recommendations", help="Explore nodes by role and impact metrics")
+    st.subheader("🧠 Decision Table & Recommendations", help="Explore nodes by role and impact metrics")
+    
+    if not metrics_data or "decision_table" not in metrics_data:
+        st.info("No decision table data available for this dataset.")
+        return
     
     decision_table = metrics_data["decision_table"]
     
     if decision_table.empty:
-        st.info("No decision table data available for this dataset.")
+        st.info("Decision table is empty for this dataset.")
         return
     
-    # Get global metrics for reference (but don't include in node table)
-    global_metrics = {}
-    for _, row in metrics_data["final_report"].iterrows():
-        if row["metric"] == "Fractal Dimension":
-            global_metrics["D"] = row["value"]
-        elif row["metric"] == "Power Law Alpha":
-            global_metrics["alpha"] = row["value"]
-    
     # Display global metrics reference
-    st.info(f"""
+    st.write(f"""
     **Global Network Metrics:** 
-    - Fractal Dimension (D): {float(global_metrics.get('D', 0)):.2f}
-    - Power-Law Alpha (Î±): {float(global_metrics.get('alpha', 0)):.2f}
+    - Fractal Dimension (D): {metrics_data.get("fractal_dimension", 0):.2f}
+    - Power-Law Alpha (α): {metrics_data.get("power_law_alpha", 0):.2f}
+    - Percolation Threshold: {metrics_data.get("percolation_threshold", 0):.2f}
+        """)
     
-    These metrics apply to the entire graph and are not node-specific.
-    See the Network Structure Metrics panel for details.
-    """)
+    # Create filters
+    col1, col2 = st.columns([1, 2])
     
-    # Check if the node-level metrics are available
-    has_node_metrics = "fractal_participation" in decision_table.columns and "hubness" in decision_table.columns
+    with col1:
+        # Filter by percolation role
+        role_filter = st.selectbox(
+            "Filter by role:",
+            ["All"] + sorted(decision_table["percolation_role"].unique().tolist()),
+            key="role_filter"
+        )
     
-    # Add explanation about metrics
-    if has_node_metrics:
-        with st.expander("â„¹ï¸ Node-Level Metrics Explanation", expanded=False):
-            st.markdown("""
-            - **Fractal Participation**: How deeply a node participates in nested or self-similar structures. Higher values indicate nodes that are part of complex, redundant, or nested patterns.
-            
-            - **Hubness**: How important a node is in the scale-free structure of the network. Higher values indicate hub nodes with more influence or centrality.
-            
-            - **FB (Fractal Betweenness)**: Measures a node's importance in controlling information flow, especially through repetitive patterns.
-            
-            - **WSJF Score**: Weighted Shortest Job First score - combines frequency of friction with impact.
-            """)
-    
-    # Filter controls
-    st.markdown("#### Filter & Explore Nodes")
-    
-    # Create columns for filters
-    cols = st.columns(4)
-    
-    # Filter by role
-    with cols[0]:
-        roles = ['All'] + sorted(decision_table['percolation_role'].unique().tolist())
-        selected_role = st.selectbox('Role:', roles, help="Filter by node's structural role in the network")
-    
-    # Filter by UX label
-    with cols[1]:
-        labels = ['All'] + sorted(decision_table['ux_label'].unique().tolist())
-        selected_label = st.selectbox('UX Label:', labels, help="Filter by UX classification")
-    
-    # Filter by WSJF score range
-    with cols[2]:
-        min_wsjf = float(decision_table['wsjf_score'].min())
-        max_wsjf = float(decision_table['wsjf_score'].max())
-        wsjf_range = st.slider('WSJF Score Range:', 
-                              min_value=min_wsjf, 
-                              max_value=max_wsjf,
-                              value=(min_wsjf, max_wsjf),
-                              help="Filter by friction impact score")
-    
-    # Filter by FB (Fractal Betweenness) range
-    with cols[3]:
-        min_fb = float(decision_table['FB'].min())
-        max_fb = float(decision_table['FB'].max())
-        fb_range = st.slider('Fractal Betweenness Range:', 
-                            min_value=min_fb, 
-                            max_value=max_fb,
-                            value=(min_fb, max_fb),
-                            help="Filter by structural importance score")
+    with col2:
+        # Filter by minimum FB score
+        min_fb = decision_table["FB"].min() if not decision_table.empty else 0
+        max_fb = decision_table["FB"].max() if not decision_table.empty else 100
+        
+        fb_threshold = st.slider(
+            "Minimum FB score:",
+            min_value=float(min_fb),
+            max_value=float(max_fb),
+            value=float(min_fb),
+            key="fb_threshold"
+        )
     
     # Apply filters
     filtered_table = decision_table.copy()
     
-    if selected_role != 'All':
-        filtered_table = filtered_table[filtered_table['percolation_role'] == selected_role]
+    # Remove global metrics columns if they exist
+    if "D" in filtered_table.columns:
+        filtered_table = filtered_table.drop(columns=["D"])
+    if "alpha" in filtered_table.columns:
+        filtered_table = filtered_table.drop(columns=["alpha"])
     
-    if selected_label != 'All':
-        filtered_table = filtered_table[filtered_table['ux_label'] == selected_label]
+    # Apply role filter
+    if role_filter != "All":
+        filtered_table = filtered_table[filtered_table["percolation_role"] == role_filter]
     
-    filtered_table = filtered_table[
-        (filtered_table['wsjf_score'] >= wsjf_range[0]) & 
-        (filtered_table['wsjf_score'] <= wsjf_range[1]) &
-        (filtered_table['FB'] >= fb_range[0]) & 
-        (filtered_table['FB'] <= fb_range[1])
-    ]
+    # Apply FB threshold filter
+    filtered_table = filtered_table[filtered_table["FB"] >= fb_threshold]
     
-    # Sort by UX impact (WSJF + FB)
-    filtered_table['impact_score'] = filtered_table['wsjf_score'] + (filtered_table['FB'] / filtered_table['FB'].max())
-    filtered_table = filtered_table.sort_values('impact_score', ascending=False)
+    # Format the FB values
+    filtered_table["FB"] = filtered_table["FB"].apply(lambda x: f"{x:.3f}")
+    
+    # Sort by FB score descending
+    filtered_table = filtered_table.sort_values("FB", ascending=False)
+    
+    # Add UX meaning explanation
+    st.write("### Node-Level Metrics")
+    st.write("""
+    This table shows **node-level metrics** with UX recommendations specific to each page.
+    The global metrics (D, α) are shown above for reference, but apply to the entire network.
+    
+    - **FB**: Fractal Betweenness - measures importance in recurring patterns
+    - **Role**: Critical nodes can collapse the network if removed
+    - **WSJF**: Friction score (exit rate × structural importance)
+        """)
     
     # Display the table
-    st.markdown("#### Decision Table")
+    st.dataframe(filtered_table, use_container_width=True)
     
-    # If no results, show a message
-    if filtered_table.empty:
-        st.warning("No nodes match the selected filters.")
-        return
-    
-    # Enhance display for the table
-    display_table = filtered_table.copy()
-    
-    # Remove global metrics from display table if they exist
-    if 'D' in display_table.columns:
-        display_table = display_table.drop(columns=['D'])
-    if 'alpha' in display_table.columns:
-        display_table = display_table.drop(columns=['alpha'])
-    
-    # Format metrics to be more readable
-    if has_node_metrics:
-        display_table['fractal_participation'] = display_table['fractal_participation'].round(2)
-        display_table['hubness'] = display_table['hubness'].round(2)
-    
-    display_table['FB'] = display_table['FB'].round(0).astype(int)
-    display_table['wsjf_score'] = display_table['wsjf_score'].round(2)
-    
-    # Select and rename columns for display
-    if has_node_metrics:
-        columns_to_display = ['node', 'ux_label', 'percolation_role', 'wsjf_score', 'FB', 
-                             'fractal_participation', 'hubness', 'suggested_action']
-    else:
-        columns_to_display = ['node', 'ux_label', 'percolation_role', 'wsjf_score', 'FB', 'suggested_action']
-    
-    # Filter to include only columns that exist in the dataframe
-    columns_to_display = [col for col in columns_to_display if col in display_table.columns]
-    display_table = display_table[columns_to_display]
-    
-    # Rename columns for better display
-    column_names = {
-        'node': 'Node',
-        'ux_label': 'UX Label',
-        'percolation_role': 'Role',
-        'wsjf_score': 'WSJF',
-        'FB': 'Fractal Betweenness',
-        'fractal_participation': 'Fractal Participation',
-        'hubness': 'Hubness',
-        'suggested_action': 'Suggested Action'
-    }
-    display_table = display_table.rename(columns=column_names)
-    
-    # Show the table with tooltips for metrics
-    st.dataframe(
-        display_table,
-        column_config={
-            "WSJF": st.column_config.NumberColumn(
-                "WSJF", 
-                help="Weighted Shortest Job First score - combines frequency of friction with impact"
-            ),
-            "Fractal Betweenness": st.column_config.NumberColumn(
-                "Fractal Betweenness", 
-                help="Measures a node's importance in controlling information flow"
-            ),
-            "Fractal Participation": st.column_config.NumberColumn(
-                "Fractal Participation", 
-                help="How deeply a node participates in nested or self-similar structures"
-            ),
-            "Hubness": st.column_config.NumberColumn(
-                "Hubness", 
-                help="How important a node is in the scale-free structure of the network"
-            ),
-            "Role": st.column_config.TextColumn(
-                "Role", 
-                help="Node's structural role in the network (critical or standard)"
-            ),
-            "UX Label": st.column_config.TextColumn(
-                "UX Label", 
-                help="Classification based on network analysis"
-            ),
-        },
-        use_container_width=True
+    # Add download button for the table
+    st.download_button(
+        label="Download Table as CSV",
+        data=filtered_table.to_csv(index=False).encode('utf-8'),
+        file_name="decision_table.csv",
+        mime="text/csv",
     )
-    
-    # Add a rerun metrics button with confirmation
-    if st.button("ðŸ”„ Rerun All Metrics"):
-        confirmation = st.warning("This will recompute all metrics for this dataset, which may take some time. Continue?")
-        if st.button("âœ… Confirm"):
-            st.info("Starting metrics computation... This may take a while.")
-            st.info("This would trigger a full metrics computation on the backend.")
-            
-            # Here we would call the backend metrics computation
-            # For now, just simulate with a message
-            import time
-            with st.spinner("Computing metrics..."):
-                time.sleep(2)
-            st.success("Metrics computation complete! Refresh to see the results.")
-    
-    # Show detailed actions for critical nodes
-    st.markdown("#### Detailed Recommendations")
-    for _, row in filtered_table.head(3).iterrows():
-        with st.expander(f"ðŸ’¡ {row['node']} - {row['ux_label']}"):
-            st.markdown(f"**Suggested Action:** {row['suggested_action']}")
-            st.markdown(f"**Why this matters:** This {row['percolation_role']} node has a WSJF score of {row['wsjf_score']:.2f} and Fractal Betweenness of {row['FB']:.0f}, making it a priority for UX improvements.")
-            if has_node_metrics:
-                st.markdown(f"**Node-level metrics:** Fractal Participation = {row['fractal_participation']:.2f}, Hubness = {row['hubness']:.2f}")
-            st.markdown("**Implementation tip:** Consider conducting a dedicated user session to observe how users interact with this part of the application.")
 
 def render_fb_vs_wsjf_chart(metrics_data):
     """
-    Render a scatter plot of Fractal Betweenness vs WSJF Score.
+    Render a simple interactive FB vs WSJF scatter plot with proper scaling.
     
     Args:
         metrics_data (Dict): Dictionary containing metrics data.
     """
-    st.subheader("ðŸ“Š Fractal Betweenness vs WSJF Score", help="Compare structural importance vs friction severity")
+    st.subheader("📊 FB vs WSJF Priority Matrix", help="Identify high-priority nodes based on structural importance and friction")
+    
+    if not metrics_data or "decision_table" not in metrics_data:
+        st.info("No decision table data available for this dataset.")
+        return
     
     decision_table = metrics_data["decision_table"]
     
     if decision_table.empty:
-        st.info("No data available for chart.")
+        st.info("Decision table is empty for this dataset.")
         return
     
-    # Create a copy for plotting
-    plot_data = decision_table.copy()
+    # Make a copy of the data
+    chart_data = decision_table.copy()
     
-    # Define high priority thresholds
-    fb_threshold = plot_data['FB'].quantile(0.75)
-    wsjf_threshold = plot_data['wsjf_score'].quantile(0.75)
+    # Ensure FB and WSJF are numeric
+    chart_data["FB"] = pd.to_numeric(chart_data["FB"], errors="coerce")
+    chart_data["wsjf_score"] = pd.to_numeric(chart_data["wsjf_score"], errors="coerce")
     
-    # Create quadrant labels
-    plot_data['priority_quadrant'] = 'Standard'
-    plot_data.loc[(plot_data['FB'] > fb_threshold) & (plot_data['wsjf_score'] > wsjf_threshold), 'priority_quadrant'] = 'High Priority'
-    plot_data.loc[(plot_data['FB'] > fb_threshold) & (plot_data['wsjf_score'] <= wsjf_threshold), 'priority_quadrant'] = 'High Structural Risk'
-    plot_data.loc[(plot_data['FB'] <= fb_threshold) & (plot_data['wsjf_score'] > wsjf_threshold), 'priority_quadrant'] = 'High Friction'
+    # Drop rows with missing values
+    chart_data = chart_data.dropna(subset=["FB", "wsjf_score"])
     
-    # Define colors and sizes for the plot
-    plot_data['color'] = plot_data['priority_quadrant'].map({
-        'High Priority': 'red',
-        'High Structural Risk': 'orange',
-        'High Friction': 'yellow',
-        'Standard': 'blue'
-    })
+    # If still empty after cleaning, return
+    if chart_data.empty:
+        st.warning("No valid data points for FB vs WSJF chart.")
+        return
     
-    plot_data['size'] = 10
-    plot_data.loc[plot_data['priority_quadrant'] == 'High Priority', 'size'] = 20
+    # Create simpler titles for the axes
+    x_axis_title = "Structural Importance (FB)"
+    y_axis_title = "User Friction (WSJF)"
     
-    # Use Plotly for better interactivity
+    # Options for chart customization
+    with st.expander("Chart Options", expanded=False):
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            # Let user select between different scaling options
+            scale_option = st.radio(
+                "Scale Type:",
+                ["Actual Range", "Full Range (0-1)", "Normalized"],
+                index=2
+            )
+            
+            log_scale_x = st.checkbox("Log scale for FB", value=False)
+            log_scale_y = st.checkbox("Log scale for WSJF", value=False)
+        
+        with col2:
+            # Let user select different quadrant calculation methods
+            quadrant_method = st.radio(
+                "Quadrant Lines:",
+                ["Median", "Mean", "Fixed (0.75)"],
+                index=0
+            )
+            
+            # Let user choose whether to emphasize critical points
+            emphasize_critical = st.checkbox("Emphasize Critical Points", value=True)
+            
+        with col3:
+            # Number of points to label
+            num_labels = st.slider("Top Points to Label:", 3, 10, 5)
+            
+            # Let user select label mode
+            label_mode = st.radio(
+                "Label:",
+                ["Top FB & WSJF", "Critical Only", "All"],
+                index=0
+            )
+    
+    # Create a simple interactive scatter plot with Plotly
     import plotly.express as px
+    import numpy as np
     
+    # Determine the actual ranges of the data
+    fb_min = chart_data["FB"].min()
+    fb_max = chart_data["FB"].max()
+    wsjf_min = chart_data["wsjf_score"].min()
+    wsjf_max = chart_data["wsjf_score"].max()
+    
+    # Calculate thresholds for quadrants based on selected method
+    if quadrant_method == "Median":
+        fb_threshold = chart_data["FB"].median()
+        wsjf_threshold = chart_data["wsjf_score"].median()
+    elif quadrant_method == "Mean":
+        fb_threshold = chart_data["FB"].mean()
+        wsjf_threshold = chart_data["wsjf_score"].mean()
+    else:  # Fixed
+        fb_threshold = 0.75  # Fixed value that makes more sense for FB
+        wsjf_threshold = chart_data["wsjf_score"].median()  # Keep median for WSJF
+    
+    # Create normalized versions of the metrics for better visualization
+    # Min-max scaling to spread the points more evenly
+    chart_data["FB_norm"] = (chart_data["FB"] - fb_min) / (fb_max - fb_min)
+    chart_data["wsjf_norm"] = (chart_data["wsjf_score"] - wsjf_min) / (wsjf_max - wsjf_min)
+    
+    # Choose which columns to use based on scale option
+    if scale_option == "Normalized":
+        x_col = "FB_norm"
+        y_col = "wsjf_norm"
+        fb_threshold_norm = (fb_threshold - fb_min) / (fb_max - fb_min)
+        wsjf_threshold_norm = (wsjf_threshold - wsjf_min) / (wsjf_max - wsjf_min)
+    else:
+        x_col = "FB"
+        y_col = "wsjf_score"
+        fb_threshold_norm = fb_threshold
+        wsjf_threshold_norm = wsjf_threshold
+    
+    # Add quadrant labels to the data
+    chart_data["quadrant"] = "Low Priority"
+    chart_data.loc[(chart_data[x_col] >= fb_threshold_norm) & (chart_data[y_col] >= wsjf_threshold_norm), "quadrant"] = "High Priority"
+    chart_data.loc[(chart_data[x_col] >= fb_threshold_norm) & (chart_data[y_col] < wsjf_threshold_norm), "quadrant"] = "Structural Only"
+    chart_data.loc[(chart_data[x_col] < fb_threshold_norm) & (chart_data[y_col] >= wsjf_threshold_norm), "quadrant"] = "User Friction Only"
+    
+    # Make points larger for emphasis
+    if emphasize_critical:
+        point_sizes = [12 if role == "critical" else 8 for role in chart_data["percolation_role"]]
+        point_symbols = ["circle" if role == "critical" else "diamond" for role in chart_data["percolation_role"]]
+    else:
+        point_sizes = [10] * len(chart_data)
+        point_symbols = ["circle"] * len(chart_data)
+    
+    chart_data["size"] = point_sizes
+    chart_data["symbol"] = point_symbols
+    
+    # Color by quadrant instead of percolation role for better visual separation
+    color_map = {
+        "High Priority": "#F87171",        # Red
+        "User Friction Only": "#FBBF24",   # Yellow
+        "Structural Only": "#60A5FA",      # Blue
+        "Low Priority": "#94A3B8"          # Gray
+    }
+    
+    # Create the scatter plot
     fig = px.scatter(
-        plot_data, 
-        x='wsjf_score', 
-        y='FB',
-        color='priority_quadrant',
-        color_discrete_map={
-            'High Priority': 'red',
-            'High Structural Risk': 'orange',
-            'High Friction': 'yellow',
-            'Standard': 'blue'
-        },
-        size='size',
-        size_max=20,
-        hover_name='node',
+        chart_data, 
+        x=x_col, 
+        y=y_col,
+        color="quadrant",
+        color_discrete_map=color_map,
+        hover_name="node",
         hover_data={
-            'node': True,
-            'wsjf_score': ':.2f',
-            'FB': ':.0f',
-            'priority_quadrant': True,
-            'percolation_role': True,
-            'ux_label': True,
-            'size': False
+            "FB": ":.3f",
+            "wsjf_score": ":.3f",
+            "percolation_role": True,
+            "ux_label": True
         },
+        title="Structural Importance vs User Friction",
         labels={
-            'wsjf_score': 'WSJF Score (UX Friction)',
-            'FB': 'Fractal Betweenness (Structural Importance)',
-            'priority_quadrant': 'Priority Category'
+            x_col: x_axis_title,
+            y_col: y_axis_title,
+            "quadrant": "Priority"
         },
-        title='UX Priority Quadrants'
+        height=600,
+        symbol="symbol",
+        size="size",
+        size_max=15
     )
+    
+    # Determine which points to label
+    if label_mode == "Critical Only":
+        nodes_to_label = chart_data[chart_data["percolation_role"] == "critical"]
+    elif label_mode == "All":
+        nodes_to_label = chart_data
+    else:  # Top FB & WSJF
+        top_fb = chart_data.nlargest(num_labels, "FB")
+        top_wsjf = chart_data.nlargest(num_labels, "wsjf_score")
+        nodes_to_label = pd.concat([top_fb, top_wsjf]).drop_duplicates()
+    
+    # Add text labels
+    for _, row in nodes_to_label.iterrows():
+        fig.add_annotation(
+            x=row[x_col],
+            y=row[y_col],
+            text=row["node"],
+            showarrow=True,
+            arrowhead=2,
+            arrowsize=1,
+            arrowwidth=1,
+            arrowcolor="#888",
+            font=dict(size=10),
+            ax=20,
+            ay=-20
+        )
     
     # Add quadrant lines
     fig.add_shape(
-        type='line', x0=wsjf_threshold, y0=0, x1=wsjf_threshold, y1=plot_data['FB'].max(),
-        line=dict(color='gray', width=1, dash='dash')
+        type="line",
+        x0=fb_threshold_norm,
+        y0=0 if scale_option == "Full Range (0-1)" else (0 if y_col == "wsjf_norm" else wsjf_min),
+        x1=fb_threshold_norm,
+        y1=1 if scale_option == "Full Range (0-1)" else (1 if y_col == "wsjf_norm" else wsjf_max),
+        line=dict(color="rgba(100, 100, 100, 0.5)", width=1, dash="dash"),
     )
+    
     fig.add_shape(
-        type='line', x0=0, y0=fb_threshold, x1=plot_data['wsjf_score'].max(), y1=fb_threshold,
-        line=dict(color='gray', width=1, dash='dash')
+        type="line",
+        x0=0 if scale_option == "Full Range (0-1)" else (0 if x_col == "FB_norm" else fb_min),
+        y0=wsjf_threshold_norm,
+        x1=1 if scale_option == "Full Range (0-1)" else (1 if x_col == "FB_norm" else fb_max),
+        y1=wsjf_threshold_norm,
+        line=dict(color="rgba(100, 100, 100, 0.5)", width=1, dash="dash"),
     )
+    
+    # Calculate optimal positions for quadrant labels
+    if scale_option == "Full Range (0-1)":
+        x_low = fb_threshold_norm / 2
+        x_high = (1 + fb_threshold_norm) / 2
+        y_low = wsjf_threshold_norm / 2
+        y_high = (1 + wsjf_threshold_norm) / 2
+    elif scale_option == "Normalized":
+        x_low = fb_threshold_norm / 2
+        x_high = (1 + fb_threshold_norm) / 2
+        y_low = wsjf_threshold_norm / 2
+        y_high = (1 + wsjf_threshold_norm) / 2
+    else:
+        fb_range = fb_max - fb_min
+        wsjf_range = wsjf_max - wsjf_min
+        x_low = fb_min + (fb_threshold - fb_min) / 2
+        x_high = fb_threshold + (fb_max - fb_threshold) / 2
+        y_low = wsjf_min + (wsjf_threshold - wsjf_min) / 2
+        y_high = wsjf_threshold + (wsjf_max - wsjf_threshold) / 2
     
     # Add quadrant labels
     fig.add_annotation(
-        x=plot_data['wsjf_score'].max() * 0.75, 
-        y=plot_data['FB'].max() * 0.75,
-        text="HIGH PRIORITY",
+        x=x_low,
+        y=y_high,
+        text="User Friction Only",
         showarrow=False,
-        font=dict(color="red", size=14)
+        font=dict(size=12, color="#FBBF24")
     )
     
-    # Update layout
+    fig.add_annotation(
+        x=x_high,
+        y=y_high,
+        text="High Priority",
+        showarrow=False,
+        font=dict(size=12, color="#F87171")
+    )
+    
+    fig.add_annotation(
+        x=x_high,
+        y=y_low,
+        text="Structural Only",
+        showarrow=False,
+        font=dict(size=12, color="#60A5FA")
+    )
+    
+    fig.add_annotation(
+        x=x_low,
+        y=y_low,
+        text="Low Priority",
+        showarrow=False,
+        font=dict(size=12, color="#94A3B8")
+    )
+    
+    # Set axis ranges based on scaling option
+    if scale_option == "Full Range (0-1)":
+        x_range = [0, 1]
+        y_range = [0, 1]
+    elif scale_option == "Normalized":
+        x_range = [0, 1]
+        y_range = [0, 1]
+    else:  # Actual Range
+        # Add some padding to the ranges
+        fb_range = fb_max - fb_min
+        wsjf_range = wsjf_max - wsjf_min
+        x_range = [max(0, fb_min - fb_range * 0.05), fb_max + fb_range * 0.05]
+        y_range = [max(0, wsjf_min - wsjf_range * 0.05), wsjf_max + wsjf_range * 0.05]
+    
+    # Update layout for better readability
     fig.update_layout(
-        xaxis_title="WSJF Score (UX Friction)",
-        yaxis_title="Fractal Betweenness (Structural Importance)",
-        legend_title="Priority Category",
-        height=500
+        xaxis=dict(
+            title=x_axis_title,
+            zeroline=True,
+            zerolinewidth=1,
+            zerolinecolor="rgba(100, 100, 100, 0.5)",
+            showgrid=True,
+            gridwidth=1,
+            gridcolor="rgba(100, 100, 100, 0.2)",
+            range=x_range
+        ),
+        yaxis=dict(
+            title=y_axis_title,
+            zeroline=True,
+            zerolinewidth=1,
+            zerolinecolor="rgba(100, 100, 100, 0.5)",
+            showgrid=True,
+            gridwidth=1,
+            gridcolor="rgba(100, 100, 100, 0.2)",
+            range=y_range
+        ),
+        legend=dict(
+            title="Priority Level",
+            orientation="h",
+            yanchor="top",
+            y=-0.12,
+            xanchor="center",
+            x=0.5
+        ),
+        margin=dict(l=40, r=40, t=80, b=120),
+        title=dict(
+            text="Structural Importance vs User Friction",
+            y=0.95,
+            x=0.5,
+            xanchor="center",
+            yanchor="top"
+        )
     )
     
+    # Add a second legend for the symbol meaning
+    fig.add_trace(
+        go.Scatter(
+            x=[None],
+            y=[None],
+            mode="markers",
+            marker=dict(size=12, symbol="circle"),
+            name="Critical Node (Circle)",
+            showlegend=True,
+            legendgroup="symbols"
+        )
+    )
+    
+    fig.add_trace(
+        go.Scatter(
+            x=[None],
+            y=[None],
+            mode="markers",
+            marker=dict(size=8, symbol="diamond"),
+            name="Standard Node (Diamond)",
+            showlegend=True,
+            legendgroup="symbols"
+        )
+    )
+    
+    # Adjust legend layout to accommodate both legends
+    fig.update_layout(
+        legend=dict(
+            title="Node Types",
+            orientation="h",
+            yanchor="top",
+            y=-0.20,  # Position below the first legend
+            xanchor="center",
+            x=0.5,
+            groupclick="toggleitem"
+        )
+    )
+    
+    # Clean up the quadrant annotations to prevent overlap
+    for i, annotation in enumerate(fig.layout.annotations[:4]):  # First 4 annotations are quadrant labels
+        annotation.font.size = 11
+        
+        # Adjust positioning to avoid overlapping with points or other elements
+        if annotation.text == "High Priority":
+            annotation.y = annotation.y - 0.05
+            annotation.x = annotation.x - 0.05
+        elif annotation.text == "User Friction Only":
+            annotation.y = annotation.y - 0.05
+            annotation.x = annotation.x + 0.05
+        elif annotation.text == "Structural Only":
+            annotation.y = annotation.y + 0.05
+            annotation.x = annotation.x - 0.05
+        elif annotation.text == "Low Priority":
+            annotation.y = annotation.y + 0.05
+            annotation.x = annotation.x + 0.05
+    
+    # Apply log scales if selected
+    if log_scale_x:
+        fig.update_xaxes(type="log")
+    if log_scale_y:
+        fig.update_yaxes(type="log")
+    
+    # Display the chart
     st.plotly_chart(fig, use_container_width=True)
     
-    # Add explanation of the chart
-    with st.expander("ðŸ“ How to interpret this chart"):
-        st.markdown("""
-        This chart plots each node by two critical metrics:
-        
-        - **X-axis: WSJF Score** - Measures user friction and UX priority
-        - **Y-axis: Fractal Betweenness** - Measures structural importance in the network
-        
-        The **quadrants** indicate different priority levels:
-        
-        - **ðŸ”´ High Priority (top right)**: Both structurally important and causing friction - fix these first!
-        - **ðŸŸ  High Structural Risk (bottom right)**: Critical for network structure but not currently causing high friction
-        - **ðŸŸ¡ High Friction (top left)**: Causing significant UX issues but not structurally critical
-        - **ðŸ”µ Standard (bottom left)**: Lower priority items
-        
-        Hover over points for detailed information about each node.
-        """)
-
-def render_priority_nodes_section(metrics_data):
-    """
-    Render a section highlighting top priority nodes needing attention.
+    # Add explanatory text with clearer language
+    st.write("""
+    **Understanding the chart:**
     
-    Args:
-        metrics_data (Dict): Dictionary containing metrics data.
-    """
-    st.subheader("ðŸš© Top Priority Nodes", help="Nodes requiring immediate UX attention")
+    - **High Priority (Red)**: High structural importance AND high user friction - these require immediate attention
+    - **User Friction Only (Yellow)**: Pages causing friction but not critical to site structure - improve user experience
+    - **Structural Only (Blue)**: Important navigation nodes with low friction - maintain and optimize
+    - **Low Priority (Gray)**: Less important pages with minimal friction - monitor but lower priority
     
-    decision_table = metrics_data["decision_table"]
+    **Node Symbols:**
+    - **Filled Circles (●)**: Critical nodes whose removal would severely disrupt network connectivity
+    - **Diamonds (◆)**: Standard nodes that are less critical to overall network structure
     
-    if decision_table.empty:
-        st.info("No priority nodes data available.")
-        return
-    
-    # Calculate combined priority score
-    # Normalize FB to 0-1 range for fair comparison
-    fb_max = decision_table['FB'].max()
-    decision_table['priority_score'] = decision_table['wsjf_score'] + (decision_table['FB'] / fb_max)
-    
-    # Get top 5 priority nodes
-    top_nodes = decision_table.sort_values('priority_score', ascending=False).head(5)
-    
-    # Create a visually prominent display
-    for i, (_, row) in enumerate(top_nodes.iterrows()):
-        with st.container():
-            cols = st.columns([1, 4])
-            
-            # Priority number
-            with cols[0]:
-                st.markdown(f"""
-                <div style="background-color:#f63366; color:white; width:40px; height:40px; 
-                border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:bold;">
-                {i+1}
-                </div>
-                """, unsafe_allow_html=True)
-            
-            # Node details
-            with cols[1]:
-                st.markdown(f"### {row['node']}")
-                st.markdown(f"**UX Issue:** {row['ux_label']} ({row['percolation_role']} node)")
-                st.markdown(f"**Action:** {row['suggested_action']}")
-                
-                # Progress bars for metrics
-                cols2 = st.columns(2)
-                with cols2[0]:
-                    st.markdown(f"**WSJF Score:** {row['wsjf_score']:.2f}")
-                    st.progress(min(1.0, row['wsjf_score']))
-                with cols2[1]:
-                    st.markdown(f"**FB Score:** {int(row['FB'])}")
-                    st.progress(min(1.0, row['FB'] / fb_max))
-            
-            st.divider()
-    
-    # Add action button
-    st.button("ðŸ“‹ Generate UX Priority Report", help="Generate a detailed report for the UX team")
+    Critical nodes have more impact on network integrity - changes to these pages will affect the overall user flow.
+    """)
 
 def render_recurring_patterns(metrics_data):
     """
-    Render the recurring patterns analysis.
+    Render visualization of recurring patterns in the user flow graph.
     
     Args:
         metrics_data (Dict): Dictionary containing metrics data.
     """
-    # Check if recurring patterns data is available
-    network_metrics = metrics_data["network_metrics"]
-    recurring_patterns = network_metrics.get("recurring_patterns", None)
-    
-    with st.expander("ðŸ”„ Recurring Pattern Analysis", expanded=False):
-        if recurring_patterns is None:
-            st.info("Recurring patterns data not available for this dataset.")
+    with st.expander("🔄 Recurring User Flow Patterns", expanded=False):
+        st.write("Identify common loops and repeated paths in user journeys")
+        
+        # Check if metrics data is available
+        if not metrics_data or "network_metrics" not in metrics_data:
+            st.info("No network metrics data available for this dataset.")
             return
         
-        st.markdown("### Detected Recurring Patterns")
-        st.markdown("""
-        These are repeating subgraph patterns that may indicate behavioral traps - users bouncing or stuck in loops.
-        Redesigning or eliminating these patterns can improve user flow.
+        network_metrics = metrics_data["network_metrics"]
+        
+        # First check if we have exit paths data (newer version)
+        if "recurring_exit_paths" in network_metrics:
+            exit_paths_data = network_metrics["recurring_exit_paths"]
+            if exit_paths_data and "exit_paths" in exit_paths_data and exit_paths_data["exit_paths"]:
+                # First, add a tab for regular recurring patterns (if available)
+                if "recurring_patterns" in network_metrics and network_metrics["recurring_patterns"]:
+                    pattern_tab, exit_tab = st.tabs(["Regular Recurring Patterns", "Exit Path Patterns"])
+                    
+                    with pattern_tab:
+                        st.write("### Regular Recurring Patterns")
+                        st.write("These patterns show loops and repeated sequences in user journeys, regardless of whether they lead to exits.")
+                        render_regular_patterns(network_metrics["recurring_patterns"])
+                    
+                    with exit_tab:
+                        st.write("### Exit Path Patterns")
+                        st.write("These patterns specifically track sequences that lead to users leaving the site (with exit rates).")
+                        render_exit_path_patterns(exit_paths_data)
+                else:
+                    # If only exit paths are available
+                    st.write("### Exit Path Patterns")
+                    st.write("These patterns specifically track sequences that lead to users leaving the site (with exit rates).")
+                    render_exit_path_patterns(exit_paths_data)
+                return
+        
+        # Fall back to older recurring patterns data
+        if "recurring_patterns" not in network_metrics or not network_metrics["recurring_patterns"]:
+            # Check if we have a separate recurring_exit_paths.json file
+            dataset_name = metrics_data.get("dataset_name", "default")
+            exit_paths_file = Path(f"outputs/{dataset_name}/recurring_exit_paths.json")
+            
+            if exit_paths_file.exists():
+                try:
+                    with open(exit_paths_file, 'r') as f:
+                        exit_paths_data = json.load(f)
+                        if exit_paths_data and "exit_paths" in exit_paths_data and exit_paths_data["exit_paths"]:
+                            st.write("### Exit Path Patterns")
+                            st.write("These patterns specifically track sequences that lead to users leaving the site (with exit rates).")
+                            render_exit_path_patterns(exit_paths_data)
+                            return
+                except Exception as e:
+                    st.warning(f"Error loading exit paths data: {str(e)}")
+            
+            st.info("No recurring patterns found in this dataset.")
+            return
+        
+        # If we only have regular patterns
+        st.write("### Regular Recurring Patterns")
+        st.write("These patterns show loops and repeated sequences in user journeys, regardless of whether they lead to exits.")
+        render_regular_patterns(network_metrics["recurring_patterns"])
+
+def render_regular_patterns(patterns_data):
+    """
+    Render visualization of regular recurring patterns.
+    
+    Args:
+        patterns_data (Dict): Dictionary containing recurring patterns data.
+    """
+    if not patterns_data or "recurring_patterns" not in patterns_data or not patterns_data["recurring_patterns"]:
+        st.info("No recurring patterns found in this dataset.")
+        return
+    
+    # Get the patterns and node counts
+    patterns = patterns_data["recurring_patterns"]
+    node_counts = patterns_data.get("node_loop_counts", {})
+    total_patterns = patterns_data.get("total_patterns", len(patterns))
+    
+    # Display summary
+    st.write(f"Found {total_patterns} recurring patterns in the user flow graph.")
+    
+    # Create pattern data for display
+    pattern_list = []
+    for i, pattern in enumerate(patterns[:20]):  # Limit to top 20 patterns
+        pattern_str = " → ".join(str(node) for node in pattern)
+        pattern_list.append({
+            "Pattern ID": i + 1,
+            "Path": pattern_str,
+            "Length": len(pattern),
+            "Nodes": ", ".join(str(node) for node in pattern)
+        })
+    
+    # Create DataFrame for display
+    if pattern_list:
+        patterns_df = pd.DataFrame(pattern_list)
+        
+        # Display patterns in a container (not an expander since we're already in an expander)
+        st.write(f"#### Top 20 Recurring Patterns (out of {total_patterns})")
+        st.dataframe(patterns_df, use_container_width=True)
+    
+    # Create node participation data
+    if node_counts:
+        node_data = []
+        for node, count in sorted(node_counts.items(), key=lambda x: x[1], reverse=True):
+            node_data.append({
+                "Node": node,
+                "Loop Count": count,
+                "Percentage": f"{(count / total_patterns * 100):.1f}%"
+            })
+        
+        # Create DataFrame for display
+        nodes_df = pd.DataFrame(node_data)
+        
+        # Display top 10 nodes by loop participation
+        st.write("### Top Nodes in Recurring Patterns")
+        st.dataframe(nodes_df.head(10), use_container_width=True)
+        
+        # Create visualization of node participation
+        try:
+            import plotly.express as px
+            
+            # Create bar chart of top 10 nodes by loop participation
+            fig = px.bar(
+                nodes_df.head(10),
+                x="Node",
+                y="Loop Count",
+                color="Loop Count",
+                color_continuous_scale="Viridis",
+                title="Top Nodes by Participation in Recurring Patterns",
+                labels={"Node": "Node Path", "Loop Count": "Number of Loops"}
+            )
+            
+            # Update layout
+            fig.update_layout(
+                xaxis_title="Node Path",
+                yaxis_title="Number of Loops",
+                coloraxis_showscale=True,
+                showlegend=False,
+                margin=dict(l=20, r=20, t=40, b=20),
+            )
+            
+            # Display chart
+            st.plotly_chart(fig, use_container_width=True)
+        except Exception as e:
+            st.warning(f"Error creating visualization: {str(e)}")
+    
+        # Add explanatory text
+        st.write("""
+        **What are recurring patterns?**
+        
+        Recurring patterns are loops or repeated sequences in user journeys. High loop counts may indicate:
+        
+        - Users getting stuck in circular navigation
+        - Back-and-forth between related pages
+        - Search-browse-return cycles
+        
+        Nodes with high loop participation are candidates for UX optimization to reduce unnecessary repetition.
         """)
+
+def render_exit_path_patterns(exit_paths_data):
+    """
+    Render visualization of recurring exit paths.
+    
+    Args:
+        exit_paths_data (Dict): Dictionary containing exit paths data.
+    """
+    # Get the exit paths
+    exit_paths = exit_paths_data.get("exit_paths", [])
+    node_counts = exit_paths_data.get("node_loop_counts", {})
+    total_paths = len(exit_paths)
+    
+    # Display summary
+    st.write(f"Found {total_paths} recurring exit paths in the user flow graph.")
+    
+    # Calculate average exit rate if possible
+    exit_rates = [path_data.get("exit_rate", 0) for path_data in exit_paths if "exit_rate" in path_data]
+    if exit_rates:
+        avg_exit_rate = sum(exit_rates) / len(exit_rates)
+        max_exit_rate = max(exit_rates)
         
-        # Display patterns
-        for i, pattern in enumerate(recurring_patterns[:5]):  # Show top 5 patterns
-            st.markdown(f"**Pattern {i+1}**")
-            
-            # Format the pattern path
-            path_parts = []
-            for node in pattern:
-                path_parts.append(f"{node}")
-            
-            path_str = " â†’ ".join(path_parts)
-            st.markdown(f"- Path: {path_str}")
-            
-            # Add a separator between patterns
-            if i < len(recurring_patterns[:5]) - 1:
-                st.markdown("---")
+        # Show exit rate metrics
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Average Exit Rate", f"{avg_exit_rate:.2%}")
+        with col2:
+            st.metric("Highest Exit Rate", f"{max_exit_rate:.2%}")
+    
+    # Create exit path data for display
+    exit_path_list = []
+    for i, path_data in enumerate(exit_paths[:20]):  # Limit to top 20 paths
+        path = path_data.get("path", [])
+        count = path_data.get("count", 0)
+        exit_rate = path_data.get("exit_rate", 0)
         
-        # If there are more patterns, show a message
-        if len(recurring_patterns) > 5:
-            st.info(f"{len(recurring_patterns) - 5} more patterns detected but not shown.")
+        path_str = " → ".join(str(node) for node in path)
+        exit_path_list.append({
+            "Path ID": i + 1,
+            "Path": path_str,
+            "Count": count,
+            "Exit Rate": f"{exit_rate:.2%}",
+            "Length": len(path)
+        })
+    
+    # Create DataFrame for display
+    if exit_path_list:
+        exit_paths_df = pd.DataFrame(exit_path_list)
+        
+        # Sort by exit rate (descending)
+        exit_paths_df = exit_paths_df.sort_values(by="Exit Rate", ascending=False)
+        
+        # Display patterns in a container (not an expander since we're already in an expander)
+        st.write(f"#### Top 20 Exit Paths (out of {total_paths}) - Ranked by Exit Rate")
+        st.dataframe(exit_paths_df, use_container_width=True)
+    
+    # Create node participation data
+    if node_counts:
+        node_data = []
+        for node, count in sorted(node_counts.items(), key=lambda x: x[1], reverse=True):
+            node_data.append({
+                "Node": node,
+                "Path Count": count,
+                "Percentage": f"{(count / sum(node_counts.values()) * 100):.1f}%"
+            })
+        
+        # Create DataFrame for display
+        nodes_df = pd.DataFrame(node_data)
+        
+        # Display top 10 nodes by participation
+        st.write("### Top Nodes in Exit Paths")
+        st.dataframe(nodes_df.head(10), use_container_width=True)
+        
+        # Create visualization of exit paths
+        try:
+            import plotly.express as px
+            import plotly.graph_objects as go
+            
+            # Extract top 5 exit paths for visualization
+            top_paths = exit_paths[:5]
+            
+            # Create Sankey diagram data
+            source = []
+            target = []
+            value = []
+            path_labels = []
+            
+            # Assign unique indices to nodes
+            node_indices = {}
+            node_idx = 0
+            
+            # Process each path
+            for path_data in top_paths:
+                path = path_data.get("path", [])
+                count = path_data.get("count", 0)
+                
+                # Skip paths that are too short
+                if len(path) < 2:
+                    continue
+                
+                # Add path label
+                path_str = " → ".join(path)
+                path_labels.append(f"{path_str} ({count})")
+                
+                # Add nodes and links
+                for i in range(len(path) - 1):
+                    # Add source node if not seen before
+                    if path[i] not in node_indices:
+                        node_indices[path[i]] = node_idx
+                        node_idx += 1
+                    
+                    # Add target node if not seen before
+                    if path[i+1] not in node_indices:
+                        node_indices[path[i+1]] = node_idx
+                        node_idx += 1
+                    
+                    # Add link
+                    source.append(node_indices[path[i]])
+                    target.append(node_indices[path[i+1]])
+                    value.append(count)
+            
+            # Create node labels
+            node_labels = [""] * len(node_indices)
+            for node, idx in node_indices.items():
+                node_labels[idx] = str(node)
+            
+            # Create Sankey diagram if we have data
+            if source and target and value:
+                fig = go.Figure(data=[go.Sankey(
+                    node=dict(
+                        pad=15,
+                        thickness=20,
+                        line=dict(color="black", width=0.5),
+                        label=node_labels,
+                        color="blue"
+                    ),
+                    link=dict(
+                        source=source,
+                        target=target,
+                        value=value,
+                        hoverlabel=dict(bgcolor="white", font_size=16),
+                        color="rgba(100, 100, 200, 0.4)"
+                    )
+                )])
+                
+                # Update layout
+                fig.update_layout(
+                    title="Top 5 Exit Paths",
+                    font=dict(size=12),
+                    margin=dict(l=20, r=20, t=40, b=20),
+                )
+                
+                # Display chart
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Add path labels
+                st.markdown("**Top Exit Paths:**")
+                for i, label in enumerate(path_labels):
+                    st.markdown(f"**{i+1}.** {label}")
+            
+            # Create bar chart of top 10 nodes by participation
+            bar_fig = px.bar(
+                nodes_df.head(10),
+                x="Node",
+                y="Path Count",
+                color="Path Count",
+                color_continuous_scale="Viridis",
+                title="Top Nodes by Participation in Exit Paths",
+                labels={"Node": "Node Path", "Path Count": "Number of Exit Paths"}
+            )
+            
+            # Update layout
+            bar_fig.update_layout(
+                xaxis_title="Node Path",
+                yaxis_title="Number of Exit Paths",
+                coloraxis_showscale=True,
+                showlegend=False,
+                margin=dict(l=20, r=20, t=40, b=20),
+            )
+            
+            # Display chart
+            st.plotly_chart(bar_fig, use_container_width=True)
+            
+        except Exception as e:
+            st.warning(f"Error creating visualization: {str(e)}")
+    
+    # Add explanatory text
+    st.write("""
+    **What are recurring exit paths?**
+    
+    Recurring exit paths are common sequences in user journeys that lead to exits or abandonments. High exit rates may indicate:
+    
+    - Pain points that cause users to leave
+    - Confusing workflows where users get stuck
+    - Natural exit points that may need optimization
+    
+    Analyzing these paths helps identify where to focus UX improvements for better user retention.
+    
+    **Exit Rate:** The percentage of sessions where users leave the site after following this specific path.
+    Higher exit rates indicate potential friction points or abandonment issues.
+    """)
 
 def render_percolation_collapse(metrics_data):
     """
-    Render the percolation collapse visualization.
+    Render visualization of percolation collapse simulation results.
     
     Args:
         metrics_data (Dict): Dictionary containing metrics data.
     """
-    with st.expander("ðŸ’¥ Network Stability Analysis", expanded=False):
-        network_metrics = metrics_data["network_metrics"]
+    with st.expander("🔍 Network Stability Analysis", expanded=False):
+        st.write("Understand how the removal of key nodes affects the user flow network")
         
-        # Check if we have percolation data in network_metrics
-        if "percolation_data" not in network_metrics:
-            st.info("Percolation analysis data not available for this dataset.")
-            
-            # Show simplified info based on threshold only
-            threshold = None
-            for _, row in metrics_data["final_report"].iterrows():
-                if row["metric"] == "Percolation Threshold":
-                    threshold = row["value"]
-            
-            if threshold is not None:
-                try:
-                    # Convert to float for formatting
-                    threshold_float = float(threshold)
-                    st.markdown(f"""
-                    ### Network Stability Summary
-                    
-                    This network has a percolation threshold of **{threshold_float:.2f}**.
-                    
-                    **Interpretation:**
-                    - Values closer to 0 indicate a more fragile network structure
-                    - Values closer to 1 indicate a more robust network structure
-                    
-                    **UX Implications:**
-                    - Low threshold (<0.3): High risk of user flow breakdowns if key pages have issues
-                    - Medium threshold (0.3-0.6): Moderate resilience, but still vulnerable at key nodes
-                    - High threshold (>0.6): Robust structure with multiple alternative paths
-                    """)
-                except (ValueError, TypeError):
-                    # Handle case where conversion to float fails
-                    st.markdown(f"""
-                    ### Network Stability Summary
-                    
-                    This network has a percolation threshold of **{threshold}**.
-                    
-                    **Interpretation:**
-                    - Values closer to 0 indicate a more fragile network structure
-                    - Values closer to 1 indicate a more robust network structure
-                    
-                    **UX Implications:**
-                    - Low threshold (<0.3): High risk of user flow breakdowns if key pages have issues
-                    - Medium threshold (0.3-0.6): Moderate resilience, but still vulnerable at key nodes
-                    - High threshold (>0.6): Robust structure with multiple alternative paths
-                    """)
+        if not metrics_data:
+            st.info("No metrics data available for this dataset.")
             return
         
-        # If we have detailed percolation data, create a plot
-        percolation_data = network_metrics["percolation_data"]
+        # Get percolation threshold and critical nodes count
+        percolation_threshold = metrics_data.get("percolation_threshold", 0)
+        critical_nodes_count = metrics_data.get("network_metrics", {}).get("critical_nodes_count", 0)
         
-        # Create a DataFrame for the plot
-        data = pd.DataFrame(percolation_data)
-        
-        # Plot the percolation collapse
-        st.markdown("### Network Percolation Analysis")
-        st.markdown("""
-        This chart shows how the network collapses as high-importance nodes are removed.
-        A rapid drop indicates vulnerability to targeted node failures.
-        """)
-        
-        # Create the chart
-        st.line_chart(
-            data,
-            x="nodes_removed_pct",
-            y="largest_component_pct",
-            height=300
+        # Display percolation metrics
+        st.metric(
+            label="Percolation Threshold", 
+            value=f"{percolation_threshold:.2f}",
+            help="Fraction of top nodes that can be removed before network collapses."
         )
         
-        st.markdown("""
-        **Interpretation:**
-        - The x-axis shows the percentage of nodes removed (highest importance first)
-        - The y-axis shows the size of the largest connected component
-        - A steep drop indicates a fragile network structure
-        """)
-
-def render_recommendations_panel(metrics_data):
-    """
-    Render recommendations from the final report.
-    
-    Args:
-        metrics_data (Dict): Dictionary containing metrics data.
-    """
-    with st.expander("ðŸ“‹ Key Recommendations", expanded=True):
-        final_report = metrics_data["final_report"]
-        decision_table = metrics_data["decision_table"]
+        # Create a simple visualization of percolation collapse
+        import plotly.graph_objects as go
+        import numpy as np
         
-        if final_report.empty or decision_table.empty:
-            st.info("No recommendation data available for this dataset.")
-            return
+        # Simulate percolation collapse curve
+        # This is a visualization based on the threshold, not actual simulation results
+        x = np.linspace(0, 1, 100)
         
-        # Get top metrics for recommendations
-        fractal_dimension = None
-        power_law_alpha = None
+        # Using a sigmoid function to model collapse
+        # Centered at percolation_threshold
+        midpoint = max(0.01, min(0.99, percolation_threshold))
+        steepness = 15  # Controls how sharp the collapse is
         
-        for _, row in final_report.iterrows():
-            if row["metric"] == "Fractal Dimension":
-                fractal_dimension = row["value"]
-            elif row["metric"] == "Power Law Alpha":
-                power_law_alpha = row["value"]
+        # Generate y values (fraction of largest connected component remaining)
+        y = 1 / (1 + np.exp(steepness * (x - midpoint)))
         
-        # Get top 3 critical nodes
-        top_critical_nodes = decision_table[decision_table["percolation_role"] == "critical"].sort_values("wsjf_score", ascending=False).head(3)
+        # Create figure
+        fig = go.Figure()
         
-        # Generate recommendations based on metrics
-        st.markdown("### Key Recommendations")
+        # Add collapse curve
+        fig.add_trace(
+            go.Scatter(
+                x=x,
+                y=y,
+                mode="lines",
+                name="Network Integrity",
+                line=dict(color="#3B82F6", width=3),
+            )
+        )
         
-        # Structure-based recommendations
-        if fractal_dimension is not None:
-            st.markdown("#### Structure Recommendations")
+        # Add vertical line at percolation threshold
+        fig.add_shape(
+            type="line",
+            x0=percolation_threshold,
+            y0=0,
+            x1=percolation_threshold,
+            y1=1,
+            line=dict(color="red", width=2, dash="dash"),
+        )
+        
+        # Add annotation for percolation threshold
+        fig.add_annotation(
+            x=percolation_threshold,
+            y=0.9,
+            text=f"Threshold: {percolation_threshold:.2f}",
+            showarrow=True,
+            arrowhead=2,
+            arrowsize=1,
+            arrowwidth=1,
+            arrowcolor="#FF0000",
+            font=dict(size=12, color="#FF0000"),
+            ax=40,
+            ay=0,
+        )
+        
+        # Update layout
+        fig.update_layout(
+            title="Network Collapse Simulation",
+            xaxis_title="Fraction of Nodes Removed (highest centrality first)",
+            yaxis_title="Fraction of Network Remaining Connected",
+            xaxis=dict(
+                showgrid=True,
+                gridwidth=1,
+                gridcolor="rgba(211, 211, 211, 0.3)",
+                zeroline=True,
+                zerolinewidth=1,
+                zerolinecolor="rgba(211, 211, 211, 0.5)",
+            ),
+            yaxis=dict(
+                showgrid=True,
+                gridwidth=1,
+                gridcolor="rgba(211, 211, 211, 0.3)",
+                zeroline=True,
+                zerolinewidth=1,
+                zerolinecolor="rgba(211, 211, 211, 0.5)",
+            ),
+            plot_bgcolor="rgba(255, 255, 255, 0)",
+            paper_bgcolor="rgba(255, 255, 255, 0)",
+            margin=dict(l=20, r=20, t=40, b=20),
+        )
+        
+        # Display chart
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Display critical nodes information
+        st.write(f"**Critical Nodes:** {critical_nodes_count} nodes identified as critical for network stability.")
+        
+        # Add interpretation based on threshold
+        if percolation_threshold < 0.3:
+            st.error("""
+            **High Risk Network:** Your user flow network is highly dependent on a small number of critical nodes.
+            If these key pages/events are disrupted, users may be unable to complete their journeys.
+            Consider adding alternative paths and reducing bottlenecks.
+                """)
+        elif percolation_threshold < 0.5:
+            st.warning("""
+            **Moderate Risk Network:** Your user flow network has some resilience but still depends on key nodes.
+            Consider strengthening alternative paths through critical sections of the journey.
+                """)
+        else:
+            st.success("""
+            **Robust Network:** Your user flow network demonstrates good resilience to disruption.
+            Users have multiple paths to accomplish their goals, which is ideal for complex applications.
+                """)
             
-            # Convert to float if possible
-            try:
-                fractal_dimension = float(fractal_dimension)
-            except (ValueError, TypeError):
-                # If conversion fails, use default threshold
-                fractal_dimension = 1.5
-                
-            if fractal_dimension <= 1.2:
-                st.markdown("- **Linear Structure Detected**: Users follow a strict sequence with few alternatives.")
-                st.markdown("- **Recommendation**: Add shortcuts and alternative paths to increase flexibility.")
-            elif fractal_dimension <= 1.7:
-                st.markdown("- **Tree-like Structure Detected**: Hierarchical navigation with some branching.")
-                st.markdown("- **Recommendation**: Consider connecting related branches to reduce path length.")
-            else:
-                st.markdown("- **Complex Structure Detected**: Many interconnected paths may confuse users.")
-                st.markdown("- **Recommendation**: Simplify navigation by reducing redundant connections.")
+        # Add explanatory text
+        st.write("""
+        **What is Percolation Analysis?**
         
-        # Hierarchy-based recommendations
-        if power_law_alpha is not None:
-            st.markdown("#### Hub Node Recommendations")
-            
-            # Convert to float if possible
-            try:
-                power_law_alpha = float(power_law_alpha)
-            except (ValueError, TypeError):
-                # If conversion fails, use default threshold
-                power_law_alpha = 2.2
-                
-            if power_law_alpha < 2.0:
-                st.markdown("- **Strong Hub Structure Detected**: A few nodes dominate the flow.")
-                st.markdown("- **Recommendation**: Strengthen alternative paths to reduce dependency on hub nodes.")
-            elif power_law_alpha < 2.5:
-                st.markdown("- **Moderate Hub Structure**: Several important nodes with moderate influence.")
-                st.markdown("- **Recommendation**: Balance traffic across key pages.")
-            else:
-                st.markdown("- **Distributed Structure**: Traffic spread across many nodes fairly evenly.")
-                st.markdown("- **Recommendation**: Consider creating clearer entry/exit points for major user flows.")
+        Percolation analysis models how the network breaks apart as key nodes are progressively removed.
+        The percolation threshold is the fraction of nodes that can be removed before the network collapses.
         
-        # Node-specific recommendations
-        if not top_critical_nodes.empty:
-            st.markdown("#### Critical Node Recommendations")
-            for i, (_, node) in enumerate(top_critical_nodes.iterrows()):
-                st.markdown(f"- **{node['node']}**: {node['suggested_action']}")
+        - **Low threshold (<0.3):** Fragile network dependent on few critical nodes
+        - **Medium threshold (0.3-0.5):** Moderately resilient network
+        - **High threshold (>0.5):** Robust network with good redundancy
+        
+        This helps identify over-reliance on specific pages or events in your user experience.
+            """)
 
 def render_glossary_sidebar():
     """
     Render a metrics glossary in the sidebar.
     """
-    with st.sidebar.expander("ðŸ“– Metrics Glossary", expanded=False):
+    with st.sidebar.expander("📘 Advanced Metrics Glossary", expanded=False):
         st.markdown("### Global Network Metrics")
         st.markdown("""
-        - **Fractal Dimension (D)**: Measures how space-filling the graph is. Higher values (>1.5) indicate more complex user navigation paths with nested or recursive patterns.
+        - **Fractal Dimension (D)**: Measures how space-filling the graph is. Higher values (>2.2) indicate more complex user navigation paths with nested or recursive patterns.
         
-        - **Power-Law Alpha (Î±)**: Exponent of degree distribution. Lower values (<2.5) indicate stronger hierarchy with vulnerable hub nodes. Higher values (>3.0) suggest more uniform structure.
+        - **Power-Law Alpha (α)**: Exponent of degree distribution. Lower values (<1.8) indicate stronger hierarchy with vulnerable hub nodes. Higher values (>2.6) suggest more uniform structure.
         
-        - **Percolation Threshold**: Fraction of top nodes that can be removed before network collapses. Lower values indicate a more fragile structure dependent on few critical nodes.
-        """)
+        - **Percolation Threshold**: Fraction of top nodes that can be removed before network collapses. Lower values (<0.3) indicate a more fragile structure dependent on few critical nodes.
+            """)
         
         st.markdown("### Node-Level Metrics")
         st.markdown("""
-        - **Fractal Participation**: How deeply a node participates in nested or self-similar structures. Higher values indicate nodes that are part of complex, redundant, or nested patterns.
+        - **Fractal Betweenness (FB)**: Measures a node's structural importance in controlling information flow. Values typically range from 0.6-1.0, with higher values indicating critical navigation points.
         
-        - **Hubness**: How important a node is in the scale-free structure of the network. Higher values indicate hub nodes with more influence or centrality.
+        - **Percolation Role**: How important a node is for maintaining network connectivity:
+          • **Critical**: Removing this node would severely disrupt network connectivity
+          • **Standard**: Less critical for overall network stability
         
-        - **FB (Fractal Betweenness)**: Measures a node's importance in controlling information flow, especially through repetitive patterns. Higher values indicate critical chokepoints in user flows.
+        - **WSJF Score**: Weighted Shortest Job First score - combines frequency of friction with impact. Higher values (typically 0.2-0.4) indicate more pressing UX issues to fix.
+            """)
         
-        - **WSJF Score**: Weighted Shortest Job First score - combines frequency of friction with impact. Higher values indicate more pressing UX issues to fix.
-        """)
-        
-        st.markdown("### Roles & Labels")
+        st.markdown("### Priority Quadrants")
         st.markdown("""
-        - **Critical Node**: Removing this node would severely disrupt network connectivity.
+        - **High Priority (Top Right)**: High structural importance AND high user friction - requires immediate attention. These pages are both critical to site structure and causing significant user friction.
         
-        - **Standard Node**: Less critical for overall network stability.
+        - **User Friction Only (Top Left)**: Pages causing friction but not critical to site structure - focus on improving user experience but less urgent structurally.
         
-        - **UX Labels**: Classifications like "redundant bottleneck", "complex hub", etc. that suggest specific UX improvements.
-        """)
+        - **Structural Only (Bottom Right)**: Important navigation nodes with low friction - maintain and optimize these core pathways that are working well.
+        
+        - **Low Priority (Bottom Left)**: Less important pages with minimal friction - monitor but lower priority for changes.
+            """)
+        
+        st.markdown("### Graph Statistics")
+        st.markdown("""
+        - **Node Count**: Total number of unique pages or states in the user journey.
+        
+        - **Edge Count**: Total number of transitions between pages.
+        
+        - **Edge/Node Ratio**: Measure of graph density - higher values indicate more complex navigation options.
+        
+        - **Connected Components**: Number of isolated subgraphs - ideally should be 1 for a fully connected experience.
+            """)
+        
+        st.markdown("### UX Interpretations")
+        st.markdown("""
+        - **Redundant Bottleneck**: Node with high FB and high WSJF - users frequently encounter friction at this structurally important point.
+        
+        - **Complex Hub**: Node with high centrality in multiple recurring patterns - may be confusing users with too many options.
+        
+        - **Exit Paths**: Sequences of pages that frequently lead to users leaving the site - high exit rates indicate potential friction or completion points.
+        
+        - **Recurring Patterns**: Loops or repeated sequences in user journeys - may indicate users getting stuck in circular navigation.
+            """)
 
-def advanced_metrics_tab(metrics_data):
+def render_developer_controls(dataset):
+    """
+    Render developer controls for rerunning metrics.
+    
+    Args:
+        dataset (str): Current dataset name
+    """
+    with st.expander("Developer Controls", expanded=False):
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            rerun = st.button("🔁 Rerun All Metrics")
+            if rerun:
+                st.warning("Rerunning metrics may take some time...")
+                try:
+                    # Import required modules
+                    from analysis.event_chokepoints import main as run_chokepoints
+                    
+                    # Run the analysis
+                    st.info(f"Rerunning metrics for dataset {dataset}...")
+                    
+                    # Show spinner during processing
+                    with st.spinner("Running analysis..."):
+                        # Construct input paths
+                        input_flows = f"outputs/{dataset}/session_flows.csv"
+                        input_graph = f"outputs/{dataset}/user_graph.gpickle"
+                        input_graph_multi = f"outputs/{dataset}/user_graph_multi.gpickle"
+                        output_dir = f"outputs/{dataset}"
+                        
+                        # Check if files exist
+                        if not os.path.exists(input_flows):
+                            st.error(f"Session flows file not found: {input_flows}")
+                            return
+                        
+                        if not os.path.exists(input_graph):
+                            st.error(f"Graph file not found: {input_graph}")
+                            return
+                        
+                        # Run the analysis
+                        run_chokepoints(input_flows, input_graph, input_graph_multi, output_dir, fast=True)
+                        
+                        st.success("Metrics recomputed successfully! Refresh the page to see updated results.")
+                        
+                except Exception as e:
+                    st.error(f"Error running metrics: {str(e)}")
+                    logger.error(f"Error running metrics: {str(e)}")
+                    logger.error(traceback.format_exc())
+        
+        with col2:
+            show_debug = st.checkbox("Show intermediate logs", value=False)
+            if show_debug:
+                try:
+                    # Display session stats log if available
+                    log_file = f"outputs/{dataset}/session_stats.log"
+                    if os.path.exists(log_file):
+                        with open(log_file, 'r') as f:
+                            st.code(f.read(), language="text")
+                    else:
+                        st.info(f"No log file found at {log_file}")
+                        
+                    # Display metrics JSON if available
+                    metrics_file = f"outputs/{dataset}/metrics.json"
+                    if os.path.exists(metrics_file):
+                        with open(metrics_file, 'r') as f:
+                            st.json(json.load(f))
+                    else:
+                        st.info(f"No metrics file found at {metrics_file}")
+                except Exception as e:
+                    st.error(f"Error loading debug information: {str(e)}")
+        
+        # Add timestamp of last analysis
+        try:
+            decision_table_path = f"outputs/{dataset}/decision_table.csv"
+            if os.path.exists(decision_table_path):
+                mod_time = os.path.getmtime(decision_table_path)
+                mod_time_str = datetime.fromtimestamp(mod_time).strftime("%Y-%m-%d %H:%M:%S")
+                st.info(f"Last analysis: {mod_time_str}")
+            else:
+                st.info("No previous analysis found.")
+        except Exception as e:
+            st.error(f"Error checking last analysis time: {str(e)}")
+            
+def render_advanced_metrics_tab(metrics_data):
     """
     Render the Advanced Metrics tab content.
     
     Args:
         metrics_data (Dict): Dictionary containing metrics data.
     """
-    st.title("TeloMesh Advanced Metrics")
+    st.title("Advanced Metrics")
     
     # Add tab description
     st.markdown("""
     This dashboard provides advanced network metrics to help identify UX improvement opportunities
     based on structural analysis of user flows and friction points.
-    """)
+        """)
     
     # Render the top metrics cards
     render_top_metrics(metrics_data)
-    
-    # Add space between sections
-    st.markdown("---")
-    
-    # Render priority nodes section
-    render_priority_nodes_section(metrics_data)
     
     # Add space between sections
     st.markdown("---")
@@ -2224,64 +2774,268 @@ def advanced_metrics_tab(metrics_data):
     # Add space between sections
     st.markdown("---")
     
-    # Render the FB vs WSJF scatter plot
+    # Render the FB vs WSJF chart
     render_fb_vs_wsjf_chart(metrics_data)
     
     # Add space between sections
     st.markdown("---")
     
-    # Render the recommendations panel
-    render_recommendations_panel(metrics_data)
-    
     # Render recurring patterns
     render_recurring_patterns(metrics_data)
     
+    # Add space between sections
+    st.markdown("---")
+    
     # Render percolation collapse
     render_percolation_collapse(metrics_data)
+    
+    # Add developer controls
+    st.markdown("---")
+    render_developer_controls(metrics_data.get("dataset_name", "default"))
+
+def render_transition_pairs(flow_df: pd.DataFrame):
+    """
+    Render analysis of page transition pairs (A→B) to identify common patterns across sessions.
+    
+    Args:
+        flow_df (pd.DataFrame): DataFrame containing session flows with chokepoints.
+    """
+    try:
+        if len(flow_df) == 0:
+            st.info("No flow data available for transition pair analysis.")
+            return
+        
+        # Fix import path by adding parent directory to sys.path
+        import os
+        import sys
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+        
+        # Extract transition pairs from the flow data
+        from analysis.event_chokepoints import extract_transition_pairs
+        
+        # Convert the transitions dictionary to a DataFrame for easier manipulation
+        transitions = extract_transition_pairs(flow_df)
+        
+        if not transitions:
+            st.info("No transition pairs found in the data.")
+            return
+            
+        # Convert transitions dictionary to DataFrame
+        transitions_data = []
+        for key, data in transitions.items():
+            # Calculate average friction per occurrence
+            avg_friction = data["friction_score"] / data["count"] if data["count"] > 0 else 0
+            
+            # Determine if source and destination are chokepoints from the examples
+            # We'll look at the first example as representative since all examples for the same transition
+            # pair should have consistent chokepoint markings
+            from_chokepoint = False
+            to_chokepoint = False
+            if data["examples"]:
+                from_chokepoint = data["examples"][0]["from_chokepoint"]
+                to_chokepoint = data["examples"][0]["to_chokepoint"]
+            
+            transitions_data.append({
+                "from_page": data["from_page"],
+                "to_page": data["to_page"],
+                "frequency": data["count"],
+                "session_count": len(data["session_ids"]),
+                "from_chokepoint": from_chokepoint,
+                "to_chokepoint": to_chokepoint,
+                "friction_score": data["friction_score"],
+                "avg_friction": avg_friction
+                # Removed 'examples' field to prevent [object Object] in the table
+            })
+        
+        transitions_df = pd.DataFrame(transitions_data)
+        
+        # Total transitions
+        total_transitions = transitions_df["frequency"].sum()
+        total_unique_transitions = len(transitions_df)
+        
+        # Display summary metrics
+        st.markdown(f"**Found {total_unique_transitions} unique page transitions across {total_transitions} total transitions**")
+        
+        # Create two columns for the filter controls
+        filter_col1, filter_col2, filter_col3 = st.columns(3)
+        
+        with filter_col1:
+            # Sort by frequency by default (most common first)
+            sort_options = {
+                "Frequency (highest first)": "frequency",
+                "Total WSJF Score (highest first)": "friction_score" if "friction_score" in transitions_df.columns else "frequency"
+            }
+            
+            # Allow user to select sort method
+            selected_sort = st.selectbox("Sort transitions by:", list(sort_options.keys()))
+            sort_column = sort_options[selected_sort]
+        
+        # Add page filters
+        with filter_col2:
+            # Get unique from_pages and add "All" option
+            from_pages = ["All"] + sorted(transitions_df["from_page"].unique().tolist())
+            selected_from_page = st.selectbox("Filter by start page:", from_pages)
+        
+        with filter_col3:
+            # Get unique to_pages and add "All" option
+            to_pages = ["All"] + sorted(transitions_df["to_page"].unique().tolist())
+            selected_to_page = st.selectbox("Filter by end page:", to_pages)
+        
+        # Sort the DataFrame
+        if sort_column in transitions_df.columns:
+            transitions_df = transitions_df.sort_values(by=sort_column, ascending=False)
+        
+        # Apply page filters
+        filtered_df = transitions_df.copy()
+        if selected_from_page != "All":
+            filtered_df = filtered_df[filtered_df["from_page"] == selected_from_page]
+        if selected_to_page != "All":
+            filtered_df = filtered_df[filtered_df["to_page"] == selected_to_page]
+        
+        # Filter to transitions with chokepoints if requested
+        show_any_chokepoint = st.checkbox("Show only transitions with either 'From' *or* 'To' chokepoint", value=False)
+        show_both_chokepoints = st.checkbox("Show only transitions with both 'From' *and* 'To' as chokepoints", value=False)
+        
+        # Apply filters based on chokepoints
+        if show_both_chokepoints:
+            # Filter to transitions where both source and destination are chokepoints
+            filtered_df = filtered_df[(filtered_df["from_chokepoint"] == True) & (filtered_df["to_chokepoint"] == True)]
+            if len(filtered_df) == 0:
+                st.info("No transitions with both endpoints as chokepoints found matching your filters.")
+                return
+        elif show_any_chokepoint:
+            # Filter to transitions with at least one chokepoint (either from or to)
+            filtered_df = filtered_df[(filtered_df["from_chokepoint"] == True) | (filtered_df["to_chokepoint"] == True)]
+            if len(filtered_df) == 0:
+                st.info("No transitions with chokepoints found matching your filters.")
+                return
+        
+        # Show transitions in a table
+        st.markdown("### Transition Pairs Analysis")
+        
+        if len(filtered_df) == 0:
+            st.info("No transitions found matching your filters.")
+            return
+        
+        # Configure columns for display
+        column_config = {
+            "from_page": st.column_config.TextColumn("From Page"),
+            "to_page": st.column_config.TextColumn("To Page"),
+            "frequency": st.column_config.NumberColumn("Frequency"),
+            "session_count": st.column_config.NumberColumn("Session Count"),
+            "from_chokepoint": st.column_config.CheckboxColumn(
+                "From Chokepoint", 
+                help="Indicates whether the source page/event in this transition is a chokepoint (top 10% by WSJF score)"
+            ),
+            "to_chokepoint": st.column_config.CheckboxColumn(
+                "To Chokepoint", 
+                help="Indicates whether the destination page/event in this transition is a chokepoint (top 10% by WSJF score)"
+            )
+        }
+        
+        # Add friction columns if available
+        if "friction_score" in transitions_df.columns:
+            column_config["friction_score"] = st.column_config.NumberColumn(
+                "Total WSJF Score",
+                format="%.6f",
+                help="Sum of WSJF scores for this transition - higher values indicate more problematic transitions"
+            )
+        
+        if "avg_friction" in transitions_df.columns:
+            column_config["avg_friction"] = st.column_config.NumberColumn(
+                "Avg WSJF per Transition",
+                format="%.6f",
+                help="Average WSJF per occurrence of this transition"
+            )
+        
+        # Display the dataframe with all transitions
+        st.dataframe(
+            filtered_df,
+            column_config=column_config,
+            use_container_width=True
+        )
+        
+                # Add export button
+        st.markdown(
+            f'<div class="download-container">{get_csv_download_link(filtered_df, "transition_pairs", "📥 Export Transitions")}</div>',
+            unsafe_allow_html=True
+        )
+    
+    except Exception as e:
+        st.error(f"Error in transition pairs analysis: {str(e)}")
+        logger.error(f"Error in transition pairs analysis: {str(e)}")
+        logger.error(traceback.format_exc())
 
 def main():
-    """
-    Main function to run the dashboard.
-    """
-    # Set page config
-    st.set_page_config(
-        page_title="TeloMesh Analytics",
-        page_icon="ðŸ•¸ï¸",
-        layout="wide"
-    )
+    """Main function to run the dashboard."""
+    configure_dark_theme()
     
-    # Add custom CSS
-    st.markdown("""
-    <style>
-    .stMetric {
-        background-color: #f0f2f6;
-        padding: 10px;
-        border-radius: 5px;
-    }
-    .stProgress > div > div {
-        background-color: #f63366;
-    }
-    .stExpander {
-        border-left: 1px solid #f0f2f6;
-        padding-left: 10px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    # Display header with logo
+    logo_path = "logos/telomesh logo.png"
+    if os.path.exists(logo_path):
+        logo_html = f'<img src="data:image/png;base64,{load_logo_base64(logo_path)}" class="telomesh-logo">'
+        st.markdown(
+            f'<div class="telomesh-header" style="flex-direction: column; align-items: center;">{logo_html}<h1>UX Journey Intelligence</h1></div>',
+            unsafe_allow_html=True
+        )
+    else:
+        st.title("User Journey Intelligence")
     
-    # Create sidebar
-    st.sidebar.title("TeloMesh Analytics")
-    st.sidebar.markdown("---")
+    # Sidebar setup
+    st.sidebar.header("Dashboard Controls")
     
-    # Add dataset selector to sidebar
-    datasets = get_available_datasets()
+    # Dataset selection
+    st.sidebar.subheader("Dataset Selection")
+    datasets, most_recent = discover_datasets()
+    
+    if not datasets:
+        st.sidebar.warning("No datasets found. Please run the TeloMesh pipeline first.")
+        st.error("No datasets found in the outputs directory.")
+        st.info("To generate a dataset, run: `python main.py --dataset <n> --users <count> --events <count>`")
+        return
+    
+    # Filter to only valid datasets
+    valid_datasets = [d for d in datasets if is_valid_dataset(d)]
+    
+    if not valid_datasets:
+        st.sidebar.warning("No valid datasets found. Please run the TeloMesh pipeline first.")
+        st.error("No valid datasets found in the outputs directory.")
+        st.info("To generate a dataset, run: `python main.py --dataset <n> --users <count> --events <count>`")
+        return
+    
+    # Dataset info
     selected_dataset = st.sidebar.selectbox(
-        "Select Dataset",
-        datasets,
-        index=0,
-        key="dataset_selector"
+        "Select Dataset in /outputs",
+        valid_datasets,
+        index=valid_datasets.index(most_recent) if most_recent in valid_datasets else 0
     )
     
-    # Add glossary to sidebar
+    # Display dataset info if available
+    dataset_info_path = Path(f"outputs/{selected_dataset}/dataset_info.json")
+    if dataset_info_path.exists():
+        try:
+            with open(dataset_info_path, 'r') as f:
+                dataset_info = json.load(f)
+            
+            # Format the timestamp if it exists
+            if "creation_timestamp" in dataset_info:
+                try:
+                    timestamp = datetime.fromisoformat(dataset_info["creation_timestamp"])
+                    dataset_info["creation_timestamp"] = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                except:
+                    pass  # Keep the original timestamp if parsing fails
+            
+            # Show dataset info in an expander
+            with st.sidebar.expander("Dataset Info", expanded=False):
+                for key, value in dataset_info.items():
+                    if key == "dataset_name":
+                        continue  # Skip displaying dataset name since it's already shown in the selectbox
+                    key_display = key.replace("_", " ").title()
+                    st.write(f"**{key_display}:** {value}")
+        except Exception as e:
+            logger.error(f"Error loading dataset info: {str(e)}")
+    
+    # Add the new glossary to sidebar
     render_glossary_sidebar()
     
     # Add sidebar info
@@ -2290,139 +3044,105 @@ def main():
         "TeloMesh analyzes user flows to identify UX improvement opportunities."
     )
     
-    # Create tabs
-    tab1, tab2, tab3 = st.tabs(["Overview", "Advanced Metrics", "Settings"])
+    # Load data based on selected dataset
+    friction_df, flow_df, node_map, G = load_friction_data(selected_dataset)
     
-    # Load metrics data
-    try:
-        metrics_data = load_metrics(selected_dataset)
+    if friction_df is None or flow_df is None or node_map is None or G is None:
+        st.error("Failed to load data. Please check the logs for details.")
+        return
+    
+    # Add node count to sidebar dataset info
+    if G is not None:
+        node_count = len(G.nodes())
+        edge_count = len(G.edges())
         
-        # Render tab content
-        with tab1:
-            st.title("Overview")
-            st.markdown("Basic overview of the selected dataset.")
-            st.info("Switch to the Advanced Metrics tab for detailed UX analytics.")
-        
-        with tab2:
-            advanced_metrics_tab(metrics_data)
-        
-        with tab3:
-            st.title("Settings")
-            st.markdown("Configure analysis parameters and visualization options.")
+        # Display in sidebar
+        with st.sidebar.expander("Graph Statistics", expanded=False):
+            st.write(f"**Nodes:** {node_count}")
+            st.write(f"**Edges:** {edge_count}")
+            st.write(f"**Edge/Node Ratio:** {edge_count/node_count:.1f}")
             
-            # Add dataset info
-            st.subheader("Dataset Information")
-            dataset_info = get_dataset_info(selected_dataset)
-            if dataset_info:
-                st.json(dataset_info)
+            # Display connected components info
+            if nx.is_directed(G):
+                num_components = nx.number_weakly_connected_components(G)
+                st.write(f"**Connected Components:** {num_components}")
             else:
-                st.info("No dataset information available.")
+                num_components = nx.number_connected_components(G)
+                st.write(f"**Connected Components:** {num_components}")
     
-    except Exception as e:
-        st.error(f"Error loading metrics: {e}")
-        st.info("Please check if the selected dataset exists and has valid metric files.")
-
-def get_available_datasets():
-    """
-    Get a list of available datasets in the outputs directory.
+    # Load data for advanced metrics
+    metrics_data = load_advanced_metrics(selected_dataset)
+    if metrics_data:
+        # Add dataset name to metrics data for reference
+        metrics_data["dataset_name"] = selected_dataset
     
-    Returns:
-        list: List of dataset names
-    """
-    try:
-        outputs_dir = Path("outputs")
-        if not outputs_dir.exists():
-            return ["default"]
-        
-        # Get all subdirectories in the outputs directory that contain valid data
-        datasets = [d.name for d in outputs_dir.iterdir() if d.is_dir() and is_valid_dataset(d.name)]
-        
-        # If no datasets found, return default
-        if not datasets:
-            return ["default"]
-        
-        # Sort datasets alphabetically
-        datasets.sort()
-        
-        return datasets
-    except Exception as e:
-        logger.error(f"Error discovering datasets: {str(e)}")
-        return ["default"]
-
-def get_dataset_info(dataset_name):
-    """
-    Get information about a dataset.
+    # Navigation tabs - add Advanced Metrics tab
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "Friction Analysis", 
+        "Flow Analysis", 
+        "User Journey Graph",
+        "Advanced Metrics"
+    ])
     
-    Args:
-        dataset_name (str): Name of the dataset
-        
-    Returns:
-        dict: Dictionary with dataset information
-    """
-    try:
-        info_path = Path(f"outputs/{dataset_name}/dataset_info.json")
-        if not info_path.exists():
-            return {}
-        
-        with open(info_path, 'r') as f:
-            return json.load(f)
-    except Exception as e:
-        logger.error(f"Error loading dataset info: {str(e)}")
-        return {}
-
-# No replacement needed - we'll use the original is_valid_dataset function at line 262
-
-def load_metrics(dataset=None):
-    """
-    Load all metrics data for the dashboard.
+    # Compute thresholds
+    top10_threshold = friction_df['WSJF_Friction_Score'].quantile(0.9)
+    top20_threshold = friction_df['WSJF_Friction_Score'].quantile(0.8)
     
-    Args:
-        dataset (str, optional): Dataset name. Defaults to None.
+    with tab1:
+        st.header("🔥 Friction Analysis Overview")
+        st.write("Displays top 3 pages with highest friction when all events on each page are aggregated together")
         
-    Returns:
-        Dict: Dictionary containing all metrics data
-    """
-    try:
-        # Create metrics data dictionary
-        metrics_data = {}
+        # Render friction table
+        render_friction_table(friction_df)
         
-        # Load node metrics data
-        node_metrics_path = Path(f"outputs/{dataset}/node_metrics.csv")
-        if node_metrics_path.exists():
-            metrics_data['node_metrics'] = pd.read_csv(node_metrics_path)
+    with tab2:
+        st.header("🔁 User Flow Analysis", help="User journeys with multiple friction points")
+        st.write("""
+        * Identifies problematic user journey patterns by analyzing paths with high WSJF scores and chokepoints.
+        * **Flow Sequences** shows multi-step user journey sessions containing 2+ chokepoints, filterable by path length steps and total WSJF score ranking to identify unique path problems.
+        * **Transition Pairs** reveals common page-to-page transitions across sessions, pinpointing specific navigation patterns that cause user friction.
+            """)
+            
+        # Add a clear explanation of chokepoints in an info box
+        st.info("""
+        **What are chokepoints?** 
+        
+        Chokepoints are the top 10% of (page, event) pairs with the highest WSJF Friction Scores. 
+        A WSJF score combines exit rate (how often users leave) and betweenness centrality (how critical the page is to user flows).
+        Pages with high scores are both structurally important and problematic for users.
+        """, icon="ℹ️")
+        
+        # Create sub-tabs for different flow analysis views
+        flow_tab1, flow_tab2 = st.tabs(["Flow Sequences", "Transition Pairs"])
+        
+        with flow_tab1:
+            # Render the traditional flow summaries in the first tab
+            render_flow_summaries(flow_df)
+            
+        with flow_tab2:
+            # Render the transition pairs in the second tab
+            render_transition_pairs(flow_df)
+    
+    with tab3:
+        # The render_graph_heatmap function already has its own header with tooltip
+        render_graph_heatmap(G, node_map)
+    
+    with tab4:
+        # Check if metrics data is available
+        if metrics_data:
+            render_advanced_metrics_tab(metrics_data)
         else:
-            logger.warning(f"Node metrics file not found: {node_metrics_path}")
-            metrics_data['node_metrics'] = pd.DataFrame()
-        
-        # Load decision table
-        decision_table_path = Path(f"outputs/{dataset}/decision_table.csv")
-        if decision_table_path.exists():
-            metrics_data['decision_table'] = pd.read_csv(decision_table_path)
-        else:
-            logger.warning(f"Decision table file not found: {decision_table_path}")
-            metrics_data['decision_table'] = pd.DataFrame()
-        
-        # Load final report
-        final_report_path = Path(f"outputs/{dataset}/final_report.csv")
-        if final_report_path.exists():
-            metrics_data['final_report'] = pd.read_csv(final_report_path)
-        else:
-            logger.warning(f"Final report file not found: {final_report_path}")
-            metrics_data['final_report'] = pd.DataFrame()
-        
-        # Load recurring patterns
-        patterns_path = Path(f"outputs/{dataset}/recurring_patterns.json")
-        if patterns_path.exists():
-            with open(patterns_path, 'r') as f:
-                metrics_data['recurring_patterns'] = json.load(f)
-        else:
-            logger.warning(f"Recurring patterns file not found: {patterns_path}")
-            metrics_data['recurring_patterns'] = {}
-        
-        return metrics_data
-    except Exception as e:
-        logger.error(f"Error loading metrics data: {str(e)}")
-        return {}
+            st.title("Advanced Metrics")
+            st.warning("Could not load advanced metrics data for this dataset.")
+            st.info("Please check if the dataset contains the required files: decision_table.csv, final_report.json, etc.")
+    
+    # Footer
+    st.markdown("---")
+    st.markdown(
+        "TeloMesh User Flow Intelligence Dashboard | "
+        "Built with Streamlit, NetworkX, and PyVis"
+    )
 
+# Run the dashboard when this script is executed directly
 if __name__ == "__main__":
-    main()
+    main() 

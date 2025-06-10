@@ -191,9 +191,11 @@ streamlit run ui/dashboard.py
 This will launch the TeloMesh User Flow Intelligence Dashboard with the following features:
 - Dataset selection dropdown
 - Friction Analysis table with export to CSV
-- User Flow Analysis with flow summaries
+- Flow Analysis with two views:
+  - Flow Sequences tab for analyzing multi-step user journey sessions with chokepoints
+  - Transition Pairs tab for analyzing common page-to-page transitions across sessions
 - User Journey Graph with interactive visualization
-- UX Recommendations based on network analysis
+- Advanced Metrics with UX recommendations based on network analysis
 - Dark theme optimized for data visualization
 
 ### Running Individual Stages
@@ -339,9 +341,11 @@ TeloMesh generates several key output files for analysis:
 
 The TeloMesh dashboard consists of four main tabs:
 
-1. **Friction Analysis**: Table of user event friction points ranked by user dropoffs, exit rate and WSJF score
-2. **User Flow Analysis**: Summaries of user journeys with multiple friction points across path steps
-3. **User Journey Graph**: Interactive visualization of user flow terrain with friction highlighted across connecting events
+1. **Friction Analysis**: Table of friction points ranked by WSJF score, exit rate, and users lost
+2. **Flow Analysis**: Analysis of user journeys with two complementary views:
+   - **Flow Sequences**: Multi-step user journey sessions containing 2+ chokepoints, filterable by path length steps and total WSJF score
+   - **Transition Pairs**: Common page-to-page transitions across sessions, showing specific navigation patterns that cause friction
+3. **User Journey Graph**: Interactive visualization of user flows with friction highlighted across connecting events
 4. **Advanced Metrics**: Network analysis visualizations including FB vs WSJF Priority Matrix and Recurring Patterns analysis
 
 ### User Journey Graph Features
