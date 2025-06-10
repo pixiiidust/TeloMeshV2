@@ -115,7 +115,7 @@ By turning exported session data from Mixpanel, Amplitude, or GA4 into graph-bas
 
 ### Visualize high-impact UX optimization targets with WSJF-prioritized journey graphs:
 
-<img src="https://github.com/user-attachments/assets/7b5da3a3-6cb3-4cfc-9052-1ee6972a198c" width="100%"/>
+<img src="https://github.com/user-attachments/assets/e7a6d71b-0c52-4a19-8100-6fcbd2747204" width="100%"/>
 <br>
 <img src="https://github.com/user-attachments/assets/7cb71141-b814-4730-86db-35fa1f687b2c" width="100%"/>
 <img src="https://github.com/user-attachments/assets/e682477b-41db-4385-9c04-0971a3bc03fc" width="100%"/>
