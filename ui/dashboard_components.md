@@ -33,6 +33,13 @@ The main file `dashboard.py` provides a comprehensive Streamlit interface for pr
   - **Journey Centrality**: Nodes arranged by betweenness centrality with most central nodes in the middle, revealing structural hubs
   - Each layout can be toggled with a single click to provide different analytical perspectives
 
+- **Enhanced Visualization**:
+  - Larger container size (1000px height) for better visibility of complex graphs
+  - Reduced edge opacity (0.25) for less visual clutter
+  - Curved edges with reduced roundness (0.15) for cleaner path visualization
+  - Improved physics settings with stronger repulsion and node spacing
+  - Node selection feature to highlight specific nodes regardless of filters
+
 - **Physics Settings**:
   - Toggle physics simulation on/off with immediate visual feedback
   - Gravitational constant (-15000) optimized for clear node separation
@@ -42,6 +49,7 @@ The main file `dashboard.py` provides a comprehensive Streamlit interface for pr
 - **Filtering Options**:
   - Show all nodes or filter to top 10%, 20%, or 50% friction nodes
   - Enable/disable physics for different visualization styles
+  - Node selection dropdown to always display specific nodes of interest
   - Export current graph view as interactive HTML with all interactivity preserved
 
 - **Export Functionality**:

@@ -59,6 +59,7 @@
 ├── dashboard.py              # Streamlit dashboard
 │   └── load_friction_data() -> Tuple[DataFrame, DataFrame, Dict]
 │   └── render_friction_table(df: pd.DataFrame)
+│   └── render_network_graph(net, height=1000) -> str
 │   └── render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float])
 │   └── render_flow_summaries(flow_df: pd.DataFrame)
 │   └── render_transition_pairs(flow_df: pd.DataFrame)
@@ -70,6 +71,8 @@
 │   └── render_advanced_metrics_tab(metrics_data: Dict)
 │   └── discover_datasets() -> List[str]
 │   └── load_dataset_metadata(dataset_name: str) -> Dict
+│   └── create_full_network(graph, score_map, top10_threshold, top20_threshold, physics_enabled, top50_threshold=None, layout_type="friction_levels") -> Network
+│   └── create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold=None, layout_type="friction_levels") -> Network
 │
 ├── dashboard_backup.py       # Backup of the latest dashboard version
 │

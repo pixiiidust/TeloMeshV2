@@ -521,7 +521,7 @@ def render_friction_table(df: pd.DataFrame):
         logger.error(f"Error in friction table: {str(e)}")
         logger.error(traceback.format_exc())
 
-def render_network_graph(net, height=600):
+def render_network_graph(net, height=1000):
     """
     Safely render a pyvis network graph in Streamlit.
     
@@ -548,7 +548,7 @@ def render_network_graph(net, height=600):
         with open(html_file, 'r', encoding='utf-8') as f:
             html_content = f.read()
         
-        # Render the HTML content
+        # Render the HTML content with increased height and responsive sizing
         components.html(html_content, height=height, scrolling=False)
         
         return html_content
@@ -692,7 +692,7 @@ def setup_betweenness_multipartite(graph, score_map):
     
     return graph
 
-def apply_multipartite_layout(graph, score_map, layout_type="friction_levels", scale=800):
+def apply_multipartite_layout(graph, score_map, layout_type="friction_levels", scale=1200):
     """
     Apply layout to graph using multipartite or force-directed arrangement.
     
@@ -734,12 +734,12 @@ def apply_multipartite_layout(graph, score_map, layout_type="friction_levels", s
         # Set correct axis-based scaling
         if align == "vertical":
             # Subset controls X-axis (left→right)
-            scale_x = scale * 0.6
-            scale_y = scale * 0.6
+            scale_x = scale * 0.8
+            scale_y = scale * 0.7
         else:
             # Subset controls Y-axis (top→bottom)
-            scale_x = scale * 0.4
-            scale_y = scale * 0.6
+            scale_x = scale * 0.8  # Increase horizontal spacing
+            scale_y = scale * 0.7
 
         # Apply scaled and separated positions
         for node in pos:
@@ -829,7 +829,7 @@ def create_full_network(graph, score_map, top10_threshold, top20_threshold, phys
         Network: PyVis network object
     """
     # Create a pyvis network
-    net = Network(height="600px", width="100%", bgcolor="#0B0F19", font_color="#E2E8F0")
+    net = Network(height="1000px", width="100%", bgcolor="#0B0F19", font_color="#E2E8F0")
     
     # Get positions using multipartite layout (when physics is disabled)
     if not physics_enabled:
@@ -891,11 +891,11 @@ def create_full_network(graph, score_map, top10_threshold, top20_threshold, phys
             title=event, 
             width=width, 
             color={
-                "color": "rgba(148, 163, 184, 0.35)",
+                "color": "rgba(148, 163, 184, 0.25)",  # More transparent for less visual clutter
                 "highlight": source_color,  # Use source node color for highlighting
                 "hover": source_color       # Also use it for hover effects
             },
-            smooth={"type": "continuous", "roundness": 0.2}
+            smooth={"type": "curvedCW", "roundness": 0.15}  # Use curved edges to reduce overlap
         )
     
     # Configure network options with more precise color inheritance
@@ -939,11 +939,12 @@ def create_full_network(graph, score_map, top10_threshold, top20_threshold, phys
                 "fit": physics_enabled  # Only auto-fit when physics is enabled
             },
             "barnesHut": {
-                "gravitationalConstant": -15000,
-                "centralGravity": 0.3,
-                "springLength": 200,
-                "springConstant": 0.04,
-                "damping": 0.09
+                "gravitationalConstant": -18000,  # Stronger repulsion
+                "centralGravity": 0.2,  # Reduced central gravity for more spread
+                "springLength": 250,  # Longer springs for more spacing
+                "springConstant": 0.03,  # Softer springs
+                "damping": 0.09,
+                "avoidOverlap": 1  # Prevent node overlap completely
             },
             "maxVelocity": 50
         },
@@ -982,7 +983,7 @@ def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_thresh
         Network: PyVis network object
     """
     # Create a pyvis network
-    net = Network(height="600px", width="100%", bgcolor="#0B0F19", font_color="#E2E8F0")
+    net = Network(height="1000px", width="100%", bgcolor="#0B0F19", font_color="#E2E8F0")
     
     # Create filtered subgraph
     filtered_graph = graph.subgraph(filtered_nodes.keys())
@@ -1044,11 +1045,11 @@ def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_thresh
                 title=event, 
                 width=width, 
                 color={
-                    "color": "rgba(148, 163, 184, 0.35)",
+                    "color": "rgba(148, 163, 184, 0.25)",  # More transparent for less visual clutter
                     "highlight": source_color,  # Use source node color for highlighting
                     "hover": source_color       # Also use it for hover effects
                 },
-                smooth={"type": "continuous", "roundness": 0.2}
+                smooth={"type": "curvedCW", "roundness": 0.15}  # Use curved edges to reduce overlap
             )
     
     # Configure network options with more precise color inheritance
@@ -1091,11 +1092,12 @@ def create_filtered_network(graph, filtered_nodes, top10_threshold, top20_thresh
                 "fit": physics_enabled
             },
             "barnesHut": {
-                "gravitationalConstant": -15000,
-                "centralGravity": 0.3,
-                "springLength": 150,
-                "springConstant": 0.04,
-                "damping": 0.09
+                "gravitationalConstant": -18000,  # Stronger repulsion
+                "centralGravity": 0.2,  # Reduced central gravity for more spread
+                "springLength": 250,  # Longer springs for more spacing
+                "springConstant": 0.03,  # Softer springs
+                "damping": 0.09,
+                "avoidOverlap": 1  # Prevent node overlap completely
             },
             "maxVelocity": 50
         },
@@ -1140,7 +1142,7 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
             top20_threshold = 0.5
             top50_threshold = 0.2  # Default value for top 50% threshold
         
-        # Filter and layout controls - NOW WITH 3 COLUMNS
+        # Filter and layout controls with 2 rows
         col1, col2, col3 = st.columns(3)
         
         with col1:
@@ -1153,7 +1155,7 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
             physics_enabled = st.checkbox("Enable Physics", value=True)
         
         with col3:
-            # NEW: Layout type selection
+            # Layout type selection
             layout_options = {
                 "Friction Levels": "friction_levels",
                 "Funnel Stages": "funnel_stages", 
@@ -1168,6 +1170,22 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
             )
             layout_type = layout_options[selected_layout_name]
         
+        # Node selection filter
+        st.subheader("Always Show Selected Nodes")
+        
+        # Sorted node options (skip "None" for multiselect)
+        node_options = sorted(list(graph.nodes()))
+        
+        # Use a multi-select with an expander for better UI
+        with st.expander("Select specific nodes to always include in the graph"):
+            # Multi-select for nodes
+            selected_nodes = st.multiselect(
+                "Always display these nodes:",
+                options=node_options,
+                default=[],
+                help="Selected nodes will always be displayed in the graph regardless of other filters"
+            )
+        
         # Display current configuration info
         if not physics_enabled:
             layout_descriptions = {
@@ -1177,35 +1195,86 @@ def render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float]):
             }
             st.info(f"**Active Layout**: {layout_descriptions.get(layout_type, 'Custom arrangement')}")
         
-        # Create and configure the network based on filters
+        # Apply node selection if specified
+        working_graph = graph
+        included_nodes = set(graph.nodes())
+        
+        # If specific nodes are selected, ensure they're included in all filters
+        if selected_nodes:
+            # Show info about the selected nodes
+            if len(selected_nodes) == 1:
+                st.info(f"**Always showing node**: {selected_nodes[0]}")
+            else:
+                st.info(f"**Always showing {len(selected_nodes)} nodes**: {', '.join(selected_nodes[:3])}{' and more...' if len(selected_nodes) > 3 else ''}")
+                
+            # No need to modify the graph here, we'll just ensure these nodes
+            # are included when applying other filters
+        
+        # Create and configure the network based on friction score filters
         html_content = ""
+        
+        # Initialize filtered nodes based on selected nodes (if any)
+        selected_nodes_dict = {}
+        if selected_nodes:
+            # Create a dictionary for selected nodes with their scores
+            selected_nodes_dict = {node: score_map.get(node, 0) for node in selected_nodes if node in graph.nodes()}
+        
         if show_selection == "Top 10% friction nodes":
-            # Filter to only include top 10% nodes
-            filtered_nodes = {node: score for node, score in score_map.items() if score >= top10_threshold}
+            # Filter to include top 10% nodes
+            filtered_nodes = {node: score for node, score in score_map.items() 
+                             if score >= top10_threshold}
+            
+            # Also include any specifically selected nodes
+            filtered_nodes.update(selected_nodes_dict)
+            
             if not filtered_nodes:
-                st.warning("No nodes meet the top 10% threshold. Try showing all nodes or top 20%.")
+                st.warning("No nodes meet the filters. Try showing all nodes or adjusting filters.")
                 return
             
-            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold, layout_type)
+            net = create_filtered_network(working_graph, filtered_nodes, top10_threshold, top20_threshold, 
+                                         physics_enabled, top50_threshold, layout_type)
+                                         
         elif show_selection == "Top 20% friction nodes":
-            # Filter to only include top 20% nodes
-            filtered_nodes = {node: score for node, score in score_map.items() if score >= top20_threshold}
+            # Filter to include top 20% nodes
+            filtered_nodes = {node: score for node, score in score_map.items() 
+                             if score >= top20_threshold}
+            
+            # Also include any specifically selected nodes
+            filtered_nodes.update(selected_nodes_dict)
+            
             if not filtered_nodes:
-                st.warning("No nodes meet the top 20% threshold. Try showing all nodes.")
+                st.warning("No nodes meet the filters. Try showing all nodes or adjusting filters.")
                 return
             
-            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold, layout_type)
+            net = create_filtered_network(working_graph, filtered_nodes, top10_threshold, top20_threshold, 
+                                         physics_enabled, top50_threshold, layout_type)
+                                         
         elif show_selection == "Top 50% friction nodes":
-            # Filter to only include top 50% nodes
-            filtered_nodes = {node: score for node, score in score_map.items() if score >= top50_threshold}
+            # Filter to include top 50% nodes
+            filtered_nodes = {node: score for node, score in score_map.items() 
+                             if score >= top50_threshold}
+            
+            # Also include any specifically selected nodes
+            filtered_nodes.update(selected_nodes_dict)
+            
             if not filtered_nodes:
-                st.warning("No nodes meet the top 50% threshold. Try showing all nodes.")
+                st.warning("No nodes meet the filters. Try showing all nodes or adjusting filters.")
                 return
             
-            net = create_filtered_network(graph, filtered_nodes, top10_threshold, top20_threshold, physics_enabled, top50_threshold, layout_type)
+            net = create_filtered_network(working_graph, filtered_nodes, top10_threshold, top20_threshold, 
+                                         physics_enabled, top50_threshold, layout_type)
         else:
-            # Show all nodes
-            net = create_full_network(graph, score_map, top10_threshold, top20_threshold, physics_enabled, top50_threshold, layout_type)
+            # Show all nodes, ensuring selected nodes are included
+            filtered_score_map = score_map.copy()
+            
+            # If there are selected nodes, highlight them with a different score
+            if selected_nodes_dict:
+                # Temporarily increase the score of selected nodes to highlight them
+                for node in selected_nodes_dict:
+                    filtered_score_map[node] = max(filtered_score_map.get(node, 0), top10_threshold)
+                    
+            net = create_full_network(working_graph, filtered_score_map, top10_threshold, top20_threshold, 
+                                     physics_enabled, top50_threshold, layout_type)
         
         # Add export button for the graph
         export_container = st.container()
@@ -2965,6 +3034,8 @@ def render_transition_pairs(flow_df: pd.DataFrame):
         st.error(f"Error in transition pairs analysis: {str(e)}")
         logger.error(f"Error in transition pairs analysis: {str(e)}")
         logger.error(traceback.format_exc())
+
+
 
 def main():
     """Main function to run the dashboard."""
