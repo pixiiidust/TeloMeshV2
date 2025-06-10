@@ -5,6 +5,8 @@
 * Efficiently outputs optimization opportunities from user flow data with advanced network analysis metrics.
 * Features performance optimization for large datasets and specific UX recommendations based on network characteristics.
 
+**Why use TeloMesh? [📖View comparison.md to find out more](comparison.md).**
+
 TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA4 by turning exported session data into graph-based UX diagnostics—revealing where friction clusters, why users drop off, and which fixes matter most.
 
 **[📖 View the complete setup guide](setup_guide.md)** for detailed installation and usage instructions.
