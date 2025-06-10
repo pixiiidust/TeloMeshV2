@@ -166,21 +166,21 @@ By combining exit rates with structural importance, the WSJF scoring system ensu
 ## Dashboard Screenshots
 ### Discover UX pain points:
 
-<img src="https://github.com/user-attachments/assets/f0ab3ebb-2e4a-416f-acd1-73c43a6eaa86" width="600"/>
+<img src="https://github.com/user-attachments/assets/f0ab3ebb-2e4a-416f-acd1-73c43a6eaa86" width="100%"/>
 <br>
 
 ### Triage pain points along user session flows:
 
-<img src="https://github.com/user-attachments/assets/89b9ec34-8b80-48a5-b74d-33cb7321fc3a" width="600"/>
+<img src="https://github.com/user-attachments/assets/89b9ec34-8b80-48a5-b74d-33cb7321fc3a" width="100%"/>
 <br>
-<img src="https://github.com/user-attachments/assets/b6a5893e-fc6d-45ac-a98a-05c0ffbbef36" width="600"/>
+<img src="https://github.com/user-attachments/assets/b6a5893e-fc6d-45ac-a98a-05c0ffbbef36" width="100%"/>
 
 ### Map priorities with user journey graphs: 
 
-<img src="https://github.com/user-attachments/assets/7b5da3a3-6cb3-4cfc-9052-1ee6972a198c" width="600"/>
+<img src="https://github.com/user-attachments/assets/7b5da3a3-6cb3-4cfc-9052-1ee6972a198c" width="100%"/>
 <br>
-<img src="https://github.com/user-attachments/assets/d592a20f-75e3-4f3e-b792-c8035031cdc9" width="600"/>
-<img src="https://github.com/user-attachments/assets/ebb8c6d1-e694-4f20-8bd0-d8e331661d3c" width="600"/>
+<img src="https://github.com/user-attachments/assets/d592a20f-75e3-4f3e-b792-c8035031cdc9" width="100%"/>
+<img src="https://github.com/user-attachments/assets/ebb8c6d1-e694-4f20-8bd0-d8e331661d3c" width="100%"/>
 
 ### WIP Preview of Advanced Metrics dashboard: 
 Advanced metrics leverages network science techniques to provide deeper structural insights into your user flows, enabling strategic insights for advanced users.
@@ -189,9 +189,9 @@ Advanced metrics leverages network science techniques to provide deeper structur
 **Hierarchical structure (Power-Law Alpha) 
 **System stability (Percolation Threshold) with visual risk indicators: 
 
-<img src="https://github.com/user-attachments/assets/7f7c5666-77f5-4ca9-a8be-70671f1d755b" width="600"/>
+<img src="https://github.com/user-attachments/assets/7f7c5666-77f5-4ca9-a8be-70671f1d755b" width="100%"/>
 <br>
-<img src="https://github.com/user-attachments/assets/85e4729a-eb33-4b9e-9825-c92dcce76664" width="600"/>
+<img src="https://github.com/user-attachments/assets/85e4729a-eb33-4b9e-9825-c92dcce76664" width="100%"/>
 
 
 
