@@ -66,7 +66,7 @@ def generate_dataset_metadata(dataset_name, data_dir, output_dir, users_count=0,
     
     return metadata
 
-def run_all_stages(dataset_name="default", users=100, events_per_user=50, input_file=None, multi=False, fast=False):
+def run_all_stages(dataset_name="default", users=100, events_per_user=50, input_file=None, multi=False, fast=False, pages=16, session_gap=30):
     """
     Run all stages of the TeloMesh pipeline.
     
@@ -77,6 +77,8 @@ def run_all_stages(dataset_name="default", users=100, events_per_user=50, input_
         input_file (str): Path to input events file (instead of generating synthetic data)
         multi (bool): Create MultiDiGraph that preserves multiple edge types
         fast (bool): Skip slow scaling tests and detailed output
+        pages (int): Number of unique pages (nodes) to generate
+        session_gap (int): Minutes of inactivity to consider as a new session boundary
     """
     print("\n[SIMPLE] TeloMesh Pipeline - SIMPLE Stage")
     print("=" * 50)
@@ -103,13 +105,14 @@ def run_all_stages(dataset_name="default", users=100, events_per_user=50, input_
         print(f"[OK] Copied {total_events} events for {unique_users} users.")
     else:
         # Generate synthetic data
-        print(f"Generating synthetic events for {users} users with ~{events_per_user} events each...")
-        df = generate_synthetic_events(users, events_per_user)
+        print(f"Generating synthetic events for {users} users with ~{events_per_user} events each across {pages} pages...")
+        df = generate_synthetic_events(users, events_per_user, pages)
         # Save to dataset directory
         df.to_csv(events_path, index=False)
         total_events = len(df)
         unique_users = df["user_id"].nunique()
-        print(f"[OK] Generated {total_events} events for {unique_users} users.")
+        unique_pages = df["page_url"].nunique()
+        print(f"[OK] Generated {total_events} events for {unique_users} users using {unique_pages} pages.")
     
     print(f"[OK] Events saved to {events_path}")
     print(f"[TIME] Time taken: {time.time() - start_time:.2f} seconds")
@@ -118,7 +121,7 @@ def run_all_stages(dataset_name="default", users=100, events_per_user=50, input_
     print("\n[Stage 2] Parsing sessions...")
     start_time = time.time()
     session_flows_path = f"{output_dir}/session_flows.csv"
-    df = parse_sessions(events_path, session_flows_path)
+    df = parse_sessions(events_path, session_flows_path, session_gap_minutes=session_gap)
     unique_users = df["user_id"].nunique()
     unique_sessions = df["session_id"].nunique()
     total_events = len(df)
@@ -234,6 +237,8 @@ def main():
                         default="all", help="Which stage to run")
     parser.add_argument("--users", type=int, default=100, help="Number of users to generate")
     parser.add_argument("--events", type=int, default=50, help="Average number of events per user")
+    parser.add_argument("--pages", type=int, default=16, help="Number of unique pages (nodes) to generate")
+    parser.add_argument("--session-gap", type=int, default=30, help="Minutes of inactivity to consider as a new session boundary")
     parser.add_argument("--fast", action="store_true", help="Skip slow scaling tests and detailed output")
     parser.add_argument("--multi", action="store_true", help="Create MultiDiGraph that preserves multiple edge types")
     parser.add_argument("--dataset", type=str, default="default", help="Name of the dataset to create")
@@ -250,16 +255,17 @@ def main():
     data_dir, output_dir = create_dataset_directories(args.dataset)
     
     if args.stage == "all":
-        run_all_stages(args.dataset, args.users, args.events, args.input, args.multi, args.fast)
+        run_all_stages(args.dataset, args.users, args.events, args.input, args.multi, args.fast, args.pages, args.session_gap)
     elif args.stage == "synthetic":
         print("[STAGE] Generating synthetic events...")
         # Create dataset directories
         data_dir, output_dir = create_dataset_directories(args.dataset)
         # Generate synthetic data
         events_path = f"{data_dir}/events.csv"
-        df = generate_synthetic_events(args.users, args.events)
+        df = generate_synthetic_events(args.users, args.events, args.pages)
         df.to_csv(events_path, index=False)
-        print(f"[OK] Generated {len(df)} events -> {events_path}")
+        unique_pages = df["page_url"].nunique()
+        print(f"[OK] Generated {len(df)} events for {args.users} users with {unique_pages} pages -> {events_path}")
     elif args.stage == "parse":
         print("[STAGE] Parsing sessions...")
         # Create dataset directories
@@ -272,7 +278,7 @@ def main():
             # Copy input file to dataset directory if provided
             shutil.copy(args.input, events_path)
         # Parse sessions
-        df = parse_sessions(events_path, session_flows_path)
+        df = parse_sessions(events_path, session_flows_path, session_gap_minutes=args.session_gap)
         print(f"[OK] Parsed {len(df)} events into structured flows -> {session_flows_path}")
     elif args.stage == "graph":
         print("[STAGE] Building user journey graph...")

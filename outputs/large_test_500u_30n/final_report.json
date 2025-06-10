@@ -1,0 +1,55 @@
+{
+  "fractal_dimension": 1.9,
+  "power_law_alpha": 2.5,
+  "clustering_coefficient": 0.0,
+  "percolation_threshold": 0.5333333333333333,
+  "top_fb_nodes": [
+    [
+      "/product/1010",
+      0.9365296803652967
+    ],
+    [
+      "/account",
+      0.9324233059770085
+    ],
+    [
+      "/login",
+      0.9209045541481076
+    ],
+    [
+      "/product/789",
+      0.9131494430896836
+    ],
+    [
+      "/blog",
+      0.9106260174006879
+    ]
+  ],
+  "top_chokepoints": [
+    [
+      "/search",
+      "Register",
+      0.4117647058823529
+    ],
+    [
+      "/account",
+      "Checkout",
+      0.404530903016396
+    ],
+    [
+      "/search",
+      "Checkout",
+      0.38095238095238093
+    ],
+    [
+      "/contact",
+      "Page View",
+      0.37988352133381303
+    ],
+    [
+      "/product/1010",
+      "Form Submit",
+      0.375
+    ]
+  ]
+}

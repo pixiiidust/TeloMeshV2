@@ -1,0 +1,54 @@
+{
+  "fractal_dimension": 0.34481617685146904,
+  "power_law_alpha": 19.378078718148068,
+  "percolation_threshold": 0.5,
+  "top_fb_nodes": [
+    [
+      "/contact",
+      9438.0
+    ],
+    [
+      "/account",
+      8998.465214941436
+    ],
+    [
+      "/product/789",
+      8893.67580854084
+    ],
+    [
+      "/login",
+      7943.490142109029
+    ],
+    [
+      "/product/123",
+      7005.581247289656
+    ]
+  ],
+  "top_chokepoints": [
+    [
+      "/checkout",
+      "Logout",
+      0.7341929924735926
+    ],
+    [
+      "/product/789",
+      "Logout",
+      0.5602903701306703
+    ],
+    [
+      "/account",
+      "Add to Cart",
+      0.5459736804866933
+    ],
+    [
+      "/contact",
+      "Add to Cart",
+      0.5
+    ],
+    [
+      "/blog",
+      "Error",
+      0.46943547398367785
+    ]
+  ]
+}

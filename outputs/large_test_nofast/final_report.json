@@ -1,0 +1,55 @@
+{
+  "fractal_dimension": 1.0,
+  "power_law_alpha": 2.5,
+  "clustering_coefficient": 1.0,
+  "percolation_threshold": 0.5,
+  "top_fb_nodes": [
+    [
+      "/settings",
+      14301.0
+    ],
+    [
+      "/blog",
+      13465.207246064267
+    ],
+    [
+      "/faq",
+      6304.940910071168
+    ],
+    [
+      "/search",
+      5034.289195600605
+    ],
+    [
+      "/home",
+      4566.533103299549
+    ]
+  ],
+  "top_chokepoints": [
+    [
+      "/blog",
+      "Scroll",
+      0.2307737846054963
+    ],
+    [
+      "/settings",
+      "Add to Cart",
+      0.21495327102803738
+    ],
+    [
+      "/settings",
+      "Remove from Cart",
+      0.20967741935483872
+    ],
+    [
+      "/blog",
+      "Page View",
+      0.20923489804231665
+    ],
+    [
+      "/settings",
+      "Logout",
+      0.2079207920792079
+    ]
+  ]
+}

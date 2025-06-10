@@ -1,0 +1,15 @@
+{
+  "total_events": 2913,
+  "unique_users": 200,
+  "total_sessions": 573,
+  "sessions_per_user": 2.865,
+  "avg_flow_length": 5.0837696335078535,
+  "most_common_event": "Form Submit",
+  "most_common_event_count": 246,
+  "node_count": 16,
+  "edge_count": 250,
+  "unique_edge_events": 13,
+  "most_common_edge_event": "Click",
+  "most_common_edge_event_count": 30,
+  "connected_components": 1
+}

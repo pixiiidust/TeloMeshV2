@@ -1,0 +1,7 @@
+{
+  "dataset_name": "test_nodes_full",
+  "creation_timestamp": "2025-06-10T01:26:18.986660",
+  "num_users": 100,
+  "num_events": 1445,
+  "num_sessions": 289
+}

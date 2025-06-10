@@ -1,0 +1,15 @@
+{
+  "total_events": 22324,
+  "unique_users": 1500,
+  "total_sessions": 4457,
+  "sessions_per_user": 2.9713333333333334,
+  "avg_flow_length": 5.008750280457707,
+  "most_common_event": "Remove from Cart",
+  "most_common_event_count": 1825,
+  "node_count": 16,
+  "edge_count": 256,
+  "unique_edge_events": 13,
+  "most_common_edge_event": "Form Submit",
+  "most_common_edge_event_count": 34,
+  "connected_components": 1
+}

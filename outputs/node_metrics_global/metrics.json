@@ -1,0 +1,15 @@
+{
+  "total_events": 1536,
+  "unique_users": 100,
+  "total_sessions": 314,
+  "sessions_per_user": 3.14,
+  "avg_flow_length": 4.89171974522293,
+  "most_common_event": "Page View",
+  "most_common_event_count": 137,
+  "node_count": 16,
+  "edge_count": 1222,
+  "unique_edge_events": 13,
+  "most_common_edge_event": "Page View",
+  "most_common_edge_event_count": 119,
+  "connected_components": 1
+}

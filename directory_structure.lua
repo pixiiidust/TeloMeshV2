@@ -61,9 +61,16 @@
 │   └── render_friction_table(df: pd.DataFrame)
 │   └── render_graph_heatmap(graph: nx.DiGraph, score_map: Dict[str, float])
 │   └── render_flow_summaries(flow_df: pd.DataFrame)
-│   └── render_tooltips(metric: str) -> str
+│   └── load_advanced_metrics(dataset: str = None) -> Dict
+│   └── render_fb_vs_wsjf_chart(metrics_data: Dict)
+│   └── render_recurring_patterns(metrics_data: Dict)
+│   └── render_percolation_collapse(metrics_data: Dict)
+│   └── render_glossary_sidebar()
+│   └── render_advanced_metrics_tab(metrics_data: Dict)
 │   └── discover_datasets() -> List[str]
 │   └── load_dataset_metadata(dataset_name: str) -> Dict
+│
+├── dashboard_v2.py           # Backup of latest dashboard with advanced metrics
 │
 ├── dashboard_components.md   # Documentation about dashboard components
 
@@ -88,10 +95,8 @@
 │   ├── high_friction_flows.csv   # From event_chokepoints.py
 │   ├── friction_node_map.json    # From event_chokepoints.py
 │   ├── decision_table.csv        # From event_chokepoints.py (UX recommendations)
-│   ├── final_report.json         # From event_chokepoints.py (network metrics)
-│   ├── final_report.csv          # From event_chokepoints.py (tabular metrics)
+│   ├── metrics.json              # From event_chokepoints.py (network metrics)
 │   ├── dataset_info.json         # Dataset metadata
-│   ├── metrics.json              # From flow_metrics.py
 │   └── session_stats.log         # From flow_metrics.py
 ├── analysis_results.md           # Documentation about output files
 
@@ -110,6 +115,7 @@
 ├── test_flow_metrics.py
 ├── test_event_chokepoints.py    # Tests for all event_chokepoints.py functions
 ├── test_dashboard_ui.py
+├── test_advanced_metrics_tab.py # Tests for advanced metrics visualizations
 ├── test_analytics_converter.py
 ├── test_dataset_organization.py  # Tests for dataset organization
 

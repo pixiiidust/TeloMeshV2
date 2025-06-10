@@ -1,0 +1,7 @@
+{
+  "dataset_name": "node_metrics_test",
+  "creation_timestamp": "2025-06-09T22:31:53.914308",
+  "num_users": 50,
+  "num_events": 720,
+  "num_sessions": 142
+}

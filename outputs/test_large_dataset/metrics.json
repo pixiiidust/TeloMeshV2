@@ -1,0 +1,15 @@
+{
+  "total_events": 14893,
+  "unique_users": 1000,
+  "total_sessions": 2981,
+  "sessions_per_user": 2.981,
+  "avg_flow_length": 4.995974505199597,
+  "most_common_event": "Update Profile",
+  "most_common_event_count": 1199,
+  "node_count": 16,
+  "edge_count": 256,
+  "unique_edge_events": 13,
+  "most_common_edge_event": "Error",
+  "most_common_edge_event_count": 26,
+  "connected_components": 1
+}

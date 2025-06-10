@@ -1,0 +1,55 @@
+{
+  "fractal_dimension": 0.34481617685146904,
+  "power_law_alpha": 5.0,
+  "clustering_coefficient": 0.8222520535020535,
+  "percolation_threshold": 0.5,
+  "top_fb_nodes": [
+    [
+      "/blog",
+      2656.0
+    ],
+    [
+      "/account",
+      2642.379770114943
+    ],
+    [
+      "/about",
+      2065.8287533156504
+    ],
+    [
+      "/checkout",
+      1414.1423872679045
+    ],
+    [
+      "/product/456",
+      1374.9071618037142
+    ]
+  ],
+  "top_chokepoints": [
+    [
+      "/account",
+      "Error",
+      0.8330327144120249
+    ],
+    [
+      "/account",
+      "Checkout",
+      0.8330327144120249
+    ],
+    [
+      "/product/456",
+      "Remove from Cart",
+      0.7029177718832894
+    ],
+    [
+      "/settings",
+      "Logout",
+      0.5394518125552609
+    ],
+    [
+      "/blog",
+      "Login",
+      0.5
+    ]
+  ]
+}

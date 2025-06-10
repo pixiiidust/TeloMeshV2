@@ -1,0 +1,15 @@
+{
+  "total_events": 720,
+  "unique_users": 50,
+  "total_sessions": 142,
+  "sessions_per_user": 2.84,
+  "avg_flow_length": 5.070422535211268,
+  "most_common_event": "Click",
+  "most_common_event_count": 77,
+  "node_count": 16,
+  "edge_count": 158,
+  "unique_edge_events": 13,
+  "most_common_edge_event": "Add to Cart",
+  "most_common_edge_event_count": 18,
+  "connected_components": 1
+}

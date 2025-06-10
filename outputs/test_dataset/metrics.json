@@ -1,0 +1,15 @@
+{
+  "total_events": 1344,
+  "unique_users": 100,
+  "total_sessions": 264,
+  "sessions_per_user": 2.64,
+  "avg_flow_length": 5.090909090909091,
+  "most_common_event": "Checkout",
+  "most_common_event_count": 117,
+  "node_count": 16,
+  "edge_count": 217,
+  "unique_edge_events": 13,
+  "most_common_edge_event": "Checkout",
+  "most_common_edge_event_count": 24,
+  "connected_components": 1
+}

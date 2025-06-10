@@ -10,6 +10,8 @@ This folder contains the generated data files that serve as inputs to the TeloMe
 - `high_friction_flows.csv`: User flows containing multiple high-friction points
 - `friction_node_map.json`: Node scoring data for visualization heat mapping
 - `decision_table.csv`: UX recommendations based on network analysis
+- `recurring_patterns.json`: Detected recurring sequences and loops in user journeys
+- `recurring_exit_paths.json`: Sequences that lead to users leaving the site with exit rates
 - `final_report.json`: Summary of key network metrics and insights
 - `final_report.csv`: Tabular format of network metrics for easy import
 - `dataset_info.json`: Metadata about the dataset generation parameters
@@ -26,6 +28,8 @@ outputs/
     ├── event_chokepoints.csv       # Friction point rankings
     ├── high_friction_flows.csv     # Problematic user flows
     ├── friction_node_map.json      # Node score mapping
+    ├── recurring_patterns.json     # Recurring sequences with node participation counts
+    ├── recurring_exit_paths.json   # Sequences leading to exits with exit rates
     ├── decision_table.csv          # UX recommendations
     ├── final_report.json           # Network analysis metrics
     └── final_report.csv            # Tabular metrics summary
@@ -38,6 +42,8 @@ The new output files include detailed network analytics:
 - **Clustering Coefficient**: Measure of interconnectedness between pages
 - **Percolation Threshold**: Critical point for network robustness
 - **Fractal Betweenness**: Centrality measures considering subgraph patterns
+- **Node Loop Counts**: Frequency of node participation in recurring patterns
+- **Exit Path Analysis**: Sequences leading to user exits with associated rates
 - **UX Recommendations**: Actionable insights based on network properties
 
 ## Usage

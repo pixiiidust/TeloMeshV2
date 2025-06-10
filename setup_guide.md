@@ -63,9 +63,11 @@ pip install -r requirements.txt
 - **Graph Building**: Create directed graphs (DiGraph and MultiDiGraph) of user flows
 - **Flow Metrics**: Validate session and graph quality metrics
 - **Friction Analysis**: Identify chokepoints and fragile flows in user journeys
-- **Advanced Network Analysis**: Calculate metrics like fractal dimension, power-law alpha, and more
+- **Advanced Network Analysis**: Calculate metrics like fractal dimension, power-law alpha, and fractal betweenness
+- **Interactive Priority Matrix**: Visualize nodes by structural importance and user friction with customizable scaling
+- **Recurring Patterns Analysis**: Detect repeating sequences and exit paths in user journeys
 - **UX Recommendations Engine**: Generate actionable insights based on network characteristics
-- **Dashboard**: Interactive visualization of friction points and user flows
+- **Interactive Dashboard**: Visualize friction points, user flows, and advanced network metrics
 - **Analytics Import**: Convert data from Mixpanel, Amplitude, and Google Analytics 4
 - **Dataset Management**: Create, organize, and switch between multiple datasets
 - **Performance Optimization**: Fast mode for processing large datasets efficiently
@@ -97,6 +99,7 @@ Advanced analysis components for discovering insights:
 #### `/ui`
 User interface components:
 - `dashboard.py` - Streamlit dashboard with interactive visualizations, filtering, and data export capabilities
+- `dashboard_v2.py` - Backup of the latest dashboard version with advanced metrics features
 - `dashboard_components.md` - Documentation about the dashboard components
 
 #### `/utils`
@@ -115,8 +118,7 @@ Generated data files organized by dataset:
   - `high_friction_flows.csv` - User journeys that contain multiple high-friction points
   - `friction_node_map.json` - Mapping of pages to WSJF scores for visualization
   - `decision_table.csv` - UX recommendations based on network analysis
-  - `final_report.json` - Summary of key network metrics
-  - `final_report.csv` - Tabular format of network metrics
+  - `metrics.json` - Summary of key network metrics and analysis results
   - `dataset_info.json` - Metadata about the dataset (creation timestamp, users, events, sessions)
 
 #### `/logs`
@@ -131,6 +133,7 @@ Test suites for each component:
 - `test_build_graph.py` - Tests for graph construction
 - `test_flow_metrics.py` - Tests for metrics calculation
 - `test_event_chokepoints.py` - Tests for friction point identification and network analysis
+- `test_advanced_metrics_tab.py` - Tests for advanced metrics visualization
 - `test_dashboard_ui.py` - Tests for UI components
 
 #### `/logos`
@@ -163,6 +166,9 @@ python main.py --dataset large_project --users 1000 --events 50 --fast
 
 # Create a MultiDiGraph instead of standard DiGraph
 python main.py --dataset multi_edge_project --users 100 --events 50 --multi
+
+# Control the number of unique pages/nodes in the generated graph
+python main.py --dataset custom_nodes --users 100 --events 50 --pages 32
 ```
 
 This will:
@@ -255,45 +261,43 @@ Where:
 
 TeloMesh includes sophisticated network analysis metrics:
 
-- **Fractal Dimension (D)**: Measures the complexity of user navigation patterns (1.0-3.0)
+- **Fractal Dimension (D)**: Measures the complexity of user navigation patterns (typically 2.0-3.0)
   - Lower values indicate simpler, more linear user flows
   - Higher values suggest complex, interconnected navigation patterns
   
-- **Power-law Alpha (α)**: Quantifies the degree distribution characteristics (typically 2.0-5.0)
-  - Higher values indicate more centralized hub-and-spoke structures
-  - Lower values suggest more distributed connection patterns
+- **Power-law Alpha (α)**: Quantifies the degree distribution characteristics (typically 1.8-2.6)
+  - Lower values indicate stronger hierarchy with vulnerable hub nodes
+  - Higher values suggest more uniform connection distribution
   
-- **Clustering Coefficient**: Measures how interconnected pages are (0.0-1.0)
-  - Higher values indicate groups of pages that are highly interconnected
-  - Lower values suggest more tree-like or linear structures
-  
-- **Percolation Threshold**: Identifies the critical point at which the network collapses (0.0-1.0)
+- **Percolation Threshold**: Identifies the critical point at which the network collapses (typically 0.2-0.5)
   - Lower values indicate fragile networks vulnerable to disruption
   - Higher values suggest more robust user journey structures
   
-- **Fractal Betweenness**: Enhanced centrality measure that considers repeating subgraph patterns
+- **Fractal Betweenness (FB)**: Enhanced centrality measure for structural importance (typically 0.6-1.0)
   - Identifies critical junction points in the user journey
   - Highlights pages that serve as connectors between different functional areas
   
-- **Repeating Subgraph Detection**: Identifies common navigation patterns in user journeys
+- **Recurring Patterns Detection**: Identifies common navigation loops and repetitive behaviors
   - Reveals frequently traversed paths and user behavior patterns
   - Helps identify optimizable sequences and workflows
+  
+- **Exit Path Analysis**: Detects sequences that frequently lead to users leaving the site
+  - Tracks exit rates for common departure sequences
+  - Reveals problematic paths that lead to user drop-off
 
 ### UX Recommendations Engine
 
 Based on network analysis, TeloMesh generates a decision table with actionable UX recommendations:
 
-- **Structural Role Classification**: Automatically categorizes pages into roles:
-  - Standard pages: Normal content or functional pages
-  - Bottlenecks: Pages with high friction that impede user flow
-  - Critical junctions: Pages that connect multiple user paths
-  - Hub pages: Central navigation points with multiple connections
+- **Priority Matrix Classification**: Automatically categorizes pages into quadrants:
+  - High Priority: High structural importance AND high user friction
+  - User Friction Only: Pages causing friction but not critical to site structure
+  - Structural Only: Important navigation nodes with low friction
+  - Low Priority: Less important pages with minimal friction
   
-- **Pattern Recognition**: Identifies common UX patterns requiring attention:
-  - Linear bottlenecks: Sequential paths with high friction
-  - Hub-and-spoke issues: Central pages causing navigation problems
-  - Tree hierarchy friction: Navigational branches with varying friction
-  - Complex mesh simplification: Overlapping page networks needing streamlining
+- **Percolation Role**: Classifies nodes based on network resilience impact:
+  - Critical nodes: Removing these would severely disrupt network connectivity
+  - Standard nodes: Less critical for overall network stability
   
 - **Actionable Recommendations**: Provides specific suggestions tailored to page characteristics:
   - Design improvements for high-friction pages
@@ -302,7 +306,7 @@ Based on network analysis, TeloMesh generates a decision table with actionable U
   - Structural changes for inefficient user flows
   
 - **Decision Priority**: Ranks improvement opportunities by potential impact:
-  - Based on combined metrics (WSJF, network position, user volume)
+  - Based on combined metrics (WSJF, FB, percolation role)
   - Considers both page-level and flow-level optimizations
 
 ## Output Files
@@ -317,37 +321,63 @@ TeloMesh generates several key output files for analysis:
 ### Advanced Analysis Files
 - **decision_table.csv**: UX recommendations table with the following columns:
   - `node`: Page identifier
-  - `D`: Fractal dimension
-  - `alpha`: Power-law exponent
-  - `FB`: Fractal betweenness
+  - `FB`: Fractal betweenness (structural importance)
   - `percolation_role`: Critical/Standard classification
   - `wsjf_score`: Weighted friction score
-  - `ux_label`: Pattern classification (e.g., "linear bottleneck")
+  - `ux_label`: Pattern classification (e.g., "redundant bottleneck")
   - `suggested_action`: Specific recommendation
 
-- **final_report.json**: JSON summary of key network metrics, including:
+- **metrics.json**: JSON summary of key network metrics, including:
   - `fractal_dimension`: Overall complexity measure
   - `power_law_alpha`: Degree distribution exponent
-  - `clustering_coefficient`: Network interconnectedness
   - `percolation_threshold`: Network robustness measure
-  - `top_fb_nodes`: Highest fractal betweenness pages
-  - `top_chokepoints`: Highest WSJF friction pages
-
-- **final_report.csv**: Tabular version of the same metrics for easy import into spreadsheets or dashboards
+  - `recurring_patterns`: Repeating sequence information
+  - `exit_paths`: Common exit sequences with exit rates
+  - `network_metrics`: Graph statistics and structural properties
 
 ## Dashboard UI Overview
 
-The TeloMesh dashboard consists of three main tabs:
+The TeloMesh dashboard consists of four main tabs:
 
 1. **Friction Analysis**: Table of user event friction points ranked by user dropoffs, exit rate and WSJF score
 2. **User Flow Analysis**: Summaries of user journeys with multiple friction points across path steps
 3. **User Journey Graph**: Interactive visualization of user flow terrain with friction highlighted across connecting events
-   - Color-coded nodes by friction percentile (🔴 Top 10%, 🟠 Top 20%, 🟢 Top 50%, ⚪ Lower friction)
-   - Three layout options when physics is disabled:
-     - Friction Levels: Nodes arranged by friction severity (problems at top)
-     - Funnel Stages: Nodes arranged by user journey stage (entry → exit)
-     - Journey Centrality: Nodes arranged by betweenness centrality (hubs centered)
-   - Configurable physics settings with optimized parameters
+4. **Advanced Metrics**: Network analysis visualizations including FB vs WSJF Priority Matrix and Recurring Patterns analysis
+
+### User Journey Graph Features
+- Color-coded nodes by friction percentile (🔴 Top 10%, 🟠 Top 20%, 🟢 Top 50%, ⚪ Lower friction)
+- Three layout options when physics is disabled:
+  - Friction Levels: Nodes arranged by friction severity (problems at top)
+  - Funnel Stages: Nodes arranged by user journey stage (entry → exit)
+  - Journey Centrality: Nodes arranged by betweenness centrality (hubs centered)
+- Configurable physics settings with optimized parameters
+
+### Advanced Metrics Features
+- **FB vs WSJF Priority Matrix**: Interactive scatter plot visualizing nodes by structural importance and user friction
+  - Customizable scaling options (actual range, normalized, full range)
+  - Quadrant-based prioritization (High Priority, User Friction Only, Structural Only, Low Priority)
+  - Log scale options for better visualization of skewed data
+  - Node labeling options with customizable highlighting
+  
+- **Recurring User Flow Patterns**: Analysis of repeating sequences in user journeys
+  - Identification of common loops and navigation patterns
+  - Exit path analysis showing sequences that lead to users leaving the site
+  - Visualization of pattern frequency and participation rates
+  
+- **Network Stability Analysis**: Percolation threshold visualization
+  - Simulation of network resilience to node removal
+  - Critical node identification for maintaining network integrity
+  
+- **Network Structure Metrics**: Global metrics with diagnostic indicators
+  - Fractal Dimension (D): Measures navigation complexity
+  - Power-Law Alpha (α): Quantifies degree distribution characteristics
+  - Percolation Threshold: Identifies network fragility
+
+### Sidebar Components
+- **Advanced Metrics Glossary**: Detailed explanations of all metrics and their interpretations
+- **Graph Statistics**: Key network statistics including node count, edge count, and edge/node ratio
+- **Dataset Selection**: Dropdown menu for selecting different datasets
+- **Dataset Info**: Metadata about the currently selected dataset
 
 Each section includes detailed tooltips explaining the metrics and interactive elements for exploring the data.
 
@@ -391,4 +421,52 @@ After identifying friction points, consider:
 
 ## Getting Help
 
-For more information, check the documentation in the repository or open an issue on the GitHub repository. 
+For more information, check the documentation in the repository or open an issue on the GitHub repository.
+
+### Session Parsing Options
+
+```bash
+# Parse sessions with default settings
+python main.py --stage parse --dataset myproject
+
+# Parse sessions with custom session gap (45 minutes instead of default 30)
+python main.py --stage parse --dataset myproject --session-gap 45
+```
+
+The session gap parameter controls how TeloMesh identifies distinct user sessions:
+- Default: 30 minutes (industry standard)
+- Shorter gaps (e.g., 15 minutes): Creates more granular sessions, useful for fast-paced applications
+- Longer gaps (e.g., 60 minutes): Better for content-heavy sites where users spend more time between interactions
+
+## All Available Parameters
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `--dataset` | `default` | Name of the dataset to create |
+| `--users` | `100` | Number of users to generate in synthetic data |
+| `--events` | `50` | Average number of events per user |
+| `--pages` | `16` | Number of unique pages (nodes) to generate |
+| `--session-gap` | `30` | Minutes of inactivity to consider as a new session boundary |
+| `--fast` | `False` | Skip slow scaling tests and detailed output |
+| `--multi` | `False` | Create MultiDiGraph that preserves multiple edge types |
+| `--stage` | `all` | Which stage to run (all, synthetic, parse, graph, metrics, chokepoints, dashboard) |
+| `--input` | `None` | Path to input events file (instead of generating synthetic data) |
+
+## Pipeline Stages
+
+```bash
+# Generate synthetic events for a specific dataset
+python main.py --stage synthetic --dataset myproject --users 100 --events 50
+
+# Parse events into sessions for a specific dataset
+python main.py --stage parse --dataset myproject
+
+# Build user journey graph for a specific dataset
+python main.py --stage graph --dataset myproject --multi
+
+# Validate flow metrics for a specific dataset
+python main.py --stage metrics --dataset myproject
+
+# Analyze friction points for a specific dataset
+python main.py --stage chokepoints --dataset myproject --fast
+```

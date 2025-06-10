@@ -1,0 +1,7 @@
+{
+  "dataset_name": "test_large_dataset",
+  "creation_timestamp": "2025-06-09T20:22:06.835758",
+  "num_users": 1000,
+  "num_events": 14893,
+  "num_sessions": 2981
+}

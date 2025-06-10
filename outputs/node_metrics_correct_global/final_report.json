@@ -1,0 +1,55 @@
+{
+  "fractal_dimension": 1.0,
+  "power_law_alpha": 5.0,
+  "clustering_coefficient": 0.9829670329670329,
+  "percolation_threshold": 0.5,
+  "top_fb_nodes": [
+    [
+      "/settings",
+      11462.0
+    ],
+    [
+      "/search",
+      9988.938144329895
+    ],
+    [
+      "/account",
+      8650.577319587628
+    ],
+    [
+      "/product/123",
+      8137.480455326459
+    ],
+    [
+      "/product/789",
+      7984.352448453606
+    ]
+  ],
+  "top_chokepoints": [
+    [
+      "/settings",
+      "Add to Cart",
+      0.6666666666666666
+    ],
+    [
+      "/products",
+      "Form Submit",
+      0.5037943871706758
+    ],
+    [
+      "/settings",
+      "Login",
+      0.5
+    ],
+    [
+      "/search",
+      "Form Submit",
+      0.4613402061855669
+    ],
+    [
+      "/register",
+      "Login",
+      0.4494201030927834
+    ]
+  ]
+}

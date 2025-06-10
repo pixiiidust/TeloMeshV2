@@ -1,0 +1,54 @@
+{
+  "fractal_dimension": -0.0,
+  "power_law_alpha": NaN,
+  "percolation_threshold": 0.5,
+  "top_fb_nodes": [
+    [
+      "/account",
+      14301.0
+    ],
+    [
+      "/login",
+      11819.173417035123
+    ],
+    [
+      "/settings",
+      11677.201363977643
+    ],
+    [
+      "/blog",
+      11664.376157503964
+    ],
+    [
+      "/checkout",
+      8764.686451989657
+    ]
+  ],
+  "top_chokepoints": [
+    [
+      "/account",
+      "Checkout",
+      0.2692307692307692
+    ],
+    [
+      "/account",
+      "Register",
+      0.25757575757575757
+    ],
+    [
+      "/account",
+      "Add to Cart",
+      0.2537313432835821
+    ],
+    [
+      "/settings",
+      "Logout",
+      0.24374042028117526
+    ],
+    [
+      "/account",
+      "Login",
+      0.2413793103448276
+    ]
+  ]
+}

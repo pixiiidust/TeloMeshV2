@@ -32,6 +32,9 @@
    
    # For multi-graph analysis
    python main.py --dataset detailed_analysis --users 100 --events 50 --multi
+   
+   # Control the number of unique pages (nodes) in the graph
+   python main.py --dataset node_control --users 100 --events 50 --pages 32
    ```
 
 4. Run the dashboard to analyze your data:
@@ -39,7 +42,7 @@
    streamlit run ui/dashboard.py
    ```
 
-For more detailed setup instructions, see the [Setup Guide](setup_guide.md).
+For more detailed setup instructions and command-line parameters, see the [Setup Guide](setup_guide.md).
 
 ## Key Features
 
@@ -71,17 +74,21 @@ For more detailed setup instructions, see the [Setup Guide](setup_guide.md).
 ### 4. Advanced Network Analysis
 - Fractal dimension calculation to measure user journey complexity
 - Power-law alpha exponent to quantify network degree distribution
-- Clustering coefficient analysis to evaluate page interconnectedness
 - Percolation threshold simulation to assess network robustness
-- Fractal betweenness centrality combining structural importance with repeating patterns
-- Repeating subgraph detection to identify common navigation paths
+- Fractal betweenness centrality combining structural importance with network structure
+- Interactive FB vs WSJF Priority Matrix with customizable visualization options
+- Recurring patterns detection to identify common navigation loops
+- Exit path analysis with exit rate tracking for dropout sequences
+- Node participation analysis showing which pages appear most frequently in recurring patterns
+- Network statistics dashboard with node/edge ratios and connectivity metrics
 
 ### 5. UX Recommendations Engine
 - Decision table with actionable UX insights based on network metrics
-- Automatic classification of pages into structural role categories
+- Quadrant-based prioritization system (High Priority, User Friction Only, Structural Only, Low Priority)
+- Automatic classification of pages into critical and standard roles
 - Specific improvement suggestions tailored to page characteristics
 - Network pattern recognition for identifying UI/UX optimization opportunities
-- Comprehensive final report with key metrics and top issues
+- Comprehensive metrics glossary with detailed explanations of all metrics
 
 ### 6. Dataset Organization
 - Create and manage multiple datasets with `--dataset` parameter
@@ -91,7 +98,7 @@ For more detailed setup instructions, see the [Setup Guide](setup_guide.md).
 
 ### 7. Performance Optimization
 - Fast mode for processing large datasets efficiently
-- Optimized algorithms for subgraph detection
+- Optimized algorithms for pattern detection
 - Reduced computational complexity for network analysis
 - Processing time improvements of up to 70% for datasets with 1000+ users
 - Memory usage optimization for complex graphs
@@ -251,3 +258,35 @@ If you're interested in contributing to any of these future features, please see
 - `.gitignore` - Configuration for Git to exclude temporary files
 - `utils/analytics_converter.py` - Tool for converting data from analytics platforms
 - `utils/GUIDE.md` - Detailed guide for using the Analytics Converter
+
+### Developing with TeloMesh
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/TeloMesh.git
+   cd TeloMesh
+   ```
+
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Generate a dataset and run the pipeline:
+   ```bash
+   # Standard analysis
+   python main.py --dataset myproject --users 100 --events 50
+   
+   # For large datasets with performance optimization
+   python main.py --dataset large_project --users 1000 --events 50 --fast
+   
+   # For multi-graph analysis
+   python main.py --dataset detailed_analysis --users 100 --events 50 --multi
+   
+   # Control the number of unique pages (nodes) in the graph
+   python main.py --dataset node_control --users 100 --events 50 --pages 32
+   ```
+
+See `setup_guide.md` for detailed parameter documentation and advanced usage examples.
+
+### Directory Structure

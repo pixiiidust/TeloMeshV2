@@ -31,6 +31,9 @@ python utils/analytics_converter.py --input ga4_export.csv --output converted_da
 
 # Convert and prepare for TeloMesh in one step
 python utils/analytics_converter.py --input mixpanel_export.csv --output data/events.csv --format mixpanel --telomesh-format
+
+# Convert with custom session gap (time between events to consider a new session)
+python utils/analytics_converter.py --input mixpanel_export.csv --output data/events.csv --format mixpanel --session-gap 45
 ```
 
 ### Generating Sample Data
@@ -65,6 +68,7 @@ python utils/analytics_converter.py --generate-sample --format mixpanel --users 
 | `--generate-sample` | Generate sample data instead of converting |
 | `--users` | Number of users for sample data (default: 10) |
 | `--events-per-user` | Events per user for sample data (default: 6) |
+| `--session-gap` | Minutes of inactivity to consider as a new session (default: 30) |
 
 ## Data Format
 
@@ -126,6 +130,13 @@ If your data doesn't include proper session IDs, the converter will automaticall
 - User ID
 - Timestamp
 - Session gap (default: 30 minutes) - Any gap larger than this between events for the same user will start a new session
+
+The session gap parameter is particularly important for accurate user journey analysis:
+- Too short (< 15 min): May fragment single sessions into multiple ones, creating artificial breaks
+- Too long (> 60 min): May combine separate visits into one session, blurring distinct user journeys
+- Default (30 min): Industry standard that works well for most websites and applications
+
+You can adjust this with the `--session-gap` parameter based on your specific application's user behavior patterns.
 
 ## Working with Custom Data
 

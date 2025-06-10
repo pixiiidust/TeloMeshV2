@@ -3,13 +3,14 @@ import os
 import pandas as pd
 from datetime import datetime, timedelta
 
-def parse_sessions(input_csv="data/events.csv", output_csv="outputs/session_flows.csv"):
+def parse_sessions(input_csv="data/events.csv", output_csv="outputs/session_flows.csv", session_gap_minutes=30):
     """
     Parse event data from CSV format to a flattened session flows CSV format.
     
     Args:
         input_csv (str): Path to the input CSV file containing event data.
         output_csv (str): Path to the output CSV file.
+        session_gap_minutes (int): Minutes of inactivity to consider as a new session boundary. Default is 30.
     
     Returns:
         pd.DataFrame: The parsed session data as a DataFrame.
@@ -26,7 +27,7 @@ def parse_sessions(input_csv="data/events.csv", output_csv="outputs/session_flow
     # Sort by user_id and timestamp
     df = df.sort_values(['user_id', 'timestamp'])
     
-    # If session_id is not already in the data, split sessions based on 30 min idle gap
+    # If session_id is not already in the data, split sessions based on session_gap_minutes idle gap
     if 'session_id' not in df.columns:
         # Group by user_id
         user_groups = df.groupby('user_id')
@@ -51,8 +52,8 @@ def parse_sessions(input_csv="data/events.csv", output_csv="outputs/session_flow
             for i in range(1, len(user_df)):
                 current_timestamp = user_df.iloc[i]['timestamp']
                 
-                # Check if idle gap is > 30 minutes
-                if (current_timestamp - last_timestamp) > timedelta(minutes=30):
+                # Check if idle gap is > session_gap_minutes
+                if (current_timestamp - last_timestamp) > timedelta(minutes=session_gap_minutes):
                     # Start a new session
                     session_counter += 1
                     session_id = f"session_{user_id}_{session_counter:02d}"
@@ -108,11 +109,13 @@ def main():
                         help="Path to the input CSV file")
     parser.add_argument("--output", type=str, default="outputs/session_flows.csv", 
                         help="Path to the output CSV file")
+    parser.add_argument("--session-gap", type=int, default=30,
+                        help="Minutes of inactivity to consider as a new session boundary")
     
     args = parser.parse_args()
     
-    print(f"Parsing events from {args.input} to {args.output}...")
-    df = parse_sessions(args.input, args.output)
+    print(f"Parsing events from {args.input} to {args.output} with {args.session_gap} minute session gap...")
+    df = parse_sessions(args.input, args.output, args.session_gap)
     
     # Print some stats
     unique_users = df["user_id"].nunique()
@@ -132,12 +135,14 @@ if __name__ == "__main__":
     parser.add_argument("--output_path", type=str, default="outputs/session_flows.csv", help="CSV output path")
     parser.add_argument("--fast", action="store_true", help="Skip slow scaling tests during development")
     parser.add_argument("--input_path", type=str, default="data/events.csv", help="CSV input path")
+    parser.add_argument("--session-gap", type=int, default=30,
+                        help="Minutes of inactivity to consider as a new session boundary")
 
     args = parser.parse_args()
 
     # Parse the sessions
-    print(f"Parsing events from {args.input_path} to {args.output_path}...")
-    df = parse_sessions(args.input_path, args.output_path)
+    print(f"Parsing events from {args.input_path} to {args.output_path} with {args.session_gap} minute session gap...")
+    df = parse_sessions(args.input_path, args.output_path, args.session_gap)
     
     # Print stats
     unique_users = df["user_id"].nunique()
