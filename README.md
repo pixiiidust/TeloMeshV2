@@ -50,60 +50,30 @@ TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA
 
 ## Key Features
 
-### 1. Friction Points Analysis
-- Identifies and ranks individual (page, event) pairs by WSJF Friction Score
-- Calculates exit probability and lost user volume
-- Highlights structural weaknesses in the user journey
+### 1. Friction Analysis Dashboard
+- Rank UX pain points by WSJF score (weighted combination of exit rate and structural importance)
+- Identify high-impact abandonment points with quantified user loss metrics
+- Export prioritized opportunities for roadmap planning and team alignment
 
-### 2. User Journey Graph
-- Visual representation of user journeys with friction highlighted
-- Color-coded nodes based on friction percentile:
-  - Red: Top 10% friction (highest WSJF scores)
-  - Yellow: Top 20% friction 
-  - Green: Top 50% friction
-  - Gray: Lower friction nodes
-- Multiple layout options when physics is disabled:
-  - Friction Levels: Nodes arranged by friction severity
-  - Funnel Stages: Nodes arranged in entry-to-exit order
-  - Journey Centrality: Nodes arranged by betweenness centrality
-- Interactive graph visualization with tooltips and event details
-- Configurable physics settings with optimized gravitational constant
-- Multi-graph support for preserving detailed user journey paths
+### 2. Interactive Journey Visualization
+- Color-coded journey graph with friction hotspots (red for highest WSJF scores)
+- Multiple view options: Friction Levels, Funnel Stages, or Journey Centrality
+- Interactive exploration with tooltips, physics controls, and multi-graph support
 
 ### 3. User Flow Analysis
-- Identifies user paths containing multiple high-friction points
-- Flow Sequences tab shows multi-step user journey sessions with 2+ chokepoints
-- Transition Pairs tab reveals common page-to-page transitions across sessions
-- Highlights sequences where users encounter cascading obstacles
-- Prioritizes flow improvements based on cumulative friction
-- Filters by path length steps and chokepoint count
+- Flow Sequences tab shows multi-step user journeys containing multiple chokepoints
+- Transition Pairs tab reveals common page-to-page navigation patterns causing friction
+- Filter and sort by path length, chokepoint count, and friction severity
 
-### 4. Advanced Network Analysis & UX Recommendations (WIP)
-- Network Structure Metrics: Fractal dimension (journey complexity), Power-law alpha (hierarchy), and Percolation threshold (stability)
-- Decision Table: Actionable UX insights with quadrant-based prioritization (High Priority, User Friction Only, Structural Only, Low Priority)
-- Priority Matrix: Interactive visualization of structural importance vs user friction
-- Pattern Detection: Identify recurring navigation loops and common exit paths
-- Critical Pages Analysis: Automatic classification of pages into critical vs standard roles with specific improvement suggestions
-- Network Statistics: Measure system connectivity, resilience, and node participation metrics
-- Comprehensive Metrics Glossary: Detailed explanations for advanced users
+### 4. Advanced Network Metrics & Recommendations (WIP)
+- Network structure analysis with fractal dimension, power-law alpha, and percolation threshold
+- Decision table with quadrant-based prioritization and page-specific UX recommendations
+- Pattern detection for recurring navigation loops and critical structural chokepoints
 
-### 5. Dataset Organization
-- Create and manage multiple datasets with `--dataset` parameter
-- Dataset metadata tracking (users, events, sessions, timestamp)
-- Dataset discovery and selection in the dashboard UI
-- Isolated outputs for multiple projects/experiments
-
-### 6. Performance Optimization
-- Fast mode for processing large datasets efficiently
-- Optimized algorithms for pattern detection
-- Reduced computational complexity for network analysis
-- Processing time improvements of up to 70% for datasets with 1000+ users
-- Memory usage optimization for complex graphs
-
-### 7. Analytics Converter Utility
-- Convert data from Mixpanel, Amplitude, and Google Analytics 4
-- Automated column mapping for seamless integration
-- Sample data generation for testing
+### 5. Enterprise Features
+- **Dataset Organization**: Create and manage multiple datasets with dashboard selection
+- **Performance Optimization**: Fast mode processing with 70% speed improvement for large datasets
+- **Analytics Integration**: Convert data from Mixpanel, Amplitude, and Google Analytics 4
 
 ## Theory & Methodology
 
@@ -234,7 +204,6 @@ For more details on contributing to these features, see our [contribution guidel
 ## Repository Structure
 
 ### Core Directories
-
 - `data/` - Data generation tools and input data storage
 - `ingest/` - Data ingestion and session parsing
 - `analysis/` - Analysis of user flows and friction points
@@ -245,7 +214,6 @@ For more details on contributing to these features, see our [contribution guidel
 - `logs/` - Logging and monitoring data
 
 ### Key Files
-
 - `main.py` - Entry point for the pipeline with command-line arguments
 - `requirements.txt` - Package dependencies for easy installation
 - `directory_structure.lua` - Canonical definition of project structure
@@ -257,30 +225,30 @@ For more details on contributing to these features, see our [contribution guidel
 
 ### Developing with TeloMesh
 
-1. Clone the repository:
+For developers looking to contribute or customize:
+
+1. Set up your development environment:
    ```bash
-   git clone https://github.com/yourusername/TeloMesh.git
+   # Clone the repo with development branch
+   git clone -b dev https://github.com/yourusername/TeloMesh.git
    cd TeloMesh
+   
+   # Install dev dependencies
+   pip install -r requirements-dev.txt
    ```
 
-2. Install dependencies:
+2. Run tests to verify your setup:
    ```bash
-   pip install -r requirements.txt
+   python -m pytest tests/
    ```
 
-3. Generate a dataset and run the pipeline:
+3. Common development workflows:
    ```bash
-   # Standard analysis
-   python main.py --dataset myproject --users 100 --events 50
+   # Generate test dataset and run in debug mode
+   python main.py --dataset test_dev --users 20 --events 15 --debug
    
-   # For large datasets with performance optimization
-   python main.py --dataset large_project --users 1000 --events 50 --fast
-   
-   # For multi-graph analysis
-   python main.py --dataset detailed_analysis --users 100 --events 50 --multi
-   
-   # Control the number of unique pages (nodes) in the graph
-   python main.py --dataset node_control --users 100 --events 50 --pages 32
+   # Run the dashboard with hot reloading
+   streamlit run ui/dashboard.py --server.runOnSave=true
    ```
 
-See `setup_guide.md` for detailed parameter documentation and advanced usage examples.
+See [contributing.md](contributing.md) for code style guidelines and pull request process.
