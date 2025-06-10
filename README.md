@@ -176,7 +176,7 @@ Map priorities with user journey graphs:
 ## New in Version 2.1
 - Dataset organization and discovery
 - Enhanced dashboard with improved UI labels and descriptions
-- Customizable dark theme with improved visualization
+- Improved visualization for dark theme
 - Multi-dataset support for A/B testing comparison
 - Updated terminology for improved clarity
 
@@ -226,7 +226,7 @@ The TeloMesh roadmap includes several enhancements planned for upcoming versions
 - **Team Collaboration**: Multi-user support with commenting and sharing
 - **Export to Product Management Tools**: Integration with JIRA, Aha!, and other PM tools
 
-If you're interested in contributing to any of these future features, please see our [contribution guidelines](CONTRIBUTING.md).
+If you're interested in contributing to any of these future features, please see our [contribution guidelines](contributing.md).
 
 ## Repository Structure
 
