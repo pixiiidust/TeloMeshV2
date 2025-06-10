@@ -209,51 +209,24 @@ Advanced Network Metrics leverages network science techniques to provide deeper 
 
 ## Future Versions
 
-The TeloMesh roadmap includes several enhancements planned for upcoming versions:
+The TeloMesh roadmap is organized by complexity and priority:
 
-### Customizable WSJF Friction Scoring Framework
-- **Custom user-defined metrics**, including revenue loss per exit, conversion rate impact, and custom business metrics
-- **Multi-factor scoring models** that can be tuned for different business priorities
-- **Weighted page importance** based on business value or revenue impact
-- **Integration with A/B testing frameworks** for measuring before/after improvement impact
-- **Custom threshold settings** for friction classification and alerting
+### 1. Core Enhancements (Near-term)
+- **Customizable Scoring:** User-defined metrics (revenue impact, conversion rates) and weighted page importance
+- **Advanced Analytics:** Journey comparison, segmentation analysis, and custom North Star Metrics 
+- **Visualization Improvements:** Interactive simulations, executive dashboards, and custom themes
 
-### Enterprise Scale
-- **Massive Session Testing**: Scale to analyzing datasets with millions of sessions
-- **Distributed Processing**: Support for processing huge datasets across multiple nodes
-- **Cloud Deployment**: Containerized deployment for cloud environments
-- **Real-time Analysis**: Stream processing of incoming user data
-- **Long-term Trend Analysis**: Track UX improvements over time with historical comparisons
+### 2. Enterprise Features (Mid-term)
+- **Scale & Performance:** Support for millions of sessions, distributed processing, and cloud deployment
+- **Integration:** Native connections to analytics platforms, data warehouses, and PM tools (JIRA, Aha!)
+- **Team Collaboration:** Multi-user support with commenting and sharing capabilities
 
-### AI-Powered UX Optimization
-- **Machine learning-based friction prediction** to identify potential issues before they occur
-- **Automatic pattern detection** for complex user behavior
-- **Semantic clustering** of user journeys and intent mapping
-- **Natural language explanations** of complex network patterns
-- **Generative AI recommendations** for UX improvements
+### 3. AI & Advanced Capabilities (Long-term)
+- **Machine Learning:** Friction prediction, automatic pattern detection, and semantic clustering
+- **Generative AI:** Natural language explanations and AI-powered UX recommendations
+- **Advanced Visualization:** 3D journey mapping, animation of flow changes, and percolation simulations
 
-### Extended Visualization
-- **3D graph visualization** for complex user journey spaces
-- **Interactive simulation** of UX changes and their potential impact
-- **Executive dashboards** with high-level KPIs and metrics
-- **Custom visualization themes** for branded reports
-- **Animation of user flow changes** over time or between versions
-
-### Advanced Analytics
-- **Custom NSM Settings**: Allow Global North Star Metrics to be defined for specific pages/events
-- **Journey Comparison**: Compare before/after journeys to measure A/B testing improvement impact
-- **Segmentation Analysis**: Filter friction analysis by user segments and cohorts
-- **Predictive Flow Modeling**: Predict potential friction points in proposed new user journeys
-- **Funnel Analysis**: Advanced conversion funnel visualization and optimization
-
-### Enterprise Integration
-- **Direct API Connections**: Native integrations with major analytics platforms
-- **Data Warehousing**: Connect directly to data warehouses like Snowflake or BigQuery
-- **CI/CD Integration**: Automate friction analysis as part of continuous integration pipelines
-- **Team Collaboration**: Multi-user support with commenting and sharing
-- **Export to Product Management Tools**: Integration with JIRA, Aha!, and other PM tools
-
-If you're interested in contributing to any of these future features, please see our [contribution guidelines](contributing.md).
+For more details on contributing to these features, see our [contribution guidelines](contributing.md).
 
 ## Repository Structure
 
