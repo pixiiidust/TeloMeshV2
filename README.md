@@ -78,14 +78,14 @@ TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA
 - Prioritizes flow improvements based on cumulative friction
 - Filters by path length steps and chokepoint count
 
-### 4. Advanced Network Analysis & UX Recommendations
-- **Network Structure Metrics:** Fractal dimension (journey complexity), Power-law alpha (hierarchy), and Percolation threshold (stability)
-- **Decision Table:** Actionable UX insights with quadrant-based prioritization (High Priority, User Friction Only, Structural Only, Low Priority)
-- **Priority Matrix:** Interactive visualization of structural importance vs user friction
-- **Pattern Detection:** Identify recurring navigation loops and common exit paths
-- **Critical Pages Analysis:** Automatic classification of pages into critical vs standard roles with specific improvement suggestions
-- **Network Statistics:** Measure system connectivity, resilience, and node participation metrics
-- **Comprehensive Metrics Glossary:** Detailed explanations for advanced users
+### 4. Advanced Network Analysis & UX Recommendations (WIP)
+- Network Structure Metrics: Fractal dimension (journey complexity), Power-law alpha (hierarchy), and Percolation threshold (stability)
+- Decision Table: Actionable UX insights with quadrant-based prioritization (High Priority, User Friction Only, Structural Only, Low Priority)
+- Priority Matrix: Interactive visualization of structural importance vs user friction
+- Pattern Detection: Identify recurring navigation loops and common exit paths
+- Critical Pages Analysis: Automatic classification of pages into critical vs standard roles with specific improvement suggestions
+- Network Statistics: Measure system connectivity, resilience, and node participation metrics
+- Comprehensive Metrics Glossary: Detailed explanations for advanced users
 
 ### 5. Dataset Organization
 - Create and manage multiple datasets with `--dataset` parameter
