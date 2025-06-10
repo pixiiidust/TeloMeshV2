@@ -9,7 +9,7 @@
 - [Getting Started](#getting-started)
 - [Dashboard Screenshots](#dashboard-screenshots)
 - [Theory & Methodology](#theory--methodology)
-- [For Product Managers](#for-product-managers)
+- [For Product Teams](#for-product-managers)
 - [What's New](#whats-new)
 - [Roadmap](#future-versions)
 - [Developer Guide](#developing-with-telomesh)
@@ -19,7 +19,7 @@
 
 TeloMesh is a user-journey analysis pipeline that transforms session and event data into a directed graph of user flows. It provides:
 
-- **Actionable decision logic** for product and UX managers to identify patterns, triage chokepoints, and prioritize improvements  
+- **Actionable decision logic** for product and UX teams to identify patterns, triage chokepoints, and prioritize improvements  
 - **Efficient opportunity detection** using advanced network-analysis metrics  
 - **Scalable performance** for large datasets, with tailored UX recommendations  
 
@@ -137,9 +137,9 @@ Advanced Network Metrics leverages network science techniques to provide deeper 
 <br>
 <img src="https://github.com/user-attachments/assets/85e4729a-eb33-4b9e-9825-c92dcce76664" width="100%"/>
 
-## For Product Managers
+## For Product Teams
 
-TeloMesh helps product managers by:
+TeloMesh helps product teams by:
 - Quantifying UX friction points for prioritization
 - Visualizing critical user journey bottlenecks
 - Identifying high-impact improvement opportunities
