@@ -1,4 +1,6 @@
-Most **regular product teams triage user flows** using **event-based analytics**, **heuristics**, and **team intuition**, rather than structural or graph-based reasoning. This works *well enough* for straightforward products — but it breaks down in complex, multi-step environments. Here’s how the typical triage flow works:
+Most **regular product teams triage user flows** using **event-based analytics**, **heuristics**, and **team intuition**, rather than structural or systems, graph-based reasoning. 
+
+This works *well enough* for straightforward products — but it breaks down in complex, multi-step environments. Here’s how the typical triage flow works:
 
 ---
 
