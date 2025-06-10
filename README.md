@@ -72,8 +72,11 @@ TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA
 
 ### 3. User Flow Analysis
 - Identifies user paths containing multiple high-friction points
+- Flow Sequences tab shows multi-step user journey sessions with 2+ chokepoints
+- Transition Pairs tab reveals common page-to-page transitions across sessions
 - Highlights sequences where users encounter cascading obstacles
 - Prioritizes flow improvements based on cumulative friction
+- Filters by path length steps and chokepoint count
 
 ### 4. Advanced Network Analysis
 - Fractal dimension calculation to measure user journey complexity
@@ -181,8 +184,10 @@ Map priorities with user journey graphs:
 - Advanced network analysis with fractal dimension and power-law metrics
 - Multi-graph support for detailed user journey analysis
 - UX recommendations engine with decision table
+- Enhanced Flow Analysis with separate Flow Sequences and Transition Pairs tabs
 - Performance optimization with fast mode for large datasets
 - Enhanced output with comprehensive network metrics reports
+- Improved UI labels and descriptions for better clarity
 
 ## New in Version 2.1
 - Dataset organization and discovery
