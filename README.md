@@ -292,5 +292,3 @@ If you're interested in contributing to any of these future features, please see
    ```
 
 See `setup_guide.md` for detailed parameter documentation and advanced usage examples.
-
-### Directory Structure
