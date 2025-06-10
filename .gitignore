@@ -166,3 +166,15 @@ Telomesh lovable stage.md
 # Generated output files
 outputs/*.json
 outputs/*.gpickle 
+
+# Ignore all dataset folders in outputs except default
+outputs/*/
+!outputs/default/
+!outputs/analysis_results.md
+
+# Ignore all dataset folders in data except default
+data/*/
+!data/default/
+!data/synthetic_data.md
+!data/synthetic_event_generator.py
+!data/__init__.py 
