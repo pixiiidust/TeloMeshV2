@@ -105,8 +105,7 @@ User interface components:
 #### `/utils`
 Utility scripts and tools:
 - `analytics_converter.py` - Tool for converting data from Mixpanel, Amplitude, and GA4 to TeloMesh format
-- `README.md` - Overview of the utilities available
-- `GUIDE.md` - Detailed guide for using the Analytics Converter
+- `README.md` - Comprehensive documentation for the Analytics Converter
 
 #### `/outputs`
 Generated data files organized by dataset:
@@ -245,7 +244,7 @@ If you don't have real analytics data, you can generate realistic sample data:
 python utils/analytics_converter.py --generate-sample --format amplitude --output data/myproject/events.csv --telomesh-format
 ```
 
-For detailed documentation on analytics conversion, see the [Analytics Converter Guide](utils/GUIDE.md).
+For detailed documentation on analytics conversion, see the [Analytics Converter Guide](utils/README.md).
 
 ## Analysis Methodology
 

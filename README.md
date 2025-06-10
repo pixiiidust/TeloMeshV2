@@ -85,9 +85,9 @@ TeloMesh enhances existing analytics platforms such as Mixpanel / Amplitude / GA
    python main.py --dataset node_control --users 100 --events 50 --pages 32
    
    # Import your own analytics data
-   python utils/analytics_converter.py --source mixpanel --input your_data.json --output mydata
-   python utils/analytics_converter.py --source ga4 --input your_data.csv --output mydata
-   python utils/analytics_converter.py --source amplitude --input your_data.json --output mydata
+   python utils/analytics_converter.py --source mixpanel --input your_data.json --output mydata --telomesh-format
+   python utils/analytics_converter.py --source ga4 --input your_data.csv --output mydata --telomesh-format
+   python utils/analytics_converter.py --source amplitude --input your_data.json --output mydata --telomesh-format
    ```
 
 4. Run the dashboard to analyze your data:
@@ -274,4 +274,4 @@ See [contributing.md](contributing.md) for code style guidelines and pull reques
 - `.streamlit/config.toml` - Streamlit configuration for dark theme and UI settings
 - `.gitignore` - Configuration for Git to exclude temporary files
 - `utils/analytics_converter.py` - Tool for converting data from analytics platforms
-- `utils/GUIDE.md` - Detailed guide for using the Analytics Converter
+- `utils/README.md` - Comprehensive documentation for the Analytics Converter

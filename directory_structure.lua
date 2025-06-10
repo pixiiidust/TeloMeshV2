@@ -82,8 +82,7 @@
 │   └── convert_data(input_file: str, output_file: str, format: str, telomesh_format: bool) -> pd.DataFrame
 │   └── generate_sample_data(format: str, output_file: str) -> pd.DataFrame
 │   └── map_to_telomesh_format(df: pd.DataFrame, format: str) -> pd.DataFrame
-├── README.md                 # Brief overview of utilities
-├── GUIDE.md                  # Detailed converter documentation
+├── README.md                 # Comprehensive documentation for analytics converter
 
 # ────────────────────────────────────────────────────────────────
 
