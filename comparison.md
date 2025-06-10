@@ -1,8 +1,8 @@
-Most **regular PMs triage user flows** using **event-based analytics**, **heuristics**, and **team intuition**, rather than structural or graph-based reasoning. This works *well enough* for straightforward products — but it breaks down in complex, multi-step environments. Here’s how the typical triage flow works:
+Most **regular product teams triage user flows** using **event-based analytics**, **heuristics**, and **team intuition**, rather than structural or graph-based reasoning. This works *well enough* for straightforward products — but it breaks down in complex, multi-step environments. Here’s how the typical triage flow works:
 
 ---
 
-## 🧪 The Conventional PM Flow Triage Process
+## 🧪 The Conventional Product UX Flow Triage Process
 
 ### 1. **Start with Funnels and Drop-offs**
 
