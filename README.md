@@ -1,4 +1,4 @@
-# TeloMesh - UX Journey Intelligence (Alpha)
+# TeloMesh - UX Journey Intelligence (Alpha Ver.)
 
 > Graph-based UX analysis for prioritizing high-impact improvements in user journeys
 
