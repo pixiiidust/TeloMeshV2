@@ -2,6 +2,27 @@
 
 This guide provides instructions for setting up and running the TeloMesh application.
 
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Basic Usage](#basic-usage)
+  - [Processing a Dataset](#processing-a-dataset)
+- [Using the Dashboard](#using-the-dashboard)
+- [Input Data Format](#input-data-format)
+- [Performance Considerations](#performance-considerations)
+- [Advanced Configuration](#advanced-configuration)
+  - [Session Gap Definition](#session-gap-definition)
+  - [Using Existing Data](#using-existing-data)
+  - [Using Synthetic Data](#using-synthetic-data)
+- [Troubleshooting](#troubleshooting)
+  - [Zero-Inflation in Large Datasets](#zero-inflation-in-large-datasets)
+  - [Memory Usage](#memory-usage)
+  - [Dashboard Loading Time](#dashboard-loading-time)
+- [For Developers](#for-developers)
+  - [Running Tests](#running-tests)
+  - [Code Structure](#code-structure)
+
 ## Prerequisites
 
 - Python 3.9+ 
@@ -95,9 +116,9 @@ For different dataset sizes:
   python main.py --dataset medium_project --fast
   ```
 
-- **Large datasets (>200K users)**: Use fast mode and consider data sampling
+- **Large datasets (>200K users)**: Use fast mode and consider limiting user count
   ```bash
-  python main.py --dataset large_project --fast --sample 0.5
+  python main.py --dataset large_project --fast --users 5000 --events 50
   ```
 
 For performance benchmarks with different dataset sizes, see [analysis/performance_benchmarks.md](analysis/performance_benchmarks.md).
@@ -111,19 +132,36 @@ Customize the time gap (in minutes) that defines a new session:
 python main.py --dataset my_project --session-gap 45
 ```
 
-### Custom Output Directory
+### Using Existing Data
 
-Specify a custom output directory:
+Use your own event data instead of generating synthetic data:
 ```bash
-python main.py --dataset my_project --output-dir ./custom_outputs
+python main.py --dataset my_project --input path/to/your/events.csv
 ```
 
 ### Using Synthetic Data
 
 Generate and analyze synthetic data for testing:
 ```bash
-python main.py --synthetic --n_users 1000 --events_per_user 10
+# Standard analysis
+python main.py --dataset test_project --users 100 --events 30 --pages 30
+
+# For larger datasets with performance optimization
+python main.py --dataset large_test --users 1000 --events 50 --pages 50 --fast
+
+# For multi-graph analysis
+python main.py --dataset detailed_test --users 500 --events 30 --pages 30 --multi
 ```
+
+**Parameter Descriptions:**
+- `--dataset`: Name of the output folder where results will be stored
+- `--users`: Number of simulated users to generate
+- `--events`: Number of actions per user 
+- `--pages`: Number of screen nodes in the journey
+- `--fast`: Enable performance optimization for large datasets
+- `--multi`: Enable multi-graph analysis preserving individual transitions
+- `--session-gap`: Time gap in minutes that defines a new session (default: 30)
+- `--input`: Path to input events file (instead of generating synthetic data)
 
 ## Troubleshooting
 
@@ -135,7 +173,7 @@ If you notice that most WSJF scores are zero in large datasets, this is expected
 
 For very large datasets, you might encounter memory issues. Try these solutions:
 - Use the `--fast` flag to optimize memory usage
-- Process a sample of your data with the `--sample` parameter
+- Reduce the dataset size with fewer `--users` or `--events`
 - Increase available memory or use a machine with more RAM
 
 ### Dashboard Loading Time

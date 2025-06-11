@@ -2,6 +2,27 @@
 
 This utility converts analytics data exports from common platforms (Mixpanel, Amplitude, Google Analytics 4) to the format required by TeloMesh for user journey analysis.
 
+## Table of Contents
+- [Key Features](#key-features)
+- [Quick Start](#quick-start)
+- [Usage Options](#usage-options)
+  - [Converting Analytics Data](#converting-analytics-data)
+  - [Generating Sample Data](#generating-sample-data)
+- [Command Line Arguments](#command-line-arguments)
+- [Data Format](#data-format)
+  - [TeloMesh-Compatible Format](#telomesh-compatible-format)
+  - [Standard Converter Output Format](#standard-converter-output-format)
+- [Platform-Specific Mappings](#platform-specific-mappings)
+  - [Mixpanel](#mixpanel)
+  - [Amplitude](#amplitude)
+  - [Google Analytics 4](#google-analytics-4)
+- [Session Identification](#session-identification)
+- [Working with Custom Data](#working-with-custom-data)
+- [End-to-End Examples](#end-to-end-examples)
+  - [Example 1: Converting Mixpanel Data for TeloMesh](#example-1-converting-mixpanel-data-for-telomesh)
+  - [Example 2: Working with Sample Data](#example-2-working-with-sample-data)
+  - [Example 3: Converting GA4 Data](#example-3-converting-ga4-data)
+
 ## Key Features
 
 - Convert data from Mixpanel, Amplitude, and Google Analytics 4

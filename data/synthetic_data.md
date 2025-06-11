@@ -2,6 +2,16 @@
 
 This folder contains tools for generating synthetic user journey data for testing and demonstration purposes, as well as dataset-specific input data.
 
+## Table of Contents
+- [Components](#components)
+- [Enhanced Data Generation](#enhanced-data-generation)
+- [Page/Node Generation Control](#pagenode-generation-control)
+- [Network Structure Testing](#network-structure-testing)
+- [Performance Testing](#performance-testing)
+- [Dataset Organization](#dataset-organization)
+- [Usage Examples](#usage-examples)
+- [Generated Data Structure](#generated-data-structure)
+
 ## Components
 - Synthetic event generator for creating realistic user paths
 - Session simulators with configurable friction points

@@ -2,6 +2,17 @@
 
 This folder contains the TeloMesh User Flow Intelligence Dashboard, which visualizes user journey analysis through interactive components.
 
+## Table of Contents
+- [Key Features](#key-features)
+- [Dashboard Tabs](#dashboard-tabs)
+- [User Journey Graph Features](#user-journey-graph-features)
+- [Advanced Metrics Features](#advanced-metrics-features)
+- [Developer Controls Details](#developer-controls-details)
+- [Flow Analysis Features](#flow-analysis-features)
+- [Sidebar Components](#sidebar-components)
+- [Export Functionality](#export-functionality)
+- [Dataset Management](#dataset-management)
+
 ## Key Features
 - Dataset selection dropdown for managing multiple projects
 - Interactive Friction Analysis with sortable metrics

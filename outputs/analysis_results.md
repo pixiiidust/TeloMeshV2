@@ -2,6 +2,13 @@
 
 This folder contains the generated data files that serve as inputs to the TeloMesh dashboard visualization. All outputs are now organized by dataset in dedicated subdirectories.
 
+## Table of Contents
+- [Key Output Files](#key-output-files)
+- [Dataset Organization](#dataset-organization)
+- [Advanced Metrics](#advanced-metrics)
+- [Flow Analysis Features](#flow-analysis-features)
+- [Usage](#usage)
+
 ## Key Output Files
 - `session_flows.csv`: Structured user session paths with event sequences
 - `user_graph.gpickle`: NetworkX graph representation of user journeys

@@ -2,6 +2,12 @@
 
 This folder contains all tests for the TeloMesh application.
 
+## Table of Contents
+- [Test Categories](#test-categories)
+- [Key Test Files](#key-test-files)
+- [Running Tests](#running-tests)
+- [Test Focus Areas](#test-focus-areas)
+
 ## Test Categories
 
 - **Feature Tests**: Validate core functionality components
