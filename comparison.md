@@ -13,7 +13,7 @@ This works *well enough* for straightforward products — but it breaks down in 
 - [Gaps in This Approach](#-gaps-in-this-approach)
 - [TeloMesh: The Upgrade](#-telomesh-the-upgrade)
 - [TL;DR Comparison](#-tldr-comparison)
-- [Future Gains with GNN based Machine Learning](#https://github.com/pixiiidust/TeloMeshV2/blob/main/comparison.md#future-gains-with-gnn-based-machine-learning)
+- [Future Gains with GNN based Machine Learning](#future-gains-with-gnn-based-machine-learning)
 
 ---
 
