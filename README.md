@@ -163,7 +163,8 @@ By combining exit rates with structural importance, the WSJF scoring system ensu
 
 ## Theory & Methodology
 
-TeloMesh applies network science and graph theory to user experience analysis, creating a systematic approach to prioritizing UX improvements. Approach provides scaffold to integrate GNN based machine learning agents for UX optimizations at scale:
+* TeloMesh applies network science and graph theory to user experience analysis, creating a systematic approach to prioritizing UX improvements.
+* Approach provides scaffold to integrate GNN based machine learning agents for UX optimizations at scale:
 
 ### Core Framework: WSJF Prioritization
 **WSJF** (Weighted Shortest Job First) is an Agile prioritization method that ranks work by value-to-effort ratio, helping teams focus on high-impact, low-effort improvements. TeloMesh extends this concept to UX optimization:
