@@ -232,7 +232,7 @@ The TeloMesh roadmap is organized by complexity and priority:
 - **Team Collaboration:** Multi-user support with commenting and sharing capabilities
 
 ### 3. AI & Advanced Capabilities (Long-term)
-- **Machine Learning:** Friction prediction, automatic pattern detection, and semantic clustering
+- **Machine Learning:** GNN based prediction via learned weights for UX pattern detection, and semantic clustering
 - **Generative AI:** Natural language explanations and AI-powered UX recommendations
 - **Advanced Visualization:** 3D journey mapping, animation of flow changes, and percolation simulations
 
