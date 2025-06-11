@@ -7,11 +7,12 @@
 # 3. [Analysis & Metrics](#analysis--metrics)
 # 4. [User Interface](#user-interface)
 # 5. [Utilities](#utilities)
-# 6. [Output Files](#output-files)
-# 7. [Logs](#logs)
-# 8. [Tests](#tests)
-# 9. [Assets](#assets)
-# 10. [Main Application](#main-application)
+# 6. [GNN Integration](#gnn)
+# 7. [Output Files](#output-files)
+# 8. [Logs](#logs)
+# 9. [Tests](#tests)
+# 10. [Assets](#assets)
+# 11. [Main Application](#main-application)
 
 # Cursor Rule: Directory Hygiene Protocol
 # ----------------------------------------
@@ -103,6 +104,18 @@
 │   └── generate_sample_data(format: str, output_file: str) -> pd.DataFrame
 │   └── map_to_telomesh_format(df: pd.DataFrame, format: str) -> pd.DataFrame
 ├── README.md                 # Comprehensive documentation for analytics converter
+
+# ────────────────────────────────────────────────────────────────
+# <a name="gnn"></a>
+📁 GNN/                      # Graph Neural Network Integration (WIP)
+├── GNN_Data_Structure_Integration.md  # Implementation plan for GNN integration
+│                           # Additional files and structure will be added
+│                           # as the GNN implementation work commences
+│
+# Note: This is a work in progress section. The complete directory structure,
+# module organization, and implementation details will be added incrementally
+# as the GNN capabilities are developed. See GNN_Data_Structure_Integration.md
+# for the detailed implementation plan.
 
 # ────────────────────────────────────────────────────────────────
 # <a name="output-files"></a>
