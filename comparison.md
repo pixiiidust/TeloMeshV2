@@ -121,7 +121,7 @@ What TeloMesh does is:
 Potential for GNN-Based UX Journey Optimization: From Raw Session Data to Actionable UX Insights
 * Leverage GNN-based learning to optimize user journeys using real session exports.
 * Go from raw logs → graph construction → GNN training → ranked UX fixes — using open-source tools like PyTorch Geometric or DGL.
-* Progress towards self-improving UX systems at scale, with autonomous GNN ML agent.
+* Progress towards self-improving UX systems at scale, with autonomous, GNN-based ML agents.
 
 ### 🧪 Practical Example Pipeline
 
