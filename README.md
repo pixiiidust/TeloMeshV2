@@ -1,4 +1,4 @@
-# TeloMesh - User Flow Intelligence Dashboard (Alpha)
+# TeloMesh - UX Flow Intelligence (Alpha)
 
 > Graph-based UX analysis for prioritizing high-impact improvements in user journeys
 
