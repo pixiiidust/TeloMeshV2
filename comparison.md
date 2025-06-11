@@ -124,9 +124,9 @@ What TeloMesh does is:
 
 ---
 
-## 🧪 Practical Example Pipeline
+### 🧪 Practical Example Pipeline
 
-### 1. 🧾 Data Prep: From Session Logs to Graphs
+#### 1. 🧾 Data Prep: From Session Logs to Graphs
 
 **Input**: Exported logs from Mixpanel / Amplitude / GA4  
 **Required fields**:
@@ -147,7 +147,7 @@ What TeloMesh does is:
 
 ---
 
-### 2. 🧱 Build the GNN Dataset
+#### 2. 🧱 Build the GNN Dataset
 
 Each sample = 1 session graph.
 
@@ -162,7 +162,7 @@ Each sample = 1 session graph.
 
 ---
 
-### 3. 🧠 Choose Your GNN Architecture
+#### 3. 🧠 Choose Your GNN Architecture
 
 | Task Type               | Recommended Model            |
 |-------------------------|------------------------------|
@@ -175,7 +175,7 @@ Each sample = 1 session graph.
 
 ---
 
-### 4. 🎯 Train the Model
+#### 4. 🎯 Train the Model
 
 - Use `DataLoader` for batched session graphs
 - Choose a loss function:
@@ -190,7 +190,7 @@ Each sample = 1 session graph.
 
 ---
 
-### 5. 📈 Generate UX Optimization Insights
+#### 5. 📈 Generate UX Optimization Insights
 
 | Task                    | Output Example                               |
 |-------------------------|----------------------------------------------|
@@ -204,7 +204,7 @@ Each sample = 1 session graph.
 
 ---
 
-### 6. 🛠️ Plug Into Product Workflow
+#### 6. 🛠️ Plug Into Product Workflow
 
 | Integration Point       | Method                                     |
 |-------------------------|--------------------------------------------|
@@ -215,7 +215,7 @@ Each sample = 1 session graph.
 
 ---
 
-### 🧠 Realistic Pilot Stack
+#### 🧠 Realistic Pilot Stack
 
 | Layer               | Tools                            |
 |---------------------|----------------------------------|
@@ -227,7 +227,7 @@ Each sample = 1 session graph.
 
 ---
 
-### 💡 Example Insight
+#### 💡 Example Insight
 
 > *"Across 100,000 sessions, the model learned that entering the ‘Plans’ page from ‘Home’ after a loop through ‘Help’ predicts a 61% dropoff rate. Removing that loop increases simulated conversion probability by 19%."*
 
