@@ -1,2 +1,9 @@
 # Cursor IDE folders
 .cursor/
+
+# Ignore all outputs folder content
+outputs/*
+
+# Except these specific files and folders
+!outputs/analysis_results.md
+!outputs/large_test_500u_30n/

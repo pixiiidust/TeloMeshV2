@@ -1,0 +1,674 @@
+session_id,step_index,page,event,WSJF_Friction_Score,is_chokepoint,user_id
+session_user_001_02,0,/search,Remove from Cart,0.28,1,user_001
+session_user_001_02,1,/search,Remove from Cart,0.28,1,user_001
+session_user_001_02,2,/product/1011,Logout,0.1457234340240918,0,user_001
+session_user_001_02,3,/product/1011,Login,0.05428912247956361,0,user_001
+session_user_001_02,4,/product/1011,Login,0.05428912247956361,0,user_001
+session_user_001_02,5,/about,Page View,0.10844478822792852,0,user_001
+session_user_001_03,0,/search,Error,0.05555555555555555,0,user_001
+session_user_001_03,1,/search,Remove from Cart,0.28,1,user_001
+session_user_001_03,2,/search,Search,0.2222222222222222,0,user_001
+session_user_001_03,3,/product/1005,Page View,0.11280249632411432,0,user_001
+session_user_001_03,4,/product/1001,Add to Cart,0.23007076344121297,0,user_001
+session_user_001_03,5,/product/1001,Search,0.30118354486849697,1,user_001
+session_user_001_03,6,/product/1003,Click,0.09235917232396883,0,user_001
+session_user_004_03,0,/blog,Error,0.10446263521834505,0,user_004
+session_user_004_03,1,/products,Search,0.1189847497827215,0,user_004
+session_user_004_03,2,/products,Scroll,0.20822331211976264,0,user_004
+session_user_004_03,3,/products,Logout,0.237969499565443,0,user_004
+session_user_004_03,4,/about,Register,0.3572298906331763,1,user_004
+session_user_004_03,5,/about,Register,0.3572298906331763,1,user_004
+session_user_007_00,0,/product/1011,Scroll,0.28397387143156355,1,user_007
+session_user_007_00,1,/product/1011,Checkout,0.3400213460562142,1,user_007
+session_user_007_00,2,/product/1011,Form Submit,0.23072877053814536,0,user_007
+session_user_007_00,3,/product/1011,Click,0.11536438526907268,0,user_007
+session_user_007_00,4,/product/1013,Update Profile,0.16174116222341903,0,user_007
+session_user_007_00,5,/product/1013,Remove from Cart,0.18987006000140494,0,user_007
+session_user_011_00,0,/product/1003,Logout,0.32526491122789025,1,user_011
+session_user_011_00,1,/product/1003,Login,0.10390406886446493,0,user_011
+session_user_011_00,2,/contact,Form Submit,0.12888905188111513,0,user_011
+session_user_011_00,3,/contact,Scroll,0.2255558407919515,0,user_011
+session_user_011_00,4,/contact,Remove from Cart,0.1933335778216727,0,user_011
+session_user_011_00,5,/contact,Search,0.3323980811670864,1,user_011
+session_user_011_00,6,/contact,Register,0.16916688059396362,0,user_011
+session_user_014_00,0,/product/1000,Error,0.2701464216794168,1,user_014
+session_user_014_00,1,/product/1000,Search,0.057631236624942246,0,user_014
+session_user_014_00,2,/product/1010,Register,0.3333333333333333,1,user_014
+session_user_014_01,0,/login,Error,0.13646253937321046,0,user_014
+session_user_014_01,1,/login,Click,0.3225478203366793,1,user_014
+session_user_014_01,2,/login,Search,0.1400536588304002,0,user_014
+session_user_014_01,3,/login,Scroll,0.29566883530862265,1,user_014
+session_user_014_01,4,/login,Scroll,0.29566883530862265,1,user_014
+session_user_014_02,0,/account,Remove from Cart,0.26219595565877524,0,user_014
+session_user_014_02,1,/account,Click,0.07865878669763256,0,user_014
+session_user_014_02,2,/account,Logout,0.1415858160557386,0,user_014
+session_user_014_02,3,/account,Login,0.3670743379222853,1,user_014
+session_user_014_02,4,/account,Checkout,0.404530903016396,1,user_014
+session_user_034_00,0,/product/1001,Logout,0.2615541310700105,0,user_034
+session_user_034_00,1,/product/1003,Update Profile,0.08312325509157195,0,user_034
+session_user_034_00,2,/login,Login,0.11087581324073349,0,user_034
+session_user_034_00,3,/login,Scroll,0.29566883530862265,1,user_034
+session_user_034_00,4,/login,Scroll,0.29566883530862265,1,user_034
+session_user_035_01,0,/product/123,Scroll,0.2663278270983139,1,user_035
+session_user_035_01,1,/product/123,Add to Cart,0.0,0,user_035
+session_user_035_01,2,/cart,Logout,0.19190638520046135,0,user_035
+session_user_035_01,3,/product/1006,Form Submit,0.16506835141727016,0,user_035
+session_user_035_01,4,/product/1006,Register,0.09628987166007427,0,user_035
+session_user_035_01,5,/product/1006,Add to Cart,0.12380126356295264,0,user_035
+session_user_035_01,6,/product/1006,Error,0.2888696149802228,1,user_035
+session_user_035_03,0,/product/1000,Update Profile,0.2074724518497921,0,user_035
+session_user_035_03,1,/product/123,Update Profile,0.06295021367778328,0,user_035
+session_user_035_03,2,/faq,Login,0.2681660281290994,1,user_035
+session_user_035_03,3,/account,Scroll,0.22209539773449194,0,user_035
+session_user_035_03,4,/products,Register,0.14485099973548704,0,user_035
+session_user_035_03,5,/product/123,Scroll,0.2663278270983139,1,user_035
+session_user_044_01,0,/product/456,Search,0.1582900687407567,0,user_044
+session_user_044_01,1,/checkout,Remove from Cart,0.28428904841947816,1,user_044
+session_user_044_01,2,/login,Page View,0.20469380905981568,0,user_044
+session_user_044_01,3,/login,Add to Cart,0.13305097588888018,0,user_044
+session_user_044_01,4,/login,Search,0.1400536588304002,0,user_044
+session_user_044_01,5,/login,Click,0.3225478203366793,1,user_044
+session_user_045_00,0,/product/456,Scroll,0.27206105564817556,1,user_045
+session_user_045_00,1,/product/1010,Remove from Cart,0.2,0,user_045
+session_user_045_00,2,/product/1010,Logout,0.17391304347826086,0,user_045
+session_user_045_00,3,/product/1010,Register,0.3333333333333333,1,user_045
+session_user_045_00,4,/faq,Error,0.16983848448176297,0,user_045
+session_user_046_00,0,/checkout,Form Submit,0.13466323346185807,0,user_046
+session_user_046_00,1,/checkout,Click,0.28428904841947816,1,user_046
+session_user_046_00,2,/product/1006,Error,0.2888696149802228,1,user_046
+session_user_048_00,0,/search,Checkout,0.38095238095238093,1,user_048
+session_user_048_00,1,/search,Register,0.4117647058823529,1,user_048
+session_user_048_00,2,/search,Update Profile,0.15,0,user_048
+session_user_048_00,3,/contact,Checkout,0.20505076435631955,0,user_048
+session_user_048_00,4,/contact,Page View,0.37988352133381303,1,user_048
+session_user_050_02,0,/cart,Search,0.20460607245637427,0,user_050
+session_user_050_02,1,/product/1010,Scroll,0.125,0,user_050
+session_user_050_02,2,/product/1010,Remove from Cart,0.2,0,user_050
+session_user_050_02,3,/product/1010,Update Profile,0.058823529411764705,0,user_050
+session_user_050_02,4,/product/1010,Search,0.20689655172413793,0,user_050
+session_user_050_02,5,/product/1010,Click,0.26666666666666666,1,user_050
+session_user_050_02,6,/product/1010,Click,0.26666666666666666,1,user_050
+session_user_054_00,0,/contact,Scroll,0.2255558407919515,0,user_054
+session_user_054_00,1,/contact,Search,0.3323980811670864,1,user_054
+session_user_054_00,2,/product/1009,Update Profile,0.21708578214642135,0,user_054
+session_user_054_00,3,/product/1003,Scroll,0.12788193091011069,0,user_054
+session_user_054_00,4,/contact,Page View,0.37988352133381303,1,user_054
+session_user_063_00,0,/product/123,Update Profile,0.06295021367778328,0,user_063
+session_user_063_00,1,/product/123,Scroll,0.2663278270983139,1,user_063
+session_user_063_00,2,/product/1011,Checkout,0.3400213460562142,1,user_063
+session_user_063_00,3,/product/1011,Page View,0.14198693571578178,0,user_063
+session_user_063_00,4,/product/1011,Checkout,0.3400213460562142,1,user_063
+session_user_063_00,5,/product/1003,Logout,0.32526491122789025,1,user_063
+session_user_063_00,6,/product/1003,Page View,0.13853875848595323,0,user_063
+session_user_070_03,0,/product/456,Page View,0.19346563957203597,0,user_070
+session_user_070_03,1,/product/456,Error,0.22711183775847701,0,user_070
+session_user_070_03,2,/settings,Update Profile,0.3259373696955745,1,user_070
+session_user_070_03,3,/settings,Update Profile,0.3259373696955745,1,user_070
+session_user_070_03,4,/product/1009,Scroll,0.1736686257171371,0,user_070
+session_user_070_03,5,/product/1013,Update Profile,0.16174116222341903,0,user_070
+session_user_073_02,0,/login,Scroll,0.29566883530862265,1,user_073
+session_user_073_02,1,/products,Login,0.32034355710732715,1,user_073
+session_user_073_02,2,/product/1010,Login,0.21739130434782608,0,user_073
+session_user_077_00,0,/about,Add to Cart,0.1982990413310693,0,user_077
+session_user_077_00,1,/product/1009,Remove from Cart,0.11326214720682853,0,user_077
+session_user_077_00,2,/product/1006,Error,0.2888696149802228,1,user_077
+session_user_077_00,3,/product/1010,Register,0.3333333333333333,1,user_077
+session_user_077_00,4,/product/456,Form Submit,0.14509922967902697,0,user_077
+session_user_077_00,5,/product/1000,Scroll,0.22551353461933923,0,user_077
+session_user_077_00,6,/product/1000,Form Submit,0.23052494649976898,0,user_077
+session_user_077_02,0,/product/1010,Remove from Cart,0.2,0,user_077
+session_user_077_02,1,/product/1010,Click,0.26666666666666666,1,user_077
+session_user_077_02,2,/product/1010,Click,0.26666666666666666,1,user_077
+session_user_080_01,0,/product/1011,Error,0.27144561239781806,1,user_080
+session_user_080_01,1,/product/1011,Checkout,0.3400213460562142,1,user_080
+session_user_080_01,2,/product/1009,Checkout,0.15101619627577137,0,user_080
+session_user_080_01,3,/product/1009,Logout,0.15788056883376098,0,user_080
+session_user_080_01,4,/product/1009,Remove from Cart,0.11326214720682853,0,user_080
+session_user_080_01,5,/product/1009,Click,0.20038687582746587,0,user_080
+session_user_081_02,0,/product/1002,Update Profile,0.08423664952548637,0,user_081
+session_user_081_02,1,/about,Login,0.18264385385756382,0,user_081
+session_user_081_02,2,/product/1003,Logout,0.32526491122789025,1,user_081
+session_user_081_02,3,/product/1003,Add to Cart,0.27707751697190647,1,user_081
+session_user_081_02,4,/product/1003,Search,0.1312472448814294,0,user_081
+session_user_085_00,0,/product/123,Login,0.173113087613904,0,user_085
+session_user_085_00,1,/product/1005,Error,0.2746495562674088,1,user_085
+session_user_085_00,2,/contact,Scroll,0.2255558407919515,0,user_085
+session_user_085_00,3,/contact,Page View,0.37988352133381303,1,user_085
+session_user_088_02,0,/home,Form Submit,0.3049476863905999,1,user_088
+session_user_088_02,1,/about,Logout,0.23660681067911676,0,user_088
+session_user_088_02,2,/about,Remove from Cart,0.13013374587351423,0,user_088
+session_user_088_02,3,/about,Add to Cart,0.1982990413310693,0,user_088
+session_user_088_02,4,/about,Page View,0.10844478822792852,0,user_088
+session_user_088_02,5,/product/1003,Error,0.1662465101831439,0,user_088
+session_user_088_02,6,/product/1003,Logout,0.32526491122789025,1,user_088
+session_user_090_04,0,/product/1006,Scroll,0.2708152640439589,1,user_090
+session_user_090_04,1,/product/1006,Click,0.21665221123516712,0,user_090
+session_user_090_04,2,/product/1006,Logout,0.21665221123516712,0,user_090
+session_user_090_04,3,/product/1006,Error,0.2888696149802228,1,user_090
+session_user_090_04,4,/product/1004,Scroll,0.0,0,user_090
+session_user_090_04,5,/product/1004,Remove from Cart,0.09228599982596765,0,user_090
+session_user_093_00,0,/product/1007,Remove from Cart,0.327293164617914,1,user_093
+session_user_093_00,1,/product/1005,Error,0.2746495562674088,1,user_093
+session_user_093_00,2,/product/1005,Click,0.0,0,user_093
+session_user_093_00,3,/settings,Remove from Cart,0.231777685116853,0,user_093
+session_user_102_00,0,/search,Scroll,0.18181818181818182,0,user_102
+session_user_102_00,1,/search,Error,0.05555555555555555,0,user_102
+session_user_102_00,2,/search,Checkout,0.38095238095238093,1,user_102
+session_user_102_00,3,/search,Add to Cart,0.21428571428571427,0,user_102
+session_user_102_00,4,/product/1013,Scroll,0.17329410238223467,0,user_102
+session_user_102_00,5,/product/789,Page View,0.1207789788619825,0,user_102
+session_user_102_00,6,/product/1012,Page View,0.2968366683767216,1,user_102
+session_user_104_00,0,/login,Register,0.1689536201763558,0,user_104
+session_user_104_00,1,/login,Search,0.1400536588304002,0,user_104
+session_user_104_00,2,/product/1011,Error,0.27144561239781806,1,user_104
+session_user_104_00,3,/product/1011,Logout,0.1457234340240918,0,user_104
+session_user_104_00,4,/product/1008,Update Profile,0.26669634243223805,1,user_104
+session_user_111_02,0,/product/1003,Update Profile,0.08312325509157195,0,user_111
+session_user_111_02,1,/product/1013,Error,0.11492135210611351,0,user_111
+session_user_111_02,2,/product/1006,Error,0.2888696149802228,1,user_111
+session_user_111_02,3,/account,Update Profile,0.13983784301801344,0,user_111
+session_user_111_02,4,/product/1012,Register,0.20953176591297998,0,user_111
+session_user_111_02,5,/product/1000,Update Profile,0.2074724518497921,0,user_111
+session_user_111_02,6,/product/1000,Error,0.2701464216794168,1,user_111
+session_user_112_02,0,/cart,Scroll,0.02398829815005767,0,user_112
+session_user_112_02,1,/cart,Scroll,0.02398829815005767,0,user_112
+session_user_112_02,2,/product/1010,Click,0.26666666666666666,1,user_112
+session_user_112_02,3,/product/1010,Update Profile,0.058823529411764705,0,user_112
+session_user_112_02,4,/product/1010,Click,0.26666666666666666,1,user_112
+session_user_112_02,5,/product/1000,Scroll,0.22551353461933923,0,user_112
+session_user_112_02,6,/register,Scroll,0.16291676959772602,0,user_112
+session_user_116_02,0,/contact,Logout,0.2255558407919515,0,user_116
+session_user_116_02,1,/contact,Click,0.36088934526712246,1,user_116
+session_user_116_02,2,/checkout,Checkout,0.09476301613982606,0,user_116
+session_user_116_02,3,/checkout,Click,0.28428904841947816,1,user_116
+session_user_116_02,4,/checkout,Error,0.18952603227965212,0,user_116
+session_user_116_02,5,/checkout,Checkout,0.09476301613982606,0,user_116
+session_user_116_02,6,/product/1010,Page View,0.17857142857142858,0,user_116
+session_user_131_01,0,/search,Remove from Cart,0.28,1,user_131
+session_user_131_01,1,/search,Error,0.05555555555555555,0,user_131
+session_user_131_01,2,/search,Update Profile,0.15,0,user_131
+session_user_131_01,3,/settings,Register,0.15803023985239978,0,user_131
+session_user_131_01,4,/settings,Update Profile,0.3259373696955745,1,user_131
+session_user_135_02,0,/contact,Form Submit,0.12888905188111513,0,user_135
+session_user_135_02,1,/contact,Search,0.3323980811670864,1,user_135
+session_user_135_02,2,/product/1012,Click,0.1406068429152892,0,user_135
+session_user_135_02,3,/search,Checkout,0.38095238095238093,1,user_135
+session_user_136_03,0,/about,Add to Cart,0.1982990413310693,0,user_136
+session_user_136_03,1,/about,Add to Cart,0.1982990413310693,0,user_136
+session_user_136_03,2,/product/1011,Update Profile,0.12038022810685844,0,user_136
+session_user_136_03,3,/product/1011,Update Profile,0.12038022810685844,0,user_136
+session_user_136_03,4,/product/1010,Search,0.20689655172413793,0,user_136
+session_user_136_03,5,/product/1006,Error,0.2888696149802228,1,user_136
+session_user_136_03,6,/product/1006,Scroll,0.2708152640439589,1,user_136
+session_user_137_01,0,/checkout,Remove from Cart,0.28428904841947816,1,user_137
+session_user_137_01,1,/checkout,Add to Cart,0.10234405743101214,0,user_137
+session_user_137_01,2,/checkout,Click,0.28428904841947816,1,user_137
+session_user_137_01,3,/product/1003,Logout,0.32526491122789025,1,user_137
+session_user_139_02,0,/product/1003,Register,0.0593737536368371,0,user_139
+session_user_139_02,1,/product/1010,Logout,0.17391304347826086,0,user_139
+session_user_139_02,2,/product/123,Form Submit,0.2077357051366848,0,user_139
+session_user_139_02,3,/product/123,Search,0.1221974736098146,0,user_139
+session_user_139_02,4,/product/1010,Register,0.3333333333333333,1,user_139
+session_user_139_02,5,/product/1010,Login,0.21739130434782608,0,user_139
+session_user_139_02,6,/product/1010,Form Submit,0.375,1,user_139
+session_user_142_04,0,/search,Click,0.06666666666666667,0,user_142
+session_user_142_04,1,/search,Checkout,0.38095238095238093,1,user_142
+session_user_142_04,2,/search,Remove from Cart,0.28,1,user_142
+session_user_142_04,3,/search,Register,0.4117647058823529,1,user_142
+session_user_147_02,0,/product/1010,Login,0.21739130434782608,0,user_147
+session_user_147_02,1,/product/1010,Register,0.3333333333333333,1,user_147
+session_user_147_02,2,/product/1010,Click,0.26666666666666666,1,user_147
+session_user_147_02,3,/register,Page View,0.19550012351727122,0,user_147
+session_user_151_01,0,/product/1010,Click,0.26666666666666666,1,user_151
+session_user_151_01,1,/product/1001,Form Submit,0.19113571116654615,0,user_151
+session_user_151_01,2,/contact,Update Profile,0.0,0,user_151
+session_user_151_01,3,/register,Page View,0.19550012351727122,0,user_151
+session_user_151_01,4,/product/1003,Add to Cart,0.27707751697190647,1,user_151
+session_user_151_01,5,/product/1003,Add to Cart,0.27707751697190647,1,user_151
+session_user_157_02,0,/search,Add to Cart,0.21428571428571427,0,user_157
+session_user_157_02,1,/search,Error,0.05555555555555555,0,user_157
+session_user_157_02,2,/search,Register,0.4117647058823529,1,user_157
+session_user_157_02,3,/search,Form Submit,0.0625,0,user_157
+session_user_157_02,4,/search,Update Profile,0.15,0,user_157
+session_user_157_02,5,/search,Checkout,0.38095238095238093,1,user_157
+session_user_163_00,0,/login,Form Submit,0.2128815614222083,0,user_163
+session_user_163_00,1,/login,Scroll,0.29566883530862265,1,user_163
+session_user_163_00,2,/login,Scroll,0.29566883530862265,1,user_163
+session_user_163_00,3,/login,Logout,0.06823126968660523,0,user_163
+session_user_163_00,4,/login,Login,0.11087581324073349,0,user_163
+session_user_163_00,5,/login,Login,0.11087581324073349,0,user_163
+session_user_164_01,0,/product/1011,Checkout,0.3400213460562142,1,user_164
+session_user_164_01,1,/product/1011,Checkout,0.3400213460562142,1,user_164
+session_user_164_01,2,/product/1011,Page View,0.14198693571578178,0,user_164
+session_user_164_01,3,/product/1011,Register,0.23072877053814536,0,user_164
+session_user_165_00,0,/product/1009,Remove from Cart,0.11326214720682853,0,user_165
+session_user_165_00,1,/account,Error,0.19871693481507172,0,user_165
+session_user_165_00,2,/account,Login,0.3670743379222853,1,user_165
+session_user_165_00,3,/product/456,Form Submit,0.14509922967902697,0,user_165
+session_user_165_00,4,/products,Register,0.14485099973548704,0,user_165
+session_user_165_00,5,/products,Click,0.2776310828263502,1,user_165
+session_user_165_02,0,/products,Checkout,0.21918243381027644,0,user_165
+session_user_165_02,1,/product/1010,Click,0.26666666666666666,1,user_165
+session_user_165_02,2,/checkout,Remove from Cart,0.28428904841947816,1,user_165
+session_user_165_02,3,/checkout,Page View,0.17768065526217386,0,user_165
+session_user_167_01,0,/product/1010,Logout,0.17391304347826086,0,user_167
+session_user_167_01,1,/register,Search,0.21411918289986848,0,user_167
+session_user_167_01,2,/search,Remove from Cart,0.28,1,user_167
+session_user_167_01,3,/search,Remove from Cart,0.28,1,user_167
+session_user_167_01,4,/search,Logout,0.14285714285714285,0,user_167
+session_user_167_01,5,/search,Remove from Cart,0.28,1,user_167
+session_user_167_01,6,/search,Update Profile,0.15,0,user_167
+session_user_173_02,0,/product/1005,Update Profile,0.3509410996750223,1,user_173
+session_user_173_02,1,/cart,Page View,0.04092121449127485,0,user_173
+session_user_173_02,2,/cart,Add to Cart,0.17391516158791812,0,user_173
+session_user_173_02,3,/cart,Error,0.0993800923359532,0,user_173
+session_user_173_02,4,/product/789,Logout,0.2084029439187149,0,user_173
+session_user_173_02,5,/search,Remove from Cart,0.28,1,user_173
+session_user_175_02,0,/account,Login,0.3670743379222853,1,user_175
+session_user_175_02,1,/account,Click,0.07865878669763256,0,user_175
+session_user_175_02,2,/account,Scroll,0.22209539773449194,0,user_175
+session_user_175_02,3,/account,Click,0.07865878669763256,0,user_175
+session_user_175_02,4,/account,Page View,0.18878108807431815,0,user_175
+session_user_175_02,5,/account,Checkout,0.404530903016396,1,user_175
+session_user_176_01,0,/product/1012,Update Profile,0.22262750128254122,0,user_176
+session_user_176_01,1,/product/1012,Checkout,0.19358913155003585,0,user_176
+session_user_176_01,2,/product/1012,Page View,0.2968366683767216,1,user_176
+session_user_176_01,3,/product/1012,Page View,0.2968366683767216,1,user_176
+session_user_176_01,4,/product/1012,Error,0.1424816008208264,0,user_176
+session_user_176_01,5,/product/1012,Page View,0.2968366683767216,1,user_176
+session_user_176_01,6,/product/1010,Login,0.21739130434782608,0,user_176
+session_user_197_00,0,/search,Register,0.4117647058823529,1,user_197
+session_user_197_00,1,/search,Remove from Cart,0.28,1,user_197
+session_user_197_00,2,/product/123,Click,0.18063974359711724,0,user_197
+session_user_197_00,3,/product/123,Click,0.18063974359711724,0,user_197
+session_user_197_00,4,/product/123,Login,0.173113087613904,0,user_197
+session_user_197_00,5,/product/123,Page View,0.27698094018224645,1,user_197
+session_user_197_00,6,/blog,Update Profile,0.195867441034397,0,user_197
+session_user_210_02,0,/home,Form Submit,0.3049476863905999,1,user_210
+session_user_210_02,1,/home,Click,0.20329845759373324,0,user_210
+session_user_210_02,2,/product/1000,Page View,0.17289370987482677,0,user_210
+session_user_210_02,3,/product/1000,Login,0.16624395180271803,0,user_210
+session_user_210_02,4,/product/1000,Scroll,0.22551353461933923,0,user_210
+session_user_210_02,5,/product/1000,Search,0.057631236624942246,0,user_210
+session_user_210_02,6,/product/1000,Error,0.2701464216794168,1,user_210
+session_user_210_04,0,/product/1010,Update Profile,0.058823529411764705,0,user_210
+session_user_210_04,1,/product/1010,Scroll,0.125,0,user_210
+session_user_210_04,2,/product/1010,Remove from Cart,0.2,0,user_210
+session_user_210_04,3,/product/1013,Login,0.08562767411828066,0,user_210
+session_user_210_04,4,/product/1005,Error,0.2746495562674088,1,user_210
+session_user_210_04,5,/product/1005,Scroll,0.1373247781337044,0,user_210
+session_user_210_04,6,/product/1005,Update Profile,0.3509410996750223,1,user_210
+session_user_213_00,0,/contact,Search,0.3323980811670864,1,user_213
+session_user_213_00,1,/login,Checkout,0.08063695508416982,0,user_213
+session_user_213_00,2,/login,Click,0.3225478203366793,1,user_213
+session_user_215_02,0,/product/1003,Error,0.1662465101831439,0,user_215
+session_user_215_02,1,/product/1003,Logout,0.32526491122789025,1,user_215
+session_user_215_02,2,/product/1000,Register,0.17289370987482677,0,user_215
+session_user_215_02,3,/product/1000,Error,0.2701464216794168,1,user_215
+session_user_215_02,4,/checkout,Register,0.19681549505963875,0,user_215
+session_user_215_02,5,/checkout,Add to Cart,0.10234405743101214,0,user_215
+session_user_215_02,6,/product/1012,Update Profile,0.22262750128254122,0,user_215
+session_user_217_00,0,/account,Scroll,0.22209539773449194,0,user_217
+session_user_217_00,1,/account,Login,0.3670743379222853,1,user_217
+session_user_217_00,2,/account,Checkout,0.404530903016396,1,user_217
+session_user_217_00,3,/product/1004,Checkout,0.041528699921685445,0,user_217
+session_user_217_00,4,/product/1004,Logout,0.1916709227154713,0,user_217
+session_user_218_00,0,/product/1007,Page View,0.29092725743814574,1,user_218
+session_user_218_00,1,/product/1007,Update Profile,0.14546362871907287,0,user_218
+session_user_218_00,2,/product/1007,Scroll,0.2014111782264086,0,user_218
+session_user_218_00,3,/about,Click,0.17351166116468564,0,user_218
+session_user_218_00,4,/about,Error,0.21688957645585705,0,user_218
+session_user_218_00,5,/about,Register,0.3572298906331763,1,user_218
+session_user_221_00,0,/home,Search,0.19092376887063642,0,user_221
+session_user_221_00,1,/product/1010,Search,0.20689655172413793,0,user_221
+session_user_221_00,2,/product/1010,Page View,0.17857142857142858,0,user_221
+session_user_221_00,3,/product/1010,Form Submit,0.375,1,user_221
+session_user_221_00,4,/product/1010,Click,0.26666666666666666,1,user_221
+session_user_221_00,5,/product/1009,Login,0.1736686257171371,0,user_221
+session_user_221_00,6,/product/1009,Click,0.20038687582746587,0,user_221
+session_user_226_00,0,/products,Login,0.32034355710732715,1,user_226
+session_user_226_00,1,/products,Form Submit,0.16657864969581013,0,user_226
+session_user_226_00,2,/contact,Search,0.3323980811670864,1,user_226
+session_user_240_00,0,/product/1011,Logout,0.1457234340240918,0,user_240
+session_user_240_00,1,/product/1011,Scroll,0.28397387143156355,1,user_240
+session_user_240_00,2,/product/1011,Scroll,0.28397387143156355,1,user_240
+session_user_246_04,0,/product/1010,Click,0.26666666666666666,1,user_246
+session_user_246_04,1,/product/1001,Add to Cart,0.23007076344121297,0,user_246
+session_user_246_04,2,/product/1001,Form Submit,0.19113571116654615,0,user_246
+session_user_246_04,3,/product/1001,Checkout,0.24847642451650997,0,user_246
+session_user_246_04,4,/product/1012,Checkout,0.19358913155003585,0,user_246
+session_user_246_04,5,/product/1012,Page View,0.2968366683767216,1,user_246
+session_user_247_03,0,/contact,Logout,0.2255558407919515,0,user_247
+session_user_247_03,1,/faq,Form Submit,0.042459621120440744,0,user_247
+session_user_247_03,2,/search,Remove from Cart,0.28,1,user_247
+session_user_247_03,3,/search,Click,0.06666666666666667,0,user_247
+session_user_247_03,4,/search,Register,0.4117647058823529,1,user_247
+session_user_262_00,0,/product/1011,Remove from Cart,0.10857824495912723,0,user_262
+session_user_262_00,1,/product/1011,Checkout,0.3400213460562142,1,user_262
+session_user_262_00,2,/product/1011,Scroll,0.28397387143156355,1,user_262
+session_user_263_02,0,/product/1001,Add to Cart,0.23007076344121297,0,user_263
+session_user_263_02,1,/product/1001,Update Profile,0.10353184354854583,0,user_263
+session_user_263_02,2,/product/1008,Update Profile,0.26669634243223805,1,user_263
+session_user_263_02,3,/product/1008,Update Profile,0.26669634243223805,1,user_263
+session_user_263_02,4,/product/1002,Checkout,0.21059162381371593,0,user_263
+session_user_265_00,0,/product/456,Checkout,0.1582900687407567,0,user_265
+session_user_265_00,1,/product/456,Page View,0.19346563957203597,0,user_265
+session_user_265_00,2,/product/1010,Form Submit,0.375,1,user_265
+session_user_265_00,3,/product/1010,Search,0.20689655172413793,0,user_265
+session_user_265_00,4,/product/1010,Register,0.3333333333333333,1,user_265
+session_user_265_00,5,/product/1013,Click,0.11197465077005933,0,user_265
+session_user_265_01,0,/product/1011,Error,0.27144561239781806,1,user_265
+session_user_265_01,1,/products,Scroll,0.20822331211976264,0,user_265
+session_user_265_01,2,/products,Click,0.2776310828263502,1,user_265
+session_user_265_01,3,/products,Error,0.14698116149630305,0,user_265
+session_user_265_01,4,/products,Page View,0.08328932484790506,0,user_265
+session_user_265_01,5,/products,Form Submit,0.16657864969581013,0,user_265
+session_user_265_01,6,/products,Scroll,0.20822331211976264,0,user_265
+session_user_267_01,0,/products,Logout,0.237969499565443,0,user_267
+session_user_267_01,1,/products,Update Profile,0.08767297352411058,0,user_267
+session_user_267_01,2,/product/1004,Logout,0.1916709227154713,0,user_267
+session_user_267_01,3,/product/1006,Error,0.2888696149802228,1,user_267
+session_user_267_01,4,/login,Scroll,0.29566883530862265,1,user_267
+session_user_267_01,5,/login,Form Submit,0.2128815614222083,0,user_267
+session_user_268_00,0,/about,Register,0.3572298906331763,1,user_268
+session_user_268_00,1,/about,Logout,0.23660681067911676,0,user_268
+session_user_268_00,2,/about,Register,0.3572298906331763,1,user_268
+session_user_268_00,3,/product/1007,Scroll,0.2014111782264086,0,user_268
+session_user_271_03,0,/product/1005,Page View,0.11280249632411432,0,user_271
+session_user_271_03,1,/product/1000,Form Submit,0.23052494649976898,0,user_271
+session_user_271_03,2,/product/1001,Search,0.30118354486849697,1,user_271
+session_user_271_03,3,/product/1001,Search,0.30118354486849697,1,user_271
+session_user_273_01,0,/login,Checkout,0.08063695508416982,0,user_273
+session_user_273_01,1,/login,Form Submit,0.2128815614222083,0,user_273
+session_user_273_01,2,/login,Scroll,0.29566883530862265,1,user_273
+session_user_273_01,3,/login,Search,0.1400536588304002,0,user_273
+session_user_273_01,4,/login,Error,0.13646253937321046,0,user_273
+session_user_273_01,5,/login,Click,0.3225478203366793,1,user_273
+session_user_279_00,0,/product/1010,Form Submit,0.375,1,user_279
+session_user_279_00,1,/product/1010,Login,0.21739130434782608,0,user_279
+session_user_279_00,2,/product/1010,Register,0.3333333333333333,1,user_279
+session_user_286_02,0,/product/1001,Search,0.30118354486849697,1,user_286
+session_user_286_02,1,/product/1005,Error,0.2746495562674088,1,user_286
+session_user_286_02,2,/product/1005,Remove from Cart,0.15792349485376006,0,user_286
+session_user_286_02,3,/product/789,Page View,0.1207789788619825,0,user_286
+session_user_286_02,4,/home,Register,0.12197907455623994,0,user_286
+session_user_286_02,5,/home,Add to Cart,0.11259606882114458,0,user_286
+session_user_286_02,6,/home,Search,0.19092376887063642,0,user_286
+session_user_286_03,0,/product/1012,Click,0.1406068429152892,0,user_286
+session_user_286_03,1,/product/1010,Form Submit,0.375,1,user_286
+session_user_286_03,2,/product/1005,Update Profile,0.3509410996750223,1,user_286
+session_user_287_04,0,/product/1001,Login,0.18405661075297036,0,user_287
+session_user_287_04,1,/product/1001,Search,0.30118354486849697,1,user_287
+session_user_287_04,2,/product/1011,Click,0.11536438526907268,0,user_287
+session_user_287_04,3,/product/1011,Page View,0.14198693571578178,0,user_287
+session_user_287_04,4,/product/1011,Login,0.05428912247956361,0,user_287
+session_user_287_04,5,/search,Remove from Cart,0.28,1,user_287
+session_user_288_03,0,/product/1000,Remove from Cart,0.16466067607126356,0,user_288
+session_user_288_03,1,/product/1003,Scroll,0.12788193091011069,0,user_288
+session_user_288_03,2,/product/1003,Page View,0.13853875848595323,0,user_288
+session_user_288_03,3,/product/1003,Add to Cart,0.27707751697190647,1,user_288
+session_user_288_03,4,/product/1003,Logout,0.32526491122789025,1,user_288
+session_user_291_02,0,/products,Login,0.32034355710732715,1,user_291
+session_user_291_02,1,/products,Login,0.32034355710732715,1,user_291
+session_user_291_02,2,/product/1003,Form Submit,0.1662465101831439,0,user_291
+session_user_291_02,3,/product/1000,Logout,0.10805856867176672,0,user_291
+session_user_291_02,4,/product/1012,Register,0.20953176591297998,0,user_291
+session_user_291_02,5,/product/1012,Error,0.1424816008208264,0,user_291
+session_user_291_02,6,/product/1012,Error,0.1424816008208264,0,user_291
+session_user_300_03,0,/faq,Form Submit,0.042459621120440744,0,user_300
+session_user_300_03,1,/faq,Update Profile,0.1929982778201852,0,user_300
+session_user_300_03,2,/search,Remove from Cart,0.28,1,user_300
+session_user_300_03,3,/search,Form Submit,0.0625,0,user_300
+session_user_300_03,4,/search,Remove from Cart,0.28,1,user_300
+session_user_301_00,0,/account,Checkout,0.404530903016396,1,user_301
+session_user_301_00,1,/product/1009,Click,0.20038687582746587,0,user_301
+session_user_301_00,2,/product/1009,Update Profile,0.21708578214642135,0,user_301
+session_user_301_00,3,/settings,Update Profile,0.3259373696955745,1,user_301
+session_user_301_00,4,/settings,Error,0.1158888425584265,0,user_301
+session_user_301_00,5,/home,Search,0.19092376887063642,0,user_301
+session_user_301_02,0,/product/1013,Click,0.11197465077005933,0,user_301
+session_user_301_02,1,/product/1011,Scroll,0.28397387143156355,1,user_301
+session_user_301_02,2,/product/1010,Logout,0.17391304347826086,0,user_301
+session_user_301_02,3,/product/1010,Checkout,0.1875,0,user_301
+session_user_301_02,4,/product/1010,Click,0.26666666666666666,1,user_301
+session_user_301_02,5,/product/1010,Scroll,0.125,0,user_301
+session_user_301_02,6,/product/1010,Scroll,0.125,0,user_301
+session_user_311_01,0,/product/1005,Click,0.0,0,user_311
+session_user_311_01,1,/product/1007,Logout,0.1163709029752583,0,user_311
+session_user_311_01,2,/product/1003,Logout,0.32526491122789025,1,user_311
+session_user_311_01,3,/product/1003,Page View,0.13853875848595323,0,user_311
+session_user_311_01,4,/product/1003,Remove from Cart,0.1662465101831439,0,user_311
+session_user_311_01,5,/checkout,Add to Cart,0.10234405743101214,0,user_311
+session_user_311_01,6,/product/1007,Remove from Cart,0.327293164617914,1,user_311
+session_user_315_01,0,/product/1012,Page View,0.2968366683767216,1,user_315
+session_user_315_01,1,/product/1012,Login,0.178102001026033,0,user_315
+session_user_315_01,2,/product/1012,Add to Cart,0.12721571501859497,0,user_315
+session_user_315_01,3,/account,Page View,0.18878108807431815,0,user_315
+session_user_315_01,4,/product/456,Error,0.22711183775847701,0,user_315
+session_user_315_01,5,/product/1007,Remove from Cart,0.327293164617914,1,user_315
+session_user_318_01,0,/account,Remove from Cart,0.26219595565877524,0,user_318
+session_user_318_01,1,/product/1002,Error,0.10108397943058364,0,user_318
+session_user_318_01,2,/product/1002,Logout,0.14975404360086467,0,user_318
+session_user_318_01,3,/checkout,Click,0.28428904841947816,1,user_318
+session_user_318_01,4,/product/1005,Click,0.0,0,user_318
+session_user_318_01,5,/product/1005,Error,0.2746495562674088,1,user_318
+session_user_322_01,0,/product/1003,Logout,0.32526491122789025,1,user_322
+session_user_322_01,1,/contact,Error,0.13880359433350864,0,user_322
+session_user_322_01,2,/product/789,Error,0.16103863848264335,0,user_322
+session_user_322_01,3,/home,Form Submit,0.3049476863905999,1,user_322
+session_user_322_01,4,/home,Scroll,0.11555912326380625,0,user_322
+session_user_322_01,5,/home,Checkout,0.13722645887576995,0,user_322
+session_user_322_02,0,/product/1000,Error,0.2701464216794168,1,user_322
+session_user_322_02,1,/checkout,Checkout,0.09476301613982606,0,user_322
+session_user_322_02,2,/product/1012,Page View,0.2968366683767216,1,user_322
+session_user_322_02,3,/product/1011,Form Submit,0.23072877053814536,0,user_322
+session_user_323_01,0,/product/1010,Form Submit,0.375,1,user_323
+session_user_323_01,1,/product/1010,Add to Cart,0.25,0,user_323
+session_user_323_01,2,/product/1010,Form Submit,0.375,1,user_323
+session_user_323_03,0,/search,Checkout,0.38095238095238093,1,user_323
+session_user_323_03,1,/search,Error,0.05555555555555555,0,user_323
+session_user_323_03,2,/search,Remove from Cart,0.28,1,user_323
+session_user_331_00,0,/home,Error,0.19259853877301042,0,user_331
+session_user_331_00,1,/home,Form Submit,0.3049476863905999,1,user_331
+session_user_331_00,2,/checkout,Logout,0.08528671452584347,0,user_331
+session_user_331_00,3,/checkout,Logout,0.08528671452584347,0,user_331
+session_user_331_00,4,/checkout,Page View,0.17768065526217386,0,user_331
+session_user_331_00,5,/checkout,Remove from Cart,0.28428904841947816,1,user_331
+session_user_337_01,0,/faq,Add to Cart,0.14153207040146915,0,user_337
+session_user_337_01,1,/product/1007,Error,0.20780518388438982,0,user_337
+session_user_337_01,2,/product/1007,Click,0.20536041701516172,0,user_337
+session_user_337_01,3,/product/1007,Checkout,0.14546362871907287,0,user_337
+session_user_337_01,4,/product/1007,Update Profile,0.14546362871907287,0,user_337
+session_user_337_01,5,/contact,Page View,0.37988352133381303,1,user_337
+session_user_337_01,6,/contact,Search,0.3323980811670864,1,user_337
+session_user_347_02,0,/faq,Scroll,0.21229810560220372,0,user_347
+session_user_347_02,1,/faq,Login,0.2681660281290994,1,user_347
+session_user_347_02,2,/faq,Remove from Cart,0.0653224940314473,0,user_347
+session_user_347_02,3,/faq,Click,0.14985748630743792,0,user_347
+session_user_347_02,4,/faq,Login,0.2681660281290994,1,user_347
+session_user_350_01,0,/product/1010,Click,0.26666666666666666,1,user_350
+session_user_350_01,1,/blog,Page View,0.17628069693095727,0,user_350
+session_user_350_01,2,/login,Error,0.13646253937321046,0,user_350
+session_user_350_01,3,/login,Scroll,0.29566883530862265,1,user_350
+session_user_354_00,0,/product/1010,Add to Cart,0.25,0,user_354
+session_user_354_00,1,/product/1003,Search,0.1312472448814294,0,user_354
+session_user_354_00,2,/product/1003,Error,0.1662465101831439,0,user_354
+session_user_354_00,3,/product/1003,Register,0.0593737536368371,0,user_354
+session_user_354_00,4,/product/1003,Logout,0.32526491122789025,1,user_354
+session_user_354_00,5,/product/1002,Remove from Cart,0.03369465981019455,0,user_354
+session_user_354_00,6,/about,Register,0.3572298906331763,1,user_354
+session_user_354_01,0,/product/1011,Form Submit,0.23072877053814536,0,user_354
+session_user_354_01,1,/product/1011,Update Profile,0.12038022810685844,0,user_354
+session_user_354_01,2,/product/1011,Remove from Cart,0.10857824495912723,0,user_354
+session_user_354_01,3,/product/1011,Error,0.27144561239781806,1,user_354
+session_user_354_01,4,/product/1011,Error,0.27144561239781806,1,user_354
+session_user_355_00,0,/account,Checkout,0.404530903016396,1,user_355
+session_user_355_00,1,/account,Checkout,0.404530903016396,1,user_355
+session_user_355_00,2,/product/1007,Add to Cart,0.07934379748313067,0,user_355
+session_user_355_00,3,/product/1007,Error,0.20780518388438982,0,user_355
+session_user_355_00,4,/product/1010,Search,0.20689655172413793,0,user_355
+session_user_355_00,5,/product/1010,Form Submit,0.375,1,user_355
+session_user_355_00,6,/product/1010,Register,0.3333333333333333,1,user_355
+session_user_357_03,0,/blog,Register,0.23504092924127637,0,user_357
+session_user_357_03,1,/blog,Login,0.2452601000778536,0,user_357
+session_user_357_03,2,/home,Scroll,0.11555912326380625,0,user_357
+session_user_357_03,3,/home,Logout,0.04574215295858998,0,user_357
+session_user_357_03,4,/home,Form Submit,0.3049476863905999,1,user_357
+session_user_357_03,5,/home,Update Profile,0.15247384319529994,0,user_357
+session_user_357_03,6,/product/1003,Add to Cart,0.27707751697190647,1,user_357
+session_user_362_01,0,/product/1011,Update Profile,0.12038022810685844,0,user_362
+session_user_362_01,1,/product/1003,Add to Cart,0.27707751697190647,1,user_362
+session_user_362_01,2,/product/1003,Logout,0.32526491122789025,1,user_362
+session_user_362_01,3,/product/123,Update Profile,0.06295021367778328,0,user_362
+session_user_362_01,4,/product/123,Click,0.18063974359711724,0,user_362
+session_user_362_01,5,/product/1011,Register,0.23072877053814536,0,user_362
+session_user_362_01,6,/product/1011,Error,0.27144561239781806,1,user_362
+session_user_363_00,0,/product/1005,Update Profile,0.3509410996750223,1,user_363
+session_user_363_00,1,/account,Form Submit,0.21452396372081606,0,user_363
+session_user_363_00,2,/account,Page View,0.18878108807431815,0,user_363
+session_user_363_00,3,/account,Update Profile,0.13983784301801344,0,user_363
+session_user_363_00,4,/checkout,Remove from Cart,0.28428904841947816,1,user_363
+session_user_364_00,0,/contact,Page View,0.37988352133381303,1,user_364
+session_user_364_00,1,/contact,Update Profile,0.0,0,user_364
+session_user_364_00,2,/contact,Click,0.36088934526712246,1,user_364
+session_user_364_01,0,/product/1007,Login,0.13427411881760576,0,user_364
+session_user_364_01,1,/product/1007,Checkout,0.14546362871907287,0,user_364
+session_user_364_01,2,/product/1007,Update Profile,0.14546362871907287,0,user_364
+session_user_364_01,3,/product/1007,Remove from Cart,0.327293164617914,1,user_364
+session_user_364_01,4,/product/1011,Error,0.27144561239781806,1,user_364
+session_user_364_01,5,/product/1011,Checkout,0.3400213460562142,1,user_364
+session_user_364_01,6,/product/1011,Update Profile,0.12038022810685844,0,user_364
+session_user_365_01,0,/product/1000,Error,0.2701464216794168,1,user_365
+session_user_365_01,1,/product/1000,Update Profile,0.2074724518497921,0,user_365
+session_user_365_01,2,/product/1000,Remove from Cart,0.16466067607126356,0,user_365
+session_user_365_01,3,/account,Form Submit,0.21452396372081606,0,user_365
+session_user_365_01,4,/account,Login,0.3670743379222853,1,user_365
+session_user_365_01,5,/account,Page View,0.18878108807431815,0,user_365
+session_user_367_03,0,/product/1013,Login,0.08562767411828066,0,user_367
+session_user_367_03,1,/product/1010,Register,0.3333333333333333,1,user_367
+session_user_367_03,2,/product/1010,Error,0.1,0,user_367
+session_user_367_03,3,/product/1010,Register,0.3333333333333333,1,user_367
+session_user_367_03,4,/product/1010,Remove from Cart,0.2,0,user_367
+session_user_371_01,0,/product/1004,Checkout,0.041528699921685445,0,user_371
+session_user_371_01,1,/login,Logout,0.06823126968660523,0,user_371
+session_user_371_01,2,/contact,Scroll,0.2255558407919515,0,user_371
+session_user_371_01,3,/contact,Page View,0.37988352133381303,1,user_371
+session_user_371_01,4,/product/1009,Page View,0.23682085325064145,0,user_371
+session_user_371_01,5,/product/456,Scroll,0.27206105564817556,1,user_371
+session_user_371_01,6,/product/456,Add to Cart,0.10242298565578375,0,user_371
+session_user_377_00,0,/product/1008,Update Profile,0.26669634243223805,1,user_377
+session_user_377_00,1,/product/1008,Error,0.1481646346845767,0,user_377
+session_user_377_00,2,/product/1011,Checkout,0.3400213460562142,1,user_377
+session_user_377_00,3,/product/1011,Add to Cart,0.10254612023917571,0,user_377
+session_user_377_00,4,/product/1011,Error,0.27144561239781806,1,user_377
+session_user_377_00,5,/product/1011,Page View,0.14198693571578178,0,user_377
+session_user_388_03,0,/product/1012,Update Profile,0.22262750128254122,0,user_388
+session_user_388_03,1,/product/1012,Page View,0.2968366683767216,1,user_388
+session_user_388_03,2,/product/1012,Register,0.20953176591297998,0,user_388
+session_user_388_03,3,/product/1001,Search,0.30118354486849697,1,user_388
+session_user_389_03,0,/faq,Search,0.16983848448176297,0,user_389
+session_user_389_03,1,/product/1008,Scroll,0.2580932346118433,0,user_389
+session_user_389_03,2,/faq,Login,0.2681660281290994,1,user_389
+session_user_389_03,3,/account,Add to Cart,0.20975676452702016,0,user_389
+session_user_389_03,4,/product/1006,Click,0.21665221123516712,0,user_389
+session_user_389_03,5,/product/1006,Login,0.19695655566833373,0,user_389
+session_user_389_03,6,/product/1006,Error,0.2888696149802228,1,user_389
+session_user_394_00,0,/about,Scroll,0.21688957645585705,0,user_394
+session_user_394_00,1,/about,Register,0.3572298906331763,1,user_394
+session_user_394_00,2,/about,Scroll,0.21688957645585705,0,user_394
+session_user_394_00,3,/login,Click,0.3225478203366793,1,user_394
+session_user_394_00,4,/login,Search,0.1400536588304002,0,user_394
+session_user_406_00,0,/product/1004,Search,0.0519108749021068,0,user_406
+session_user_406_00,1,/product/1004,Page View,0.259554374510534,0,user_406
+session_user_406_00,2,/product/1004,Scroll,0.0,0,user_406
+session_user_406_00,3,/product/1011,Error,0.27144561239781806,1,user_406
+session_user_406_00,4,/product/1011,Search,0.10254612023917571,0,user_406
+session_user_406_00,5,/product/1006,Error,0.2888696149802228,1,user_406
+session_user_406_01,0,/product/1007,Remove from Cart,0.327293164617914,1,user_406
+session_user_406_01,1,/product/1007,Form Submit,0.05818545148762915,0,user_406
+session_user_406_01,2,/product/1013,Add to Cart,0.11492135210611351,0,user_406
+session_user_406_01,3,/product/123,Scroll,0.2663278270983139,1,user_406
+session_user_410_03,0,/settings,Form Submit,0.15115935985881718,0,user_410
+session_user_410_03,1,/settings,Scroll,0.09657403546535541,0,user_410
+session_user_410_03,2,/settings,Update Profile,0.3259373696955745,1,user_410
+session_user_410_03,3,/product/1013,Form Submit,0.09493503000070247,0,user_410
+session_user_410_03,4,/product/1001,Search,0.30118354486849697,1,user_410
+session_user_422_03,0,/product/1010,Checkout,0.1875,0,user_422
+session_user_422_03,1,/product/1010,Error,0.1,0,user_422
+session_user_422_03,2,/product/1010,Checkout,0.1875,0,user_422
+session_user_422_03,3,/product/1010,Click,0.26666666666666666,1,user_422
+session_user_422_03,4,/product/1010,Form Submit,0.375,1,user_422
+session_user_422_03,5,/product/1010,Logout,0.17391304347826086,0,user_422
+session_user_422_03,6,/product/1010,Search,0.20689655172413793,0,user_422
+session_user_429_00,0,/account,Checkout,0.404530903016396,1,user_429
+session_user_429_00,1,/product/1003,Scroll,0.12788193091011069,0,user_429
+session_user_429_00,2,/product/1006,Remove from Cart,0.21665221123516712,0,user_429
+session_user_429_00,3,/product/1006,Checkout,0.09999332826238483,0,user_429
+session_user_429_00,4,/product/1006,Form Submit,0.16506835141727016,0,user_429
+session_user_429_00,5,/product/1006,Error,0.2888696149802228,1,user_429
+session_user_440_00,0,/login,Update Profile,0.0,0,user_440
+session_user_440_00,1,/login,Search,0.1400536588304002,0,user_440
+session_user_440_00,2,/login,Click,0.3225478203366793,1,user_440
+session_user_440_00,3,/contact,Page View,0.37988352133381303,1,user_440
+session_user_441_00,0,/search,Update Profile,0.15,0,user_441
+session_user_441_00,1,/search,Checkout,0.38095238095238093,1,user_441
+session_user_441_00,2,/search,Checkout,0.38095238095238093,1,user_441
+session_user_441_00,3,/search,Page View,0.20833333333333334,0,user_441
+session_user_442_02,0,/product/1004,Form Submit,0.12304799976795686,0,user_442
+session_user_442_02,1,/product/1007,Page View,0.29092725743814574,1,user_442
+session_user_442_02,2,/product/1007,Search,0.2327418059505166,0,user_442
+session_user_442_02,3,/product/1007,Page View,0.29092725743814574,1,user_442
+session_user_442_02,4,/product/456,Search,0.1582900687407567,0,user_442
+session_user_442_02,5,/settings,Login,0.24336656937269568,0,user_442
+session_user_455_00,0,/product/1011,Update Profile,0.12038022810685844,0,user_455
+session_user_455_00,1,/product/1011,Click,0.11536438526907268,0,user_455
+session_user_455_00,2,/product/1011,Checkout,0.3400213460562142,1,user_455
+session_user_455_00,3,/home,Logout,0.04574215295858998,0,user_455
+session_user_455_00,4,/account,Checkout,0.404530903016396,1,user_455
+session_user_455_00,5,/account,Error,0.19871693481507172,0,user_455
+session_user_458_00,0,/product/1011,Checkout,0.3400213460562142,1,user_458
+session_user_458_00,1,/product/1011,Login,0.05428912247956361,0,user_458
+session_user_458_00,2,/product/1000,Error,0.2701464216794168,1,user_458
+session_user_462_03,0,/product/1002,Update Profile,0.08423664952548637,0,user_462
+session_user_462_03,1,/product/1006,Error,0.2888696149802228,1,user_462
+session_user_462_03,2,/product/1006,Error,0.2888696149802228,1,user_462
+session_user_462_03,3,/product/1006,Checkout,0.09999332826238483,0,user_462
+session_user_462_03,4,/blog,Click,0.18803274339302112,0,user_462
+session_user_462_03,5,/blog,Scroll,0.20146365363537974,0,user_462
+session_user_462_03,6,/blog,Register,0.23504092924127637,0,user_462
+session_user_471_00,0,/product/1000,Register,0.17289370987482677,0,user_471
+session_user_471_00,1,/product/1000,Error,0.2701464216794168,1,user_471
+session_user_471_00,2,/product/456,Logout,0.21764884451854047,0,user_471
+session_user_471_00,3,/product/456,Scroll,0.27206105564817556,1,user_471
+session_user_471_00,4,/product/1000,Remove from Cart,0.16466067607126356,0,user_471
+session_user_473_01,0,/product/123,Form Submit,0.2077357051366848,0,user_473
+session_user_473_01,1,/product/123,Page View,0.27698094018224645,1,user_473
+session_user_473_01,2,/product/123,Register,0.2443949472196292,0,user_473
+session_user_473_01,3,/product/123,Scroll,0.2663278270983139,1,user_473
+session_user_473_01,4,/product/123,Update Profile,0.06295021367778328,0,user_473
+session_user_473_01,5,/product/123,Logout,0.115408725075936,0,user_473
+session_user_485_02,0,/product/1010,Click,0.26666666666666666,1,user_485
+session_user_485_02,1,/product/1010,Checkout,0.1875,0,user_485
+session_user_485_02,2,/product/1000,Click,0.0751711782064464,0,user_485
+session_user_485_02,3,/product/1000,Click,0.0751711782064464,0,user_485
+session_user_485_02,4,/product/1000,Click,0.0751711782064464,0,user_485
+session_user_485_02,5,/product/1000,Error,0.2701464216794168,1,user_485
+session_user_489_00,0,/product/1005,Search,0.16920374448617148,0,user_489
+session_user_489_00,1,/product/1005,Form Submit,0.20598716720055657,0,user_489
+session_user_489_00,2,/product/1005,Error,0.2746495562674088,1,user_489
+session_user_489_00,3,/product/1005,Logout,0.20779407217600004,0,user_489
+session_user_489_00,4,/account,Login,0.3670743379222853,1,user_489
+session_user_491_01,0,/product/1010,Remove from Cart,0.2,0,user_491
+session_user_491_01,1,/product/1010,Update Profile,0.058823529411764705,0,user_491
+session_user_491_01,2,/product/1010,Register,0.3333333333333333,1,user_491
+session_user_491_01,3,/settings,Search,0.1810763164975414,0,user_491
+session_user_491_01,4,/settings,Search,0.1810763164975414,0,user_491
+session_user_491_01,5,/about,Remove from Cart,0.13013374587351423,0,user_491
+session_user_491_01,6,/about,Register,0.3572298906331763,1,user_491
+session_user_496_01,0,/product/1011,Search,0.10254612023917571,0,user_496
+session_user_496_01,1,/product/1011,Remove from Cart,0.10857824495912723,0,user_496
+session_user_496_01,2,/product/456,Scroll,0.27206105564817556,1,user_496
+session_user_496_01,3,/register,Click,0.2081714278193166,0,user_496
+session_user_496_01,4,/product/1009,Scroll,0.1736686257171371,0,user_496
+session_user_496_01,5,/product/1011,Error,0.27144561239781806,1,user_496
+session_user_496_01,6,/product/1011,Checkout,0.3400213460562142,1,user_496

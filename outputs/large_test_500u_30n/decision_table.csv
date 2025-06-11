@@ -1,0 +1,31 @@
+node,FB,percolation_role,wsjf_score,ux_label,suggested_action
+/product/1010,0.9365296803652967,critical,0.375,critical friction point,Fix high-priority UX issue
+/account,0.9324233059770085,critical,0.404530903016396,critical friction point,Fix high-priority UX issue
+/login,0.9209045541481076,critical,0.3225478203366793,critical friction point,Fix high-priority UX issue
+/product/789,0.9131494430896836,critical,0.25833281589924034,critical friction point,Fix high-priority UX issue
+/blog,0.9106260174006879,critical,0.2452601000778536,critical friction point,Fix high-priority UX issue
+/search,0.8885844748858447,standard,0.4117647058823529,standard flow,Monitor for changes
+/about,0.8616287136197787,critical,0.3572298906331763,critical friction point,Fix high-priority UX issue
+/product/1000,0.8530731900413455,critical,0.2701464216794168,critical friction point,Fix high-priority UX issue
+/product/1006,0.8340234517324404,standard,0.2888696149802228,standard flow,Monitor for changes
+/product/1007,0.8296687018073207,standard,0.327293164617914,standard flow,Monitor for changes
+/product/1004,0.8270638993602171,standard,0.26427354495618005,standard flow,Monitor for changes
+/product/1008,0.8250311917026193,critical,0.26669634243223805,critical friction point,Fix high-priority UX issue
+/product/1011,0.8145337081917385,standard,0.3400213460562142,standard flow,Monitor for changes
+/settings,0.79745751932215,critical,0.3259373696955745,critical friction point,Fix high-priority UX issue
+/product/1009,0.7936849388684273,standard,0.23682085325064145,standard flow,Monitor for changes
+/contact,0.7927435688293363,standard,0.37988352133381303,standard flow,Monitor for changes
+/product/1012,0.7850008392075537,standard,0.2968366683767216,standard flow,Monitor for changes
+/product/1001,0.7816048078901214,standard,0.30118354486849697,standard flow,Monitor for changes
+/product/456,0.7706039792637854,standard,0.27206105564817556,standard flow,Monitor for changes
+/faq,0.7624712253665357,standard,0.2681660281290994,standard flow,Monitor for changes
+/register,0.7583819524425773,critical,0.23419285629673117,critical friction point,Fix high-priority UX issue
+/product/1002,0.7507206711326779,critical,0.21059162381371593,critical friction point,Fix high-priority UX issue
+/product/1013,0.7309458482183817,critical,0.25316008000187323,critical friction point,Fix high-priority UX issue
+/home,0.7305769533188561,critical,0.3049476863905999,critical friction point,Fix high-priority UX issue
+/products,0.7190983332960659,standard,0.32034355710732715,standard flow,Monitor for changes
+/product/1005,0.7166591726274295,standard,0.3509410996750223,standard flow,Monitor for changes
+/checkout,0.709792389808758,critical,0.28428904841947816,critical friction point,Fix high-priority UX issue
+/product/1003,0.7074335618967114,critical,0.32526491122789025,critical friction point,Fix high-priority UX issue
+/cart,0.6947250095237962,critical,0.20460607245637427,critical friction point,Fix high-priority UX issue
+/product/123,0.664625321118018,standard,0.27698094018224645,standard flow,Monitor for changes
