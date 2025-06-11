@@ -26,7 +26,7 @@ TeloMesh is a user-journey analysis pipeline that transforms session and event d
 
 By turning exported session data from Mixpanel, Amplitude, or GA4 into graph-based diagnostics, TeloMesh reveals where friction clusters, why users drop off, and which fixes matter most.
 
-**[📖 View comparison with other analytics tools](comparison.md)**
+**[📖 View comparison and ML potential with other analytics tools](comparison.md)**
 
 ## Key Features
 
@@ -163,7 +163,7 @@ By combining exit rates with structural importance, the WSJF scoring system ensu
 
 ## Theory & Methodology
 
-TeloMesh applies network science and graph theory to user experience analysis, creating a systematic approach to prioritizing UX improvements:
+TeloMesh applies network science and graph theory to user experience analysis, creating a systematic approach to prioritizing UX improvements. Approach provides scaffold to integrate GNN based machine learning agents for UX optimizations at scale:
 
 ### Core Framework: WSJF Prioritization
 **WSJF** (Weighted Shortest Job First) is an Agile prioritization method that ranks work by value-to-effort ratio, helping teams focus on high-impact, low-effort improvements. TeloMesh extends this concept to UX optimization:
@@ -234,7 +234,7 @@ The TeloMesh roadmap is organized by complexity and priority:
 ### 3. AI & Advanced Capabilities (Long-term)
 - **Machine Learning:** GNN based prediction via learned weights for UX pattern detection, and semantic clustering
 - **Generative AI:** Natural language explanations and AI-powered UX recommendations
-- **Advanced Visualization:** 3D journey mapping, animation of flow changes, and percolation simulations
+- **Advanced Visualization:** 3D journey mapping, animation of user flow changes, and forecast simulations
 
 For more details on contributing to these features, see our [contribution guidelines](contributing.md).
 
