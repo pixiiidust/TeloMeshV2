@@ -3,6 +3,16 @@
 Thank you for your interest in contributing to TeloMesh! 🚀  
 We're currently in an early **alpha prototype** stage, so contributions are especially valuable as we shape the foundation.
 
+## Table of Contents
+- [What We're Looking For](#-what-were-looking-for)
+- [Setup](#-setup)
+- [Testing](#-testing)
+- [Folder Structure](#-folder-structure)
+- [Branch Strategy](#-branch-strategy)
+- [Code Style](#-code-style)
+- [Submitting Contributions](#-submitting-contributions)
+- [Need Help?](#-need-help)
+
 ---
 
 ## 🔧 What We're Looking For

@@ -9,10 +9,10 @@
 - [Getting Started](#getting-started)
 - [Dashboard Screenshots](#dashboard-screenshots)
 - [Theory & Methodology](#theory--methodology)
-- [For Product Teams](#for-product-managers)
+- [For Product Teams](#for-product-teams)
 - [What's New](#whats-new)
-- [Roadmap](#future-versions)
-- [Developer Guide](#developing-with-telomesh)
+- [Future Versions](#future-versions)
+- [Developing with TeloMesh](#developing-with-telomesh)
 - [Repository Structure](#repository-structure)
 - [Recent Improvements](#recent-improvements)
 
@@ -72,23 +72,29 @@ By turning exported session data from Mixpanel, Amplitude, or GA4 into graph-bas
 
 3. Generate a dataset or import your own analytics data:
    ```bash
-   # Generate synthetic data with different options
-   # Standard analysis
-   python main.py --dataset myproject --users 100 --events 50
+   # Generate synthetic data with different options (PowerShell compatible)
+   # Standard analysis pipeline
+   python main.py --dataset my_project --users 100 --events 30 --pages 30
    
-   # For large datasets with performance optimization
-   python main.py --dataset large_project --users 1000 --events 50 --fast
+   # For larger datasets with performance optimization (less granular results)
+   python main.py --dataset large_project --users 10000 --events 50 --pages 50 --fast
    
-   # For multi-graph analysis
-   python main.py --dataset detailed_analysis --users 100 --events 50 --multi
+   # For multi-graph analysis preserving individual transitions
+   python main.py --dataset detailed_analysis --users 10000 --events 30 --pages 30 --multi
+   ```
    
-   # Control the number of unique pages (nodes) in the graph
-   python main.py --dataset node_control --users 100 --events 50 --pages 32
+   **Parameters:**
+   - `--users`: Number of simulated users
+   - `--events`: Number of actions per user
+   - `--pages`: Number of screen nodes in the journey
+   - `--dataset`: Name of the output folder where results will be stored
    
-   # Import your own analytics data
-   python utils/analytics_converter.py --source mixpanel --input your_data.json --output mydata --telomesh-format
-   python utils/analytics_converter.py --source ga4 --input your_data.csv --output mydata --telomesh-format
-   python utils/analytics_converter.py --source amplitude --input your_data.json --output mydata --telomesh-format
+   ```bash
+   # Convert and import analytics data from various platforms
+   # Import own analytics data with different source format options
+   python utils/analytics_converter.py --format mixpanel --input your_data.json --output mydata --telomesh-format
+   python utils/analytics_converter.py --format ga4 --input your_data.csv --output mydata --telomesh-format
+   python utils/analytics_converter.py --format amplitude --input your_data.json --output mydata --telomesh-format
    
    # Then run analysis on the imported data
    python main.py --dataset mydata
@@ -242,8 +248,8 @@ For developers looking to contribute or customize:
    git clone -b dev https://github.com/yourusername/TeloMesh.git
    cd TeloMesh
    
-   # Install dev dependencies
-   pip install -r requirements-dev.txt
+   # Install dependencies
+   pip install -r requirements.txt
    ```
 
 2. Run tests to verify your setup:
@@ -254,7 +260,7 @@ For developers looking to contribute or customize:
 3. Common development workflows:
    ```bash
    # Generate test dataset and run in debug mode
-   python main.py --dataset test_dev --users 20 --events 15 --debug
+   python main.py --dataset test_dev --users 20 --events 15
    
    # Run the dashboard with hot reloading
    streamlit run ui/dashboard.py --server.runOnSave=true

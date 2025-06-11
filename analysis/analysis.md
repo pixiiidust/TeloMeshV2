@@ -2,6 +2,22 @@
 
 This folder contains the core analytical components of TeloMesh that identify friction points in user journeys and provide advanced network analytics.
 
+## Table of Contents
+- [Key Components](#key-components)
+- [Advanced Network Analysis](#advanced-network-analysis)
+- [Priority Matrix](#priority-matrix)
+- [Decision Table & Recommendations](#decision-table--recommendations)
+- [Performance Optimization](#performance-optimization)
+- [Graph Statistics](#graph-statistics)
+- [Dataset Integration](#dataset-integration)
+- [Advanced Flow Analysis](#advanced-flow-analysis)
+- [Event Flow Analysis](#event-flow-analysis)
+  - [Weighted Shortest Job First (WSJF) Friction Score](#weighted-shortest-job-first-wsjf-friction-score)
+  - [Robust WSJF Threshold Calculation](#robust-wsjf-threshold-calculation)
+  - [Fragile Flows](#fragile-flows)
+  - [Large-Scale Performance](#large-scale-performance)
+- [Usage](#usage)
+
 ## Key Components
 - Event chokepoint detection algorithms
 - WSJF (Weighted Shortest Job First) friction scoring system

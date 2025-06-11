@@ -1,6 +1,18 @@
 Most **regular product teams triage user flows** using **event-based analytics**, **heuristics**, and **team intuition**, rather than structural or systems, graph-based reasoning. 
 
-This works *well enough* for straightforward products — but it breaks down in complex, multi-step environments. Here’s how the typical triage flow works:
+This works *well enough* for straightforward products — but it breaks down in complex, multi-step environments. Here's how the typical triage flow works:
+
+## Table of Contents
+- [The Conventional Product UX Flow Triage Process](#-the-conventional-product-ux-flow-triage-process)
+  - [1. Start with Funnels and Drop-offs](#1-start-with-funnels-and-drop-offs)
+  - [2. Segment the Funnel](#2-segment-the-funnel)
+  - [3. Use Session Replays or Heatmaps](#3-use-session-replays-or-heatmaps)
+  - [4. Check Supporting Metrics](#4-check-supporting-metrics)
+  - [5. Speculative Prioritization](#5-speculative-prioritization)
+  - [6. Run Experiments or Redesign](#6-run-experiments-or-redesign)
+- [Gaps in This Approach](#-gaps-in-this-approach)
+- [TeloMesh: The Upgrade](#-telomesh-the-upgrade)
+- [TL;DR Comparison](#-tldr-comparison)
 
 ---
 
@@ -29,7 +41,7 @@ This works *well enough* for straightforward products — but it breaks down in 
   * Acquisition source (organic vs paid)
   * Geo or language
   * New vs returning
-* Goal: Identify “problem segments” causing friction.
+* Goal: Identify "problem segments" causing friction.
 
 ---
 
@@ -55,9 +67,9 @@ This works *well enough* for straightforward products — but it breaks down in 
 
 ### 5. **Speculative Prioritization**
 
-* Based on volume (e.g. “affects 28% of users”)
-* Based on emotion (e.g. “we *hate* this screen too”)
-* Based on cost (e.g. “this is a paid step — it’s leaking revenue”)
+* Based on volume (e.g. "affects 28% of users")
+* Based on emotion (e.g. "we *hate* this screen too")
+* Based on cost (e.g. "this is a paid step — it's leaking revenue")
 
 ---
 
@@ -75,7 +87,7 @@ This works *well enough* for straightforward products — but it breaks down in 
 | --------------------------------------------------------- | ----------------------------------------------------------- |
 | Focuses on **where** users drop, not **why** structurally | Misses latent friction spread across nodes                  |
 | Treats steps as **linear**, not as a **graph**            | Ignores loops, hub nodes, or multi-path flows               |
-| Can’t detect **cascading friction**                       | Fixes isolated issues, not systemic fragility               |
+| Can't detect **cascading friction**                       | Fixes isolated issues, not systemic fragility               |
 | Prioritization is often **volume-based only**             | Overlooks low-traffic but critical nodes (high betweenness) |
 | Session replays are **manual & low-scale**                | Hard to triage thousands of flows intelligently             |
 
