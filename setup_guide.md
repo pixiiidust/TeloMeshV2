@@ -246,9 +246,28 @@ python utils/analytics_converter.py --generate-sample --format amplitude --outpu
 
 For detailed documentation on analytics conversion, see the [Analytics Converter Guide](utils/README.md).
 
-For generating large datasets; these recently tested runtimes for 10k, 20k, and 100k users, 20 events, 30 page nodes:
-<img src="https://github.com/user-attachments/assets/bb028836-7b6e-47d5-af1d-1b32320dde53" width="100%"/>
-<br>
+**For generating large datasets; these recently tested runtimes for 10k, 20k, and 100k users, 30 events, 30 page nodes:**
+| Metric                | 10K Users                           | 20K Users                                    | 100K Users                                 |
+|-----------------------|-------------------------------------|----------------------------------------------|-------------------------------------------|
+| Events Generated      | 149,947                             | 298,931                                      | 1,499,633                                  |
+| Sessions              | 29,967                              | 59,886                                       | 299,828                                    |
+| Standard Graph        | 30 nodes, 900 edges                 | 30 nodes, 900 edges                          | 30 nodes, 900 edges                        |
+| Multi-Graph           | 30 nodes, 119,980 edges             | 30 nodes, 239,045 edges                      | 30 nodes, 1,199,805 edges                  |
+| Sessions per User     | 3.00                                | 2.99                                         | 3.00                                       |
+| Flow Length           | 5.00 steps                          | 4.99 steps                                   | 5.00 steps                                 |
+| WSJF Score Dist.      | 390/390 non-zero (100%)             | 390/390 non-zero (100%)                      | 39/390 non-zero (10%)                      |
+| WSJF Threshold        | 0.133452                            | 0.124415                                     | 0.108093                                   |
+| Threshold Stats       | Median: 0.073, MAD: 0.040           | Median: 0.049, MAD: 0.021                    | Median: 0.102, MAD: 0.004                  |
+| Threshold Adjustment  | None needed (7.7% chokepoints)      | Too many (21.8%) → Adjusted up to 10.0%      | Too few (3.3%) → Kept as optimal           |
+| Chokepts Identified   | 30/390 (7.7%)                       | 39/390 (10.0%)                               | 13/390 (3.3%)                              |
+| Fragile Flows         | 2,986                               | 7,954                                        | 13,178                                     |
+| Time: Data Generation | 1.41s                               | 2.78s                                        | 13.21s                                     |
+| Time: Session Parsing | 19.21s                              | 37.59s                                       | 183.89s                                    |
+| Time: Graph Building  | 14.34s                              | 26.71s                                       | 136.00s                                    |
+| Time: Multi-Graph     | 13.97s                              | 26.82s                                       | 138.51s                                    |
+| Time: Flow Metrics    | 0.27s                               | 0.75s                                        | 2.45s                                      |
+| Time: Chokept Analysis| 30.15s                              | 63.26s                                       | 245.77s                                    |
+| Total Time            | 79.35s (~1.3 min)                   | 158.41s (~2.6 min)                           | 719.83s (~12 min)                          |
 
 ## Analysis Methodology
 
