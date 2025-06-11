@@ -165,7 +165,8 @@ def detect_fragile_flows(session_df, chokepoints_df):
     print("Detecting fragile flows...")
     
     # Define chokepoints as the top 10% of (page, event) pairs by WSJF Friction Score
-    chokepoint_threshold = chokepoints_df['WSJF_Friction_Score'].quantile(0.9)
+    chokepoint_threshold = calculate_robust_wsjf_threshold(chokepoints_df)
+    
     chokepoints = set(tuple(x) for x in chokepoints_df[
         chokepoints_df['WSJF_Friction_Score'] >= chokepoint_threshold
     ][['page', 'event']].values)
@@ -1132,29 +1133,124 @@ def compute_fractal_betweenness(G, repeating_subgraphs=None, centrality=None):
 
 def compute_clustering_coefficient(G):
     """
-    Compute the average clustering coefficient for the graph.
+    Compute the clustering coefficient of a graph.
     
-    The clustering coefficient measures the degree to which nodes tend to cluster together.
-    For user journey graphs, high clustering indicates users following similar paths.
+    The clustering coefficient is a measure of the degree to which nodes in a graph tend to cluster together.
     
     Args:
-        G (nx.DiGraph): The user journey graph
+        G (nx.DiGraph): The graph to compute the clustering coefficient for.
         
     Returns:
-        float: The average clustering coefficient (0.0 to 1.0)
+        float: The clustering coefficient of the graph.
     """
-    # Convert directed graph to undirected for clustering calculation
-    undirected_G = G.to_undirected()
-    
-    # Compute clustering coefficient
     try:
-        # Try to compute the average clustering coefficient
-        clustering = nx.average_clustering(undirected_G)
-    except:
-        # If there's an error (e.g., no triangles), return 0
-        clustering = 0.0
+        # Convert to undirected graph for clustering coefficient calculation
+        G_undirected = nx.Graph(G)
+        
+        # Compute clustering coefficient
+        clustering = nx.average_clustering(G_undirected)
+        
+        return clustering
+    except Exception as e:
+        logging.warning(f"Failed to compute clustering coefficient: {e}")
+        return 0.0
+
+def calculate_robust_wsjf_threshold(chokepoints_df, verbose=True, mad_multiplier=1.5, min_floor=1e-6):
+    """
+    Calculate WSJF threshold using Median + MAD for outlier resistance.
     
-    return clustering
+    Handles zero-inflated distributions better than percentiles by:
+    - Operating only on non-zero WSJF scores
+    - Using median (outlier resistant) + MAD (robust scale measure)  
+    - Providing fallback for edge cases
+    
+    Args:
+        chokepoints_df (pd.DataFrame): DataFrame containing WSJF_Friction_Score column
+        verbose (bool): Whether to print debug information
+        mad_multiplier (float): Multiplier for MAD to determine threshold
+        min_floor (float): Minimum threshold value to use as a floor
+        
+    Returns:
+        float: The calculated threshold value
+    """
+    # Step 1: Filter to non-zero scores only
+    non_zero_scores = chokepoints_df.loc[chokepoints_df['WSJF_Friction_Score'] > 0, 'WSJF_Friction_Score']
+    
+    # Step 2: Handle edge cases
+    if len(non_zero_scores) == 0:
+        if verbose:
+            print("Warning: All WSJF scores are zero, using fallback minimum floor")
+        return min_floor
+    
+    if len(non_zero_scores) < 5:
+        if verbose:
+            print(f"Warning: Only {len(non_zero_scores)} non-zero scores, using simple percentile")
+        # Use a higher percentile (95th) on the non-zero subset to be more selective
+        return max(non_zero_scores.quantile(0.95), min_floor)
+    
+    # Step 3: Calculate Median + MAD threshold
+    median = non_zero_scores.median()
+    deviations = (non_zero_scores - median).abs()
+    mad = deviations.median()
+    
+    # Step 4: Handle the case where MAD is very small or zero
+    if mad < 1e-10:  # Practically zero MAD
+        if verbose:
+            print("Warning: MAD is practically zero, using 90th percentile of non-zero scores")
+        threshold = max(non_zero_scores.quantile(0.9), min_floor)
+    else:
+        threshold = median + (mad_multiplier * mad)
+    
+    # Step 5: Apply safety floor
+    final_threshold = max(threshold, min_floor)
+    
+    # Step 6: Verify we're getting a reasonable number of chokepoints (5-15%)
+    chokepoints = chokepoints_df[chokepoints_df['WSJF_Friction_Score'] >= final_threshold]
+    percentage = (len(chokepoints) / len(chokepoints_df)) * 100
+    
+    # Adjust threshold to ensure 5-15% of points are identified as chokepoints
+    if percentage < 5 and len(non_zero_scores) > 10:
+        if verbose:
+            print(f"Warning: Only {percentage:.1f}% chokepoints, adjusting threshold down")
+        
+        # Try to find a threshold that gives ~5-10% chokepoints by using percentiles
+        # Start with 90th percentile
+        for p in [0.90, 0.85, 0.80, 0.75, 0.70]:
+            test_threshold = non_zero_scores.quantile(p)
+            test_chokepoints = chokepoints_df[chokepoints_df['WSJF_Friction_Score'] >= test_threshold]
+            test_percentage = (len(test_chokepoints) / len(chokepoints_df)) * 100
+            
+            if test_percentage >= 5:
+                final_threshold = test_threshold
+                if verbose:
+                    print(f"  Adjusted to {p*100}th percentile, now {test_percentage:.1f}% chokepoints")
+                break
+    
+    elif percentage > 15 and len(non_zero_scores) > 10:
+        if verbose:
+            print(f"Warning: Too many chokepoints ({percentage:.1f}%), adjusting threshold up")
+        
+        # Try to find a threshold that gives ~10-15% chokepoints
+        for p in [0.90, 0.92, 0.95, 0.97, 0.99]:
+            test_threshold = non_zero_scores.quantile(p)
+            test_chokepoints = chokepoints_df[chokepoints_df['WSJF_Friction_Score'] >= test_threshold]
+            test_percentage = (len(test_chokepoints) / len(chokepoints_df)) * 100
+            
+            if test_percentage <= 15:
+                final_threshold = test_threshold
+                if verbose:
+                    print(f"  Adjusted to {p*100}th percentile, now {test_percentage:.1f}% chokepoints")
+                break
+    
+    # Step 7: Debug output
+    if verbose:
+        print(f"WSJF Debug: {len(non_zero_scores)}/{len(chokepoints_df)} non-zero ({len(non_zero_scores)/len(chokepoints_df)*100:.1f}%)")
+        print(f"  Median: {median:.6f}, MAD: {mad:.6f}, Threshold: {final_threshold:.6f}")
+        # Print how many chokepoints we identified
+        chokepoints = chokepoints_df[chokepoints_df['WSJF_Friction_Score'] >= final_threshold]
+        print(f"  Identified {len(chokepoints)}/{len(chokepoints_df)} chokepoints ({(len(chokepoints)/len(chokepoints_df))*100:.1f}%)")
+    
+    return final_threshold
 
 def generate_flow_signature(flow_data):
     """

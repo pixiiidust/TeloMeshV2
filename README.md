@@ -14,6 +14,7 @@
 - [Roadmap](#future-versions)
 - [Developer Guide](#developing-with-telomesh)
 - [Repository Structure](#repository-structure)
+- [Recent Improvements](#recent-improvements)
 
 ## Overview
 
@@ -278,3 +279,17 @@ See [contributing.md](contributing.md) for code style guidelines and pull reques
 - `.gitignore` - Configuration for Git to exclude temporary files
 - `utils/analytics_converter.py` - Tool for converting data from analytics platforms
 - `utils/README.md` - Comprehensive documentation for the Analytics Converter
+
+## Recent Improvements
+
+### Robust WSJF Threshold Calculation
+
+The TeloMesh dashboard has been updated to handle large datasets (100K+ users) by implementing a more robust threshold calculation for WSJF Friction Scores. This fixes an issue where the 90th percentile would become 0.0 with zero-inflated data, causing all non-zero scores to be incorrectly identified as chokepoints.
+
+Key enhancements:
+- Uses median and MAD (Median Absolute Deviation) for robustness against outliers
+- Filters zero scores before statistical calculations
+- Implements adaptive thresholding to ensure a reasonable number of chokepoints
+- Handles edge cases elegantly (all zeros, few non-zeros, low variability)
+
+This improvement was developed using Test-Driven Development (TDD) with a comprehensive test suite that includes regression testing for the specific 100K user issue.

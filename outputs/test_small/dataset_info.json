@@ -1,7 +1,0 @@
-{
-  "dataset_name": "test_small",
-  "creation_timestamp": "2025-06-10T01:14:01.525503",
-  "num_users": 500,
-  "num_events": 7602,
-  "num_sessions": 1524
-}

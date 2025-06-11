@@ -10,6 +10,8 @@ This folder contains the core analytical components of TeloMesh that identify fr
 - User flow analysis for multi-point journey failures
 - Transition pairs analysis for page-to-page navigation patterns
 - Dataset-specific analysis outputs
+- Robust WSJF threshold calculation for handling zero-inflated distributions
+- Performance benchmarks for different dataset sizes
 
 ## Advanced Network Analysis
 The system includes sophisticated network analysis metrics:
@@ -48,6 +50,7 @@ The analysis now supports a `--fast` mode for processing large datasets efficien
 - Optimized algorithms for subgraph detection and percolation simulation
 - Sampling techniques for large networks
 - Parallel processing options for computationally intensive tasks
+- Robust threshold calculation for handling datasets of all sizes (10K to 100K+ users)
 
 ## Graph Statistics
 The analysis provides key graph statistics for better network understanding:
@@ -92,6 +95,55 @@ The system now provides two complementary approaches to analyzing user flows:
    - Distinguishes between "from" chokepoints and "to" chokepoints in transitions
 
 These complementary views help product managers understand both the complete user journeys (Flow Sequences) and the specific problematic transitions between pages (Transition Pairs).
+
+## Event Flow Analysis
+
+### Weighted Shortest Job First (WSJF) Friction Score
+
+The WSJF Friction Score is calculated to identify high-friction (page, event) pairs in the user journey:
+
+```
+WSJF_Friction_Score = exit_rate × betweenness
+```
+
+Where:
+- **exit_rate**: The percentage of sessions that end after this (page, event)
+- **betweenness**: A graph-based centrality measure indicating how crucial this node is for connecting different parts of the user journey
+
+### Robust WSJF Threshold Calculation
+
+The system identifies chokepoints by comparing each (page, event) pair's WSJF_Friction_Score against a threshold. Originally, this used a simple 90th percentile approach:
+
+```python
+# Original approach (has issues with zero-inflated data)
+chokepoint_threshold = chokepoints_df['WSJF_Friction_Score'].quantile(0.9)
+```
+
+However, with large datasets (100K+ users), the distribution of WSJF scores becomes heavily zero-inflated (90%+ zeros), causing the 90th percentile to be 0.0. This resulted in all non-zero scores being classified as chokepoints.
+
+The new approach uses robust statistics and adaptive thresholding:
+
+1. **Filter to non-zero scores**: Exclude zeros before calculating statistics
+2. **Use Median + MAD**: Calculate threshold as `median + (mad_multiplier * MAD)`
+   - Median: More robust to outliers than mean
+   - MAD (Median Absolute Deviation): Better scale measure for skewed distributions
+3. **Handle edge cases**: Special handling for all-zero, few non-zero, or very low MAD cases
+4. **Adaptive adjustment**: Automatically adjust threshold to ensure a reasonable number of chokepoints (5-15%)
+
+This approach works reliably across all dataset sizes, from small test sets to 100K+ user production data.
+
+### Fragile Flows
+
+Fragile flows are user journeys that contain multiple high-friction points (chokepoints). These represent particularly problematic user experiences where users encounter several points of difficulty in a single session.
+
+### Large-Scale Performance
+
+The enhanced WSJF threshold calculation has been extensively tested with datasets ranging from 10K to 100K users. For detailed performance benchmarks, see [performance_benchmarks.md](performance_benchmarks.md).
+
+Key findings:
+- Processing time scales linearly with dataset size
+- The threshold calculation adapts to zero-inflation in larger datasets
+- For 100K user datasets, chokepoint detection completes in ~4 minutes
 
 ## Usage
 Run the analysis with advanced network metrics:

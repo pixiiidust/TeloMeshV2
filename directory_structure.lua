@@ -39,6 +39,7 @@
 │   └── compute_exit_rates(df: pd.DataFrame) -> pd.DataFrame
 │   └── compute_betweenness(g: nx.DiGraph) -> Dict[str, float]
 │   └── compute_wsjf_friction(exit_df, centrality_dict) -> pd.DataFrame
+│   └── calculate_robust_wsjf_threshold(chokepoints_df: pd.DataFrame, verbose: bool = True, mad_multiplier: float = 1.5, min_floor: float = 1e-6) -> float
 │   └── detect_fragile_flows(session_df: pd.DataFrame) -> pd.DataFrame
 │   └── export_chokepoints(df, flow_df, node_map) -> None
 │   └── convert_to_digraph(G: nx.MultiDiGraph) -> nx.DiGraph
@@ -52,6 +53,8 @@
 │   └── main(input_flows: str, input_graph: str, input_graph_multi: str, output_dir: str, fast: bool = False) -> Tuple[pd.DataFrame, pd.DataFrame, Dict]
 │
 ├── friction_analysis.md      # Documentation about friction analysis
+├── performance_benchmarks.md # Performance benchmarks for different dataset sizes
+├── analysis.md               # Documentation of analysis approach and methods
 
 # ────────────────────────────────────────────────────────────────
 
@@ -121,6 +124,8 @@
 ├── test_advanced_metrics_tab.py # Tests for advanced metrics visualizations
 ├── test_analytics_converter.py
 ├── test_dataset_organization.py  # Tests for dataset organization
+├── test_wsjf_threshold.py       # Tests for robust WSJF threshold calculation
+├── test_suite.md                # Documentation about the test suite
 
 # ────────────────────────────────────────────────────────────────
 
@@ -134,4 +139,6 @@ main.py                       # Pipeline entrypoint
 └── run_all_stages(dataset_name: str, users: int, events_per_user: int, input_file: str, multi: bool = False, fast: bool = False) -> None
 └── create_dataset_directories(dataset_name: str) -> Tuple[str, str]
 └── generate_dataset_metadata(dataset_name: str, data_dir: str, output_dir: str, users_count: int, events_count: int, sessions_count: int) -> Dict
+
+setup_guide.md                # Setup guide for TeloMesh
 

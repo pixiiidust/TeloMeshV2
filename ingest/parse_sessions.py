@@ -21,8 +21,20 @@ def parse_sessions(input_csv="data/events.csv", output_csv="outputs/session_flow
     # Read the CSV file
     df = pd.read_csv(input_csv)
     
-    # Convert timestamps to datetime for sorting
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    # Convert timestamp to datetime, handling both formats (with and without milliseconds)
+    try:
+        # First try standard format with milliseconds
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+    except ValueError:
+        # If that fails, try more flexible parsing
+        df['timestamp'] = pd.to_datetime(df['timestamp'], format='mixed', errors='coerce')
+        
+        # Check if we have any NaT (not a time) values
+        if df['timestamp'].isna().any():
+            print(f"Warning: {df['timestamp'].isna().sum()} timestamps could not be parsed")
+            # Drop rows with invalid timestamps
+            df = df.dropna(subset=['timestamp'])
+            print(f"Continuing with {len(df)} valid events")
     
     # Sort by user_id and timestamp
     df = df.sort_values(['user_id', 'timestamp'])
