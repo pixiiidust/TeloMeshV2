@@ -125,7 +125,7 @@ By turning exported session data from Mixpanel, Amplitude, or GA4 into graph-bas
 <img src="https://github.com/user-attachments/assets/6682fa2b-edfc-4ab6-b7be-93ba17c540f1" width="100%"/>
 <br>
 
-### Preview of advanced metrics tab (WIP - UI / Testing): 
+### Preview of advanced metrics tab (UI & Testing WIP): 
 Advanced Network Metrics leverages network science techniques to provide deeper structural insights into complex user flows:
 
 * **Network Structure Metrics:** Analyze user journeys that branch and repeat at multiple scales (Fractal Dimension), hierarchical structure (Power-Law Alpha), and system stability (Percolation Threshold) with visual risk indicators
