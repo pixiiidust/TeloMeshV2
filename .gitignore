@@ -7,3 +7,19 @@ outputs/*
 # Except these specific files and folders
 !outputs/analysis_results.md
 !outputs/large_test_500u_30n/
+
+# Python cache
+__pycache__/
+*/__pycache__/
+**/__pycache__/
+
+# Documentation drafts
+Telomesh lovable stage.md
+Telomesh simple stage.md
+
+# Data directories
+data/analytics_test/
+data/test100000u_20e_30n/
+data/test10000u_20e_50n/
+data/test10000u_30e_30n/
+data/test20000u_20e_30n/
